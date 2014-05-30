@@ -6,7 +6,7 @@ setup (name='mist.client',
        url='https://github.com/mistio/mist.client',
        author= 'Chris Loukas',
        author_email='commixon@gmail.com',
-       license='MIT',
+       license='AGPLv3',
        packages=['mist'],
        install_requires=[
            'requests',
