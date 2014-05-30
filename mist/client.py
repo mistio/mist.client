@@ -20,6 +20,9 @@ class MistClient(object):
         if self.email and self.password:
             self.__authenticate()
 
+    def request(self, *args, **kwargs):
+        return RequestHandler(*args, api_token=self.api_token, **kwargs)
+
     def __init_configure(self):
         if (not self.email) and (not self.password):
             credentials = parse_conf_file()
@@ -33,20 +36,20 @@ class MistClient(object):
         }
 
         data = json.dumps(payload)
-        req = RequestsHandler(self.uri+'/auth', data=data)
+        req = self.request(self.uri+'/auth', data=data)
         response = req.post().json()
         token = response['mist_api_token']
         self.api_token = "mist_1 %s:%s" % (self.email, token)
         self.user_details = response
 
     def supported_providers(self):
-        req = RequestsHandler(self.uri+'/providers', api_token=self.api_token)
+        req = self.request(self.uri+'/providers')
         providers = req.get().json()
         supported_providers = providers['supported_providers']
         return supported_providers
 
     def list_backends(self):
-        req = RequestsHandler(self.uri+'/backends', api_token=self.api_token)
+        req = self.request(self.uri+'/backends')
         backends = req.get().json()
         return backends
 
@@ -67,7 +70,7 @@ class MistClient(object):
             'machine_port': machine_port
         }
 
-        req = RequestsHandler(self.uri+'/backends', data=json.dumps(payload), api_token=self.api_token)
+        req = self.request(self.uri+'/backends', data=json.dumps(payload))
         response = req.post()
         if response.ok:
             return response
@@ -75,7 +78,7 @@ class MistClient(object):
             return response.status_code
 
     def delete_backend(self, backend_id):
-        req = RequestsHandler(self.uri+'/backends/'+backend_id, api_token=self.api_token)
+        req = self.request(self.uri + '/backends/' +backend_id)
         response = req.delete()
         if response.ok:
             return response
