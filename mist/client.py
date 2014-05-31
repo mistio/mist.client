@@ -1,5 +1,7 @@
 import json
 
+from time import time
+
 from mist.helpers import RequestsHandler
 from mist.helpers import parse_conf_file
 
@@ -33,20 +35,23 @@ class MistClient(object):
         }
 
         data = json.dumps(payload)
-        req = RequestsHandler(self.uri+'/auth', data=data)
+        req = self.request(self.uri+'/auth', data=data)
         response = req.post().json()
         token = response['mist_api_token']
         self.api_token = "mist_1 %s:%s" % (self.email, token)
         self.user_details = response
 
+    def request(self, *args, **kwargs):
+        return RequestsHandler(*args, api_token=self.api_token, **kwargs)
+
     def supported_providers(self):
-        req = RequestsHandler(self.uri+'/providers', api_token=self.api_token)
+        req = self.request(self.uri+'/providers')
         providers = req.get().json()
         supported_providers = providers['supported_providers']
         return supported_providers
 
     def list_backends(self):
-        req = RequestsHandler(self.uri+'/backends', api_token=self.api_token)
+        req = self.request(self.uri+'/backends')
         backends = req.get().json()
         return backends
 
@@ -67,7 +72,7 @@ class MistClient(object):
             'machine_port': machine_port
         }
 
-        req = RequestsHandler(self.uri+'/backends', data=json.dumps(payload), api_token=self.api_token)
+        req = self.request(self.uri+'/backends', data=json.dumps(payload))
         response = req.post()
         if response.ok:
             return response
@@ -75,7 +80,7 @@ class MistClient(object):
             return response.status_code
 
     def delete_backend(self, backend_id):
-        req = RequestsHandler(self.uri+'/backends/'+backend_id, api_token=self.api_token)
+        req = self.request(self.uri + '/backends/' +backend_id)
         response = req.delete()
         if response.ok:
             return response
@@ -88,7 +93,7 @@ class MistClient(object):
         }
 
         data = json.dumps(payload)
-        req = RequestsHandler(self.uri+'/backends/'+backend_id, data=data, api_token=self.api_token)
+        req = self.request(self.uri+'/backends/'+backend_id, data=data)
         response = req.put()
         if response.ok:
             return response
@@ -100,7 +105,7 @@ class MistClient(object):
             'newState': str(new_state)
         }
         data = json.dumps(payload)
-        req = RequestsHandler(self.uri+'/backends/'+backend_id, data=data, api_token=self.api_token)
+        req = self.request(self.uri+'/backends/'+backend_id, data=data)
         response = req.post()
         if response.ok:
             return response
@@ -108,17 +113,17 @@ class MistClient(object):
             return response.status_code
 
     def list_sizes(self, backend_id):
-        req = RequestsHandler(self.uri+'/backends/'+backend_id+'/sizes', api_token=self.api_token)
+        req = self.request(self.uri+'/backends/'+backend_id+'/sizes')
         sizes = req.get().json()
         return sizes
 
     def list_locations(self, backend_id):
-        req = RequestsHandler(self.uri+'/backends/'+backend_id+'/locations', api_token=self.api_token)
+        req = self.request(self.uri+'/backends/'+backend_id+'/locations')
         locations = req.get().json()
         return locations
 
     def list_keys(self):
-        req = RequestsHandler(self.uri+'/keys', api_token=self.api_token)
+        req = self.request(self.uri+'/keys')
         keys = req.get().json()
         return keys
 
@@ -130,7 +135,7 @@ class MistClient(object):
 
         data = json.dumps(payload)
 
-        req = RequestsHandler(self.uri+'/keys', data=data, api_token=self.api_token)
+        req = self.request(self.uri+'/keys', data=data)
         response = req.put()
 
         if response.ok:
@@ -139,7 +144,7 @@ class MistClient(object):
             return response.status_code
 
     def delete_key(self, key_id):
-        req = RequestsHandler(self.uri+'/keys/'+key_id, api_token=self.api_token)
+        req = self.request(self.uri+'/keys/'+key_id)
         response = req.delete()
         if response.ok:
             return response
@@ -147,7 +152,7 @@ class MistClient(object):
             return response.status_code
 
     def list_images(self, backend_id):
-        req = RequestsHandler(self.uri+'/backends/'+backend_id+'/images', api_token=self.api_token)
+        req = self.request(self.uri+'/backends/'+backend_id+'/images')
         images = req.get().json()
         return images
 
@@ -157,12 +162,12 @@ class MistClient(object):
         }
         data = json.dumps(payload)
 
-        req = RequestsHandler(self.uri+'/backends/'+backend_id+'/images', api_token=self.api_token, data=data)
+        req = self.request(self.uri+'/backends/'+backend_id+'/images', data=data)
         images = req.get().json()
         return images
 
     def list_machines(self, backend_id, filtered=None):
-        req = RequestsHandler(self.uri+'/backends/'+backend_id+'/machines', api_token=self.api_token)
+        req = self.request(self.uri+'/backends/'+backend_id+'/machines')
         all_machines = req.get().json()
         machines = []
 
@@ -185,7 +190,7 @@ class MistClient(object):
             'disk': disk
         }
         data = json.dumps(payload)
-        req = RequestsHandler(self.uri+'/backends/'+backend_id+'/machines', data=data, api_token=self.api_token)
+        req = self.request(self.uri+'/backends/'+backend_id+'/machines', data=data)
         response = req.post()
         if response.ok:
             return response
@@ -197,8 +202,7 @@ class MistClient(object):
             'action': action
         }
         data = json.dumps(payload)
-        req = RequestsHandler(self.uri+'/backends/'+backend_id+'/machines/'+machine_id, data=data,
-                              api_token=self.api_token)
+        req = self.request(self.uri+'/backends/'+backend_id+'/machines/'+machine_id, data=data)
         response = req.post()
         if response.ok:
             return response
@@ -213,15 +217,14 @@ class MistClient(object):
             'dns_name': dns_name
         }
         data = json.dumps(payload)
-        req = RequestsHandler(self.uri+'/backends/'+backend_id+'/machines/'+machine_id+'/monitoring', data=data,
-                              api_token=self.api_token)
+        req = self.request(self.uri+'/backends/'+backend_id+'/machines/'+machine_id+'/monitoring', data=data)
         response = req.post()
         if response.ok:
             return response
         else:
             return response.status_code
 
-    def get_stats(self, backend_id, machine_id, start, stop, step):
+    def get_stats(self, backend_id, machine_id, start=int(time()), stop=int(time())+10, step=10):
         payload = {
             'start': start,
             'stop': stop,
@@ -229,7 +232,6 @@ class MistClient(object):
         }
 
         data = json.dumps(payload)
-        req = RequestsHandler(self.uri+'/backends/'+backend_id+'/machines/'+machine_id+'/stats', data=data,
-                              api_token=self.api_token)
+        req = self.request(self.uri+'/backends/'+backend_id+'/machines/'+machine_id+'/stats', data=data)
         stats = req.get().json()
         return stats
