@@ -20,9 +20,6 @@ class MistClient(object):
         if self.email and self.password:
             self.__authenticate()
 
-    def request(self, *args, **kwargs):
-        return RequestHandler(*args, api_token=self.api_token, **kwargs)
-
     def __init_configure(self):
         if (not self.email) and (not self.password):
             credentials = parse_conf_file()
@@ -41,6 +38,9 @@ class MistClient(object):
         token = response['mist_api_token']
         self.api_token = "mist_1 %s:%s" % (self.email, token)
         self.user_details = response
+
+    def request(self, *args, **kwargs):
+        return RequestsHandler(*args, api_token=self.api_token, **kwargs)
 
     def supported_providers(self):
         req = self.request(self.uri+'/providers')
