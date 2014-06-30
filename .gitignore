@@ -19,3 +19,8 @@ src/paramiko
 /.pydevproject                                                                                                                                                                                                                                                                    
 settings.py                                                                                                                                                                                                                                                                       
 local/
+.idea
+build
+share
+lib64
+
