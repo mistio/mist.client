@@ -2,8 +2,8 @@ import json
 
 from time import time
 
-from mist.helpers import RequestsHandler
-from mist.helpers import parse_conf_file
+from mistpy.helpers import RequestsHandler
+from mistpy.helpers import parse_conf_file
 
 
 class MistClient(object):

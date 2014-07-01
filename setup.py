@@ -1,6 +1,6 @@
 from setuptools import setup
 
-setup (name='mist.client',
+setup (name='mistpy',
        version='0.0.1',
        description='Python client for mist.io',
        classifiers=[
@@ -14,7 +14,7 @@ setup (name='mist.client',
        author='Chris Loukas',
        author_email='commixon@gmail.com',
        license='AGPLv3',
-       packages=['mist'],
+       packages=['mistpy'],
        install_requires=[
            'requests',
        ],
