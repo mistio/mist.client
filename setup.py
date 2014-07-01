@@ -1,8 +1,13 @@
 from setuptools import setup
 
+def readme():
+    with open('README.md') as f:
+        return f.read()
+
 setup (name='mistpy',
        version='0.0.1',
        description='Python client for mist.io',
+       long_description=readme(),
        classifiers=[
             "Programming Language :: Python",
             "Framework :: Pylons",
