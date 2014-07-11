@@ -8,7 +8,6 @@ from mistpy.helpers import parse_conf_file
 
 class MistClient(object):
     """
-
     """
     def __init__(self, mist_uri="https://mist.io", email=None, password=None):
         self.uri = mist_uri
