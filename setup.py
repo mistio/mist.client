@@ -31,6 +31,7 @@ setup(
     author_email='commixon@gmail.com',
     license='AGPLv3',
     packages=find_packages('src'),
+    package_dir={'': 'src'},
     namespace_packages=['mist'],
     install_requires=requires,
     zip_safe=False
