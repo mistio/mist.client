@@ -2,33 +2,37 @@ import json
 
 from time import time
 
-from mistpy.helpers import RequestsHandler
-from mistpy.helpers import parse_conf_file
+from mist.client.helpers import RequestsHandler
 
 
 class MistClient(object):
     """
-
+    MistClient is the basic Class that initializes a mist client.
     """
     def __init__(self, mist_uri="https://mist.io", email=None, password=None):
+        """
+        Pretty simple initialization. By giving in email and password you can log in to
+        mist.io.
+
+        However, in case you have a different mist.io installation (e.g. localhost:8000, that does not
+        require authentication, you can just leave email and password empty)
+        """
         self.uri = mist_uri
         self.email = email
         self.password = password
         self.api_token = None
         self.user_details = None
 
-        self.__init_configure()
-
         if self.email and self.password:
             self.__authenticate()
 
-    def __init_configure(self):
-        if (not self.email) and (not self.password):
-            credentials = parse_conf_file()
-            self.email = credentials['EMAIL']
-            self.password = credentials['PASSWORD']
-
     def __authenticate(self):
+        """
+        Simple authentication method. A json paylod with the email
+        and the password.
+
+        If successful, a api_token is used for every other request.
+        """
         payload = {
             'email': self.email,
             'password': self.password
@@ -36,7 +40,11 @@ class MistClient(object):
 
         data = json.dumps(payload)
         req = self.request(self.uri+'/auth', data=data)
-        response = req.post().json()
+        response = req.post()
+        if response.ok:
+            response = response.json()
+        else:
+            raise Exception(response.content)
         token = response['mist_api_token']
         self.api_token = "mist_1 %s:%s" % (self.email, token)
         self.user_details = response
@@ -45,12 +53,18 @@ class MistClient(object):
         return RequestsHandler(*args, api_token=self.api_token, **kwargs)
 
     def supported_providers(self):
+        """
+        Returns a list of all the supported providers
+        """
         req = self.request(self.uri+'/providers')
         providers = req.get().json()
         supported_providers = providers['supported_providers']
         return supported_providers
 
     def list_backends(self):
+        """
+        List backends that are added to mist.io
+        """
         req = self.request(self.uri+'/backends')
         backends = req.get().json()
         return backends

@@ -36,16 +36,3 @@ class RequestsHandler(object):
         response = requests.delete(self.uri, data=self.data, headers=self.headers, timeout=self.timeout)
         return response
 
-
-def parse_conf_file():
-    home_dir = os.getenv("HOME")
-    if os.path.isfile(home_dir+"/.mist.conf"):
-        config = open(home_dir+"/.mist.conf", 'r')
-        credentials = yaml.load(config)
-        if credentials:
-            return credentials
-
-    credentials = dict()
-    credentials['EMAIL'] = None
-    credentials['PASSWORD'] = None
-    return credentials
