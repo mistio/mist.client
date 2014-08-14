@@ -3,19 +3,25 @@ import json
 from time import time
 
 from mist.client.helpers import RequestsHandler
+from mist.client.model import Backend
 
 
 class MistClient(object):
     """
-    MistClient is the basic Class that initializes a mist client.
+
     """
     def __init__(self, mist_uri="https://mist.io", email=None, password=None):
         """
-        Pretty simple initialization. By giving in email and password you can log in to
-        mist.io.
+        Initialize the mist.client. In case email and password are given, it will try to authenticate with mist.io
+        and keep the api_token that is returned to be used with the later requests.
 
-        However, in case you have a different mist.io installation (e.g. localhost:8000, that does not
-        require authentication, you can just leave email and password empty)
+
+        :param mist_uri: By default it is 'https://mist.io'. Can be changed if there's a different installation of
+        mist.io
+        :param email: Email to authenticate with mist.io. May be left 'None' if there's a standalone installation of
+        mist.io that does not require authentication.
+        :param password: Password to authenticate with mist.io. May be left 'None' if there's a standalone installation
+        of mist.io that does not require authentication.
         """
         self.uri = mist_uri
         self.email = email
@@ -23,15 +29,15 @@ class MistClient(object):
         self.api_token = None
         self.user_details = None
 
+        self.backends = {}
+
         if self.email and self.password:
             self.__authenticate()
 
     def __authenticate(self):
         """
-        Simple authentication method. A json paylod with the email
-        and the password.
-
-        If successful, a api_token is used for every other request.
+        Sends a json payload with the email and password in order to get the authentication api_token to be used with
+        the rest of the requests
         """
         payload = {
             'email': self.email,
@@ -40,21 +46,25 @@ class MistClient(object):
 
         data = json.dumps(payload)
         req = self.request(self.uri+'/auth', data=data)
-        response = req.post()
-        if response.ok:
-            response = response.json()
-        else:
-            raise Exception(response.content)
+        response = req.post().json()
         token = response['mist_api_token']
         self.api_token = "mist_1 %s:%s" % (self.email, token)
         self.user_details = response
 
     def request(self, *args, **kwargs):
+        """
+        The main purpose of this is to be a wrapper-like function to pass the api_token and all the other params to the
+        requests that are being made
+
+        :returns: An instance of RequestsHandler
+        """
         return RequestsHandler(*args, api_token=self.api_token, **kwargs)
 
     def supported_providers(self):
         """
-        Returns a list of all the supported providers
+        Request a list of all available providers
+
+        :returns: A list of all available providers (e.g. {'provider': 'ec2_ap_northeast', 'title': 'EC2 AP NORTHEAST'})
         """
         req = self.request(self.uri+'/providers')
         providers = req.get().json()
@@ -63,14 +73,38 @@ class MistClient(object):
 
     def list_backends(self):
         """
-        List backends that are added to mist.io
+        Request a list of all added backends.
+
+        Populates self.backends dict with mist.client.model.Backend instances
+
+        :returns: A list of the added backends' names
         """
         req = self.request(self.uri+'/backends')
         backends = req.get().json()
-        return backends
+        for backend in backends:
+            self.backends[backend['title']] = Backend(backend, self.api_token)
+
+        return self.backends.keys()
 
     def add_backend(self, title, provider, key, secret, tenant_name=None, region=None, apiurl=None, machine_ip=None,
                     machine_key=None, machine_user=None, compute_endpoint=None, machine_port=None):
+        """
+        Add a backend (hint: run supported_providers first in order to see all the available options)
+
+        :param title: Title of the backend
+        :param provider: A provider's name (must be one of the list of supported_providers)
+        :param key: According to each provider can be a username, a api_key etc.
+        :param secret: According to each provider can be a simple password, a api_secret etc.
+        :param tenant_name: Used if needed for OpenStack backends.
+        :param region: Necessary only if there is a custom Openstack region.
+        :param apiurl: APIURL needed by Openstack and HP Cloud.
+        :param machine_ip: Ip address needed when adding Bare Metal Server.
+        :param machine_key: Id of ssh key needed when adding Bare Metal Server. The key must have been added first.
+        :param machine_user: User for Bare Metal Server.
+        :param compute_endpoint: Needed by some OpenStack installations.
+        :param machine_port: Used when adding a Bare Metal Server
+        :returns: Updates self.backends dict and returns a list of added backends' names.
+        """
         payload = {
             'title': title,
             'provider': provider,
@@ -88,10 +122,8 @@ class MistClient(object):
 
         req = self.request(self.uri+'/backends', data=json.dumps(payload))
         response = req.post()
-        if response.ok:
-            return response
-        else:
-            return response.status_code
+        self.list_backends()
+        return
 
     def delete_backend(self, backend_id):
         req = self.request(self.uri + '/backends/' +backend_id)

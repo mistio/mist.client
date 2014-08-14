@@ -1,6 +1,4 @@
 import sys
-import os
-import yaml
 
 try:
     import requests
@@ -15,24 +13,38 @@ class RequestsHandler(object):
     """
 
     def __init__(self, mist_uri, data=None, api_token=None, timeout=None):
+        """
+
+        :param mist_uri:
+        :param data:
+        :param api_token:
+        :param timeout:
+        :return:
+        """
         self.headers = {'Authorization': api_token}
         self.uri = mist_uri
         self.data = data
         self.timeout = timeout
 
+    def response(self, resp):
+        if resp.ok:
+            return resp
+        else:
+            raise Exception(resp.content)
+
     def post(self):
-        response = requests.post(self.uri, data=self.data, headers=self.headers, timeout=self.timeout)
-        return response
+        resp = requests.post(self.uri, data=self.data, headers=self.headers, timeout=self.timeout)
+        return self.response(resp)
 
     def get(self):
-        response = requests.get(self.uri, data=self.data, headers=self.headers, timeout=self.timeout)
-        return response
+        resp = requests.get(self.uri, data=self.data, headers=self.headers, timeout=self.timeout)
+        return self.response(resp)
 
     def put(self):
-        response = requests.put(self.uri, data=self.data, headers=self.headers, timeout=self.timeout)
-        return response
+        resp = requests.put(self.uri, data=self.data, headers=self.headers, timeout=self.timeout)
+        return self.response(resp)
 
     def delete(self):
-        response = requests.delete(self.uri, data=self.data, headers=self.headers, timeout=self.timeout)
-        return response
+        resp = requests.delete(self.uri, data=self.data, headers=self.headers, timeout=self.timeout)
+        return self.response(resp)
 
