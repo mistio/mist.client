@@ -149,7 +149,7 @@ class Key(object):
         self.mist_client = mist_client
         self.api_token = self.mist_client.api_token
         self.id = key['id']
-        self.default_key = key['isDefault']
+        self.is_default = key['isDefault']
         self.info = key
 
     def __str__(self):
@@ -166,3 +166,36 @@ class Key(object):
         :returns: An instance of RequestsHandler
         """
         return RequestsHandler(*args, api_token=self.api_token, **kwargs)
+
+    @property
+    def private(self):
+        req = self.request(self.mist_client.uri+'/keys/'+self.id+"/private")
+        private = req.get().json()
+        return private
+
+    @property
+    def public(self):
+        req = self.request(self.mist_client.uri+'/keys/'+self.id+"/public")
+        public = req.get().json()
+        return public
+
+    def rename(self, new_name):
+        payload = {
+            'new_id': new_name
+        }
+        data = json.dumps(payload)
+        req = self.request(self.mist_client.uri+'/keys/'+self.id, data=data)
+        req.put()
+        self.id = new_name
+        self.mist_client.update_keys()
+
+    def set_default(self):
+        req = self.request(self.mist_client.uri+'/keys/'+self.id)
+        req.post()
+        self.is_default = True
+        self.mist_client.update_keys()
+
+    def delete(self):
+        req = self.request(self.mist_client.uri+'/keys/'+self.id)
+        req.delete()
+        self.mist_client.update_keys()

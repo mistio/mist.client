@@ -148,7 +148,6 @@ class MistClient(object):
                 self._keys[key['id']] = Key(key, self)
         else:
             self._keys = {}
-        return keys
 
     @property
     def keys(self):
@@ -158,22 +157,28 @@ class MistClient(object):
 
         return self._keys
 
-    # def add_key(self, key_name, private):
-    #     payload = {
-    #         'id': key_name,
-    #         'priv': private
-    #     }
-    #
-    #     data = json.dumps(payload)
-    #
-    #     req = self.request(self.uri+'/keys', data=data)
-    #     response = req.put()
-    #
-    #     if response.ok:
-    #         return response
-    #     else:
-    #         return response.status_code
-    #
+    def update_keys(self):
+        self._keys = {}
+        self._list_keys()
+        return self._keys
+
+    def generate_key(self):
+        req = self.request(self.uri+"/keys")
+        private_key = req.post().json()
+        return private_key['priv']
+
+    def add_key(self, key_name, private):
+        payload = {
+            'id': key_name,
+            'priv': private
+        }
+
+        data = json.dumps(payload)
+
+        req = self.request(self.uri+'/keys', data=data)
+        req.put()
+        self.update_keys()
+
     # def delete_key(self, key_id):
     #     req = self.request(self.uri+'/keys/'+key_id)
     #     response = req.delete()
