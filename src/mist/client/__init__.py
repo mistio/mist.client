@@ -6,7 +6,7 @@ from mist.client.model import Backend, Key
 
 class MistClient(object):
     """
-
+    The base class that initiates a new client that connects with mist.io service.
     """
     def __init__(self, mist_uri="https://mist.io", email=None, password=None):
         """
@@ -55,7 +55,7 @@ class MistClient(object):
         The main purpose of this is to be a wrapper-like function to pass the api_token and all the other params to the
         requests that are being made
 
-        :returns: An instance of RequestsHandler
+        :returns: An instance of mist.client.helpers.RequestsHandler
         """
         return RequestsHandler(*args, api_token=self.api_token, **kwargs)
 
@@ -75,9 +75,7 @@ class MistClient(object):
         """
         Request a list of all added backends.
 
-        Populates self.backends dict with mist.client.model.Backend instances
-
-        :returns: A list of the added backends' names
+        Populates self._backends dict with mist.client.model.Backend instances
         """
         req = self.request(self.uri+'/backends')
         backends = req.get().json()
@@ -89,6 +87,11 @@ class MistClient(object):
 
     @property
     def backends(self):
+        """
+        Property-like function to call the _list_backends function in order to populate self._backends dict
+
+        :returns: A list of Backend instances.
+        """
         if self._backends is None:
             self._backends = {}
             self._list_backends()
@@ -96,6 +99,14 @@ class MistClient(object):
         return self._backends
 
     def update_backends(self):
+        """
+        Update added backends' info and re-populate the self._backends dict.
+
+        This one is used whenever a new backend is added, renamed etc etc or whenever you want to update the list
+        of added backends.
+
+        :returns: A list of Backend instances.
+        """
         self._backends = {}
         self._list_backends()
         return self._backends
@@ -117,7 +128,7 @@ class MistClient(object):
         :param machine_user: User for Bare Metal Server.
         :param compute_endpoint: Needed by some OpenStack installations.
         :param machine_port: Used when adding a Bare Metal Server
-        :returns: Updates self.backends dict and returns a list of added backends' names.
+        :returns: Updates self._backends dict.
         """
         payload = {
             'title': title,
@@ -140,6 +151,11 @@ class MistClient(object):
         return
 
     def _list_keys(self):
+        """
+        Retrieves a list of all added Keys and populates the self._keys dict with Key instances
+
+        :returns: A list of Keys instances
+        """
         req = self.request(self.uri+'/keys')
         keys = req.get().json()
         if keys:
@@ -151,6 +167,11 @@ class MistClient(object):
 
     @property
     def keys(self):
+        """
+        Property-like function to call the _list_keys function in order to populate self._keys dict
+
+        :returns: A list of Key instances
+        """
         if self._keys is None:
             self._keys = {}
             self._list_keys()
@@ -158,16 +179,37 @@ class MistClient(object):
         return self._keys
 
     def update_keys(self):
+        """
+        Update added keys' info and re-populate the self._keys dict.
+
+        This one is used whenever a new key is added, renamed etc etc or whenever you want to update the list
+        of added keys.
+
+        :returns: A list of Key instances.
+        """
         self._keys = {}
         self._list_keys()
         return self._keys
 
     def generate_key(self):
+        """
+        Ask mist.io to randomly generate a private ssh-key to be used with the creation of a new Key
+
+        :returns: A string of a randomly generated ssh private key
+        """
         req = self.request(self.uri+"/keys")
         private_key = req.post().json()
         return private_key['priv']
 
     def add_key(self, key_name, private):
+        """
+        Add a new key to mist.io
+
+        :param key_name: Name of the new key (it will be used as the key's id as well).
+        :param private: Private ssh-key in string format (see also generate_key() ).
+
+        :returns: An updated list of added keys.
+        """
         payload = {
             'id': key_name,
             'priv': private
@@ -179,29 +221,3 @@ class MistClient(object):
         req.put()
         self.update_keys()
 
-    # def toggle_monitoring(self, backend_id, machine_id, machine_name, public_ips, dns_name, action='enable'):
-    #     payload = {
-    #         'action': action,
-    #         'name': machine_name,
-    #         'public_ips': public_ips,
-    #         'dns_name': dns_name
-    #     }
-    #     data = json.dumps(payload)
-    #     req = self.request(self.uri+'/backends/'+backend_id+'/machines/'+machine_id+'/monitoring', data=data)
-    #     response = req.post()
-    #     if response.ok:
-    #         return response
-    #     else:
-    #         return response.status_code
-    #
-    # def get_stats(self, backend_id, machine_id, start=int(time()), stop=int(time())+10, step=10):
-    #     payload = {
-    #         'start': start,
-    #         'stop': stop,
-    #         'step': step
-    #     }
-    #
-    #     data = json.dumps(payload)
-    #     req = self.request(self.uri+'/backends/'+backend_id+'/machines/'+machine_id+'/stats', data=data)
-    #     stats = req.get().json()
-    #     return stats

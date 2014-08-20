@@ -9,17 +9,18 @@ except ImportError:
 
 class RequestsHandler(object):
     """
-
+    A wrapper-like class to be used with all the requests being made to mist.io service.
     """
 
     def __init__(self, mist_uri, data=None, api_token=None, timeout=None):
         """
 
-        :param mist_uri:
-        :param data:
-        :param api_token:
-        :param timeout:
-        :return:
+        :param mist_uri: The uri to make the requests to.
+        :param data: Json object with all the params needed by some requests.
+        :param api_token: If api_token is used, then you do not have to provide username and password.
+        :param timeout: Optional. If given the request will fail if it lasts longer than the timeout.
+
+        :returns: A RequestsHandler instance.
         """
         self.headers = {'Authorization': api_token}
         self.uri = mist_uri
@@ -27,6 +28,12 @@ class RequestsHandler(object):
         self.timeout = timeout
 
     def response(self, resp):
+        """
+        For each respone we check if the response status is ok, otherwise raise an error with the the response's
+        content.
+        :param resp: The response we got after a request.
+        :return: Return the response if response.ok, otherwise raise error with the response.content.
+        """
         if resp.ok:
             return resp
         else:

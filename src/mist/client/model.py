@@ -7,9 +7,15 @@ from mist.client.helpers import RequestsHandler
 
 class Backend(object):
     """
-
+    A backend instance.
     """
     def __init__(self, backend, mist_client):
+        """
+
+        :param backend: Dict that is returned from the API, with all the available info.
+        :param mist_client: The MistClient instance that initiated the creation of this Backend instance.
+        :returns: A Backend object.
+        """
         self.mist_client = mist_client
         self.info = backend
         self.title = backend['title']
@@ -36,11 +42,22 @@ class Backend(object):
         return RequestsHandler(*args, api_token=self.api_token, **kwargs)
 
     def delete(self):
+        """
+        Delete the backend from the list of added backends in mist.io service.
+
+        :returns: A list of mist.clients' updated backends.
+        """
         req = self.request(self.mist_client.uri + '/backends/' + self.id)
         req.delete()
         self.mist_client.update_backends()
 
     def rename(self, new_name):
+        """
+        Rename the backend.
+
+        :param new_name: New name for the backend to be renamed to.
+        :returns: A list of mist.clients' updated backends.
+        """
         payload = {
             'new_name': new_name
         }
@@ -51,6 +68,11 @@ class Backend(object):
         self.mist_client.update_backends()
 
     def enable(self):
+        """
+        Enable the Backend.
+
+        :returns:  A list of mist.clients' updated backends.
+        """
         payload = {
             "new_state": "1"
         }
@@ -61,6 +83,11 @@ class Backend(object):
         self.mist_client.update_backends()
 
     def disable(self):
+        """
+        Disable the Backend.
+
+        :returns:  A list of mist.clients' updated backends.
+        """
         payload = {
             "new_state": "0"
         }
@@ -72,23 +99,44 @@ class Backend(object):
 
     @property
     def sizes(self):
+        """
+        Available machine sizes to be used when creating a new machine.
+
+        :returns: A list of available machine sizes.
+        """
         req = self.request(self.mist_client.uri+'/backends/'+self.id+'/sizes')
         sizes = req.get().json()
         return sizes
 
     @property
     def locations(self):
+        """
+        Available locations to be used when creating a new machine.
+
+        :returns: A list of available locations.
+        """
         req = self.request(self.mist_client.uri+'/backends/'+self.id+'/locations')
         locations = req.get().json()
         return locations
 
     @property
     def images(self):
+        """
+        Available images to be used when creating a new machine.
+
+        :returns: A list of all available images.
+        """
         req = self.request(self.mist_client.uri+'/backends/'+self.id+'/images')
         images = req.get().json()
         return images
 
     def search_image(self, search_term):
+        """
+        Search for a specific image by providing a search term (mainly used with ec2's community and public images)
+
+        :param search_term: Search term to be used when searching for images's names containing this term.
+        :returns: A list of all images, whose names contain the given search_term.
+        """
         payload = {
             'search_term': search_term
         }
