@@ -118,6 +118,21 @@ class Backend(object):
         self._list_machines()
         return self._machines
 
+    def create_machine(self, name, key, image_id, location_id, size_id, image_extra="", disk=""):
+        payload = {
+            'name': name,
+            'key': key.id,
+            'image': image_id,
+            'location': location_id,
+            'size': size_id,
+            'image_extra': image_extra,
+            'disk': disk
+        }
+        data = json.dumps(payload)
+        req = self.request(self.mist_client.uri+'/backends/'+self.id+'/machines', data=data)
+        req.post()
+        self.update_machines()
+
 
 class Machine(object):
     def __init__(self, machine, backend):
@@ -142,6 +157,30 @@ class Machine(object):
         :returns: An instance of RequestsHandler
         """
         return RequestsHandler(*args, api_token=self.api_token, **kwargs)
+
+    def _machine_actions(self, action):
+        payload = {
+            'action': action
+        }
+        data = json.dumps(payload)
+        req = self.request(self.mist_client.uri+'/backends/'+self.backend.id+'/machines/'+self.id, data=data)
+        req.post()
+        self.backend.update_machines()
+
+    def reboot(self):
+        self._machine_actions("reboot")
+
+    def start(self):
+        self._machine_actions("start")
+
+    def stop(self):
+        self._machine_actions("stop")
+
+    def destroy(self):
+        self._machine_actions("destroy")
+
+    def shutdown(self):
+        self._machine_actions("shutdown")
 
 
 class Key(object):

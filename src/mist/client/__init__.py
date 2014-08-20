@@ -179,45 +179,6 @@ class MistClient(object):
         req.put()
         self.update_keys()
 
-    # def delete_key(self, key_id):
-    #     req = self.request(self.uri+'/keys/'+key_id)
-    #     response = req.delete()
-    #     if response.ok:
-    #         return response
-    #     else:
-    #         return response.status_code
-    #
-    #
-    # def create_machine(self, backend_id, name, key_id, image_id, location_id, size_id, image_extra="", disk=""):
-    #     payload = {
-    #         'name': name,
-    #         'key': key_id,
-    #         'image': image_id,
-    #         'location': location_id,
-    #         'size': size_id,
-    #         'image_extra': image_extra,
-    #         'disk': disk
-    #     }
-    #     data = json.dumps(payload)
-    #     req = self.request(self.uri+'/backends/'+backend_id+'/machines', data=data)
-    #     response = req.post()
-    #     if response.ok:
-    #         return response
-    #     else:
-    #         return response.status_code
-    #
-    # def machine_actions(self, backend_id, machine_id, action):
-    #     payload = {
-    #         'action': action
-    #     }
-    #     data = json.dumps(payload)
-    #     req = self.request(self.uri+'/backends/'+backend_id+'/machines/'+machine_id, data=data)
-    #     response = req.post()
-    #     if response.ok:
-    #         return response
-    #     else:
-    #         return response.status_code
-    #
     # def toggle_monitoring(self, backend_id, machine_id, machine_name, public_ips, dns_name, action='enable'):
     #     payload = {
     #         'action': action,
