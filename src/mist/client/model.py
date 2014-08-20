@@ -1,4 +1,7 @@
 import json
+
+from time import time
+
 from mist.client.helpers import RequestsHandler
 
 
@@ -142,6 +145,7 @@ class Machine(object):
         self.api_token = self.mist_client.api_token
         self.name = machine['name']
         self.id = machine['id']
+        self.probed = None
 
     def __str__(self):
         return "%s => %s:%s" % (self.__class__.__name__, self.name, self.id)
@@ -179,8 +183,63 @@ class Machine(object):
     def destroy(self):
         self._machine_actions("destroy")
 
-    def shutdown(self):
-        self._machine_actions("shutdown")
+    def probe(self, key_id=None, ssh_user=None):
+        payload = {
+            'host': self.info['public_ips'][0],
+            'key': key_id,
+            'ssh_user': ssh_user
+        }
+        data = json.dumps(payload)
+        req = self.request(self.mist_client.uri+"/backends/"+self.backend.id+"/machines/"+self.id+"/probe", data=data)
+        probe_info = req.post().json()
+        self.probed = True
+        return probe_info
+
+    def _toggle_monitoring(self, action):
+        payload = {
+            'action': action,
+            'machine_name': self.name,
+            'public_ips': self.info['public_ips'],
+            'dns_name': self.info['extra']['dns_name']
+        }
+
+        data = json.dumps(payload)
+
+        req = self.request(self.mist_client.uri+"/backends/"+self.backend.id+"/machines/"+self.id+"/monitoring",
+                           data=data)
+        req.post()
+
+    def enable_monitoring(self):
+        self._toggle_monitoring(action="enable")
+
+    def disable_monitoring(self):
+        self._toggle_monitoring(action="disable")
+
+    def get_stats(self, start=int(time()), stop=int(time())+10, step=10):
+        payload = {
+            'start': start,
+            'stop': stop,
+            'step': step
+        }
+
+        data = json.dumps(payload)
+        req = self.request(self.mist_client.uri+"/backends/"+self.backend.id+"/machines/"+self.id+"/stats", data=data)
+        stats = req.get().json()
+        return stats
+
+    @property
+    def available_metrics(self):
+        req = self.request(self.mist_client.uri+"/backends/"+self.backend.id+"/machines/"+self.id+"/metrics")
+        metrics = req.get().json()
+        return metrics
+
+    def add_metric(self, metric_id):
+        payload = {
+            'metric_id': metric_id
+        }
+        data = json.dumps(payload)
+        req = self.request(self.mist_client.uri+"/backends/"+self.backend.id+"/machines/"+self.id+"/metrics", data=data)
+        req.put()
 
 
 class Key(object):
