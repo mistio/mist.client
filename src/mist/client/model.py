@@ -248,7 +248,7 @@ class Machine(object):
             'action': action,
             'machine_name': self.name,
             'public_ips': self.info['public_ips'],
-            'dns_name': self.info['extra']['dns_name']
+            'dns_name': self.info['extra'].get('dns_name', 'n/a')
         }
 
         data = json.dumps(payload)
