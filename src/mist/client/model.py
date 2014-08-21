@@ -265,6 +265,7 @@ class Machine(object):
 
     def get_stats(self, start=int(time()), stop=int(time())+10, step=10):
         payload = {
+            'v': 2,
             'start': start,
             'stop': stop,
             'step': step
