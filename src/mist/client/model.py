@@ -147,6 +147,11 @@ class Backend(object):
         return images
 
     def _list_machines(self):
+        """
+        Request a list of all added machines.
+
+        Populates self._machines dict with mist.client.model.Machine instances
+        """
         req = self.request(self.mist_client.uri+'/backends/'+self.id+'/machines')
         machines = req.get().json()
 
@@ -158,6 +163,11 @@ class Backend(object):
 
     @property
     def machines(self):
+        """
+        Property-like function to call the _list_machines function in order to populate self._machines dict
+
+        :returns: A list of Machine instances.
+        """
         if self._machines is None:
             self._machines = {}
             self._list_machines()
@@ -165,11 +175,31 @@ class Backend(object):
         return self._machines
 
     def update_machines(self):
+        """
+        Update added machines' info and re-populate the self._machines dict.
+
+        This one is used whenever a new machine is created, rebooted etc etc or whenever you want to update the list
+        of added machines.
+
+        :returns: A list of Machine instances.
+        """
         self._machines = {}
         self._list_machines()
         return self._machines
 
     def create_machine(self, name, key, image_id, location_id, size_id, image_extra="", disk=""):
+        """
+        Create a new machine on the given backend
+
+        :param name: Name of the machine
+        :param key: Key Object to associate with the machine
+        :param image_id: Id of image to be used with the creation
+        :param location_id: Id of the backend's location to create the machine
+        :param size_id: If of the size of the machine
+        :param image_extra: Needed only by Linode backend
+        :param disk: Needed only by Linode backend
+        :returns: An update list of added machines
+        """
         payload = {
             'name': name,
             'key': key.id,
@@ -186,7 +216,16 @@ class Backend(object):
 
 
 class Machine(object):
+    """
+    A machine instance
+    """
     def __init__(self, machine, backend):
+        """
+
+        :param machine: Dict with all available info for the machine
+        :param backend: The Backend instance which initiates the new machine
+        :returns: A machine instance
+        """
         self.backend = backend
         self.mist_client = backend.mist_client
         self.info = machine
@@ -211,6 +250,12 @@ class Machine(object):
         return RequestsHandler(*args, api_token=self.api_token, **kwargs)
 
     def _machine_actions(self, action):
+        """
+        Actions for the machine (e.g. stop, start etc)
+
+        :param action: Can be "reboot", "start", "stop", "destroy"
+        :returns: An updated list of the added machines
+        """
         payload = {
             'action': action
         }
@@ -220,18 +265,36 @@ class Machine(object):
         self.backend.update_machines()
 
     def reboot(self):
+        """
+        Reboot machine
+        """
         self._machine_actions("reboot")
 
     def start(self):
+        """
+        Start a stopped machine
+        """
         self._machine_actions("start")
 
     def stop(self):
+        """
+        Stop a running machine
+        """
         self._machine_actions("stop")
 
     def destroy(self):
+        """
+        Destroy machine
+        """
         self._machine_actions("destroy")
 
     def probe(self, key_id=None, ssh_user=None):
+        """
+        If no parameter is provided, mist.io will try to probe the machine with the default
+        :param key_id: Optional. Give if you explicitly want to probe with this key_id
+        :param ssh_user: Optional. Give if you explicitly want a specific user
+        :returns: A list of data received by the probing (e.g. uptime etc)
+        """
         payload = {
             'host': self.info['public_ips'][0],
             'key': key_id,
@@ -244,6 +307,11 @@ class Machine(object):
         return probe_info
 
     def _toggle_monitoring(self, action):
+        """
+        Enable or disable monitoring on a machine
+
+        :param action: Can be either "enable" or "disable"
+        """
         payload = {
             'action': action,
             'machine_name': self.name,
@@ -258,12 +326,26 @@ class Machine(object):
         req.post()
 
     def enable_monitoring(self):
+        """
+        Enable monitoring
+        """
         self._toggle_monitoring(action="enable")
 
     def disable_monitoring(self):
+        """
+        Disable monitoring
+        """
         self._toggle_monitoring(action="disable")
 
     def get_stats(self, start=int(time()), stop=int(time())+10, step=10):
+        """
+        Get stats of a monitored machine
+
+        :param start: Time formatted as integer, from when to fetch stats (default now)
+        :param stop: Time formatted as integer, until when to fetch stats (default +10 seconds)
+        :param step: Step to fetch stats (default 10 seconds)
+        :returns: A dict of stats
+        """
         payload = {
             'v': 2,
             'start': start,
@@ -278,11 +360,21 @@ class Machine(object):
 
     @property
     def available_metrics(self):
+        """
+        List all available metrics that you can add to this machine
+
+        :returns: A list of dicts, each of which is a metric that you can add to a monitored machine
+        """
         req = self.request(self.mist_client.uri+"/backends/"+self.backend.id+"/machines/"+self.id+"/metrics")
         metrics = req.get().json()
         return metrics
 
     def add_metric(self, metric_id):
+        """
+        Add a metric to a monitored machine
+
+        :param metric_id: Metric_id (provided by self.available_metrics)
+        """
         payload = {
             'metric_id': metric_id
         }
@@ -292,7 +384,16 @@ class Machine(object):
 
 
 class Key(object):
+    """
+    A Key instance
+    """
     def __init__(self, key, mist_client):
+        """
+
+        :param key: A dict with all the available info for this key
+        :param mist_client: The MistClient instance that initiated the creation of this Key instance.
+        :return:
+        """
         self.mist_client = mist_client
         self.api_token = self.mist_client.api_token
         self.id = key['id']
@@ -316,17 +417,33 @@ class Key(object):
 
     @property
     def private(self):
+        """
+        Return the private ssh-key
+
+        :returns: The private ssh-key as string
+        """
         req = self.request(self.mist_client.uri+'/keys/'+self.id+"/private")
         private = req.get().json()
         return private
 
     @property
     def public(self):
+        """
+        Return the public ssh-key
+
+        :returns: The public ssh-key as string
+        """
         req = self.request(self.mist_client.uri+'/keys/'+self.id+"/public")
         public = req.get().json()
         return public
 
     def rename(self, new_name):
+        """
+        Rename a key
+
+        :param new_name: New name for the key (will also serve as the key's id)
+        :returns: An updated list of added keys
+        """
         payload = {
             'new_id': new_name
         }
@@ -337,12 +454,22 @@ class Key(object):
         self.mist_client.update_keys()
 
     def set_default(self):
+        """
+        Set this key as the default key
+
+        :returns: An updated list of added keys
+        """
         req = self.request(self.mist_client.uri+'/keys/'+self.id)
         req.post()
         self.is_default = True
         self.mist_client.update_keys()
 
     def delete(self):
+        """
+        Delete this key from mist.io
+
+        :returns: An updated list of added keys
+        """
         req = self.request(self.mist_client.uri+'/keys/'+self.id)
         req.delete()
         self.mist_client.update_keys()
