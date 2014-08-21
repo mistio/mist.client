@@ -55,4 +55,18 @@ client.supported_providers
  {u'provider': u'docker', u'title': u'Docker'}]
 ```
 
+You can see which backends you have added in the mist.io service:
+
+```
+client.backends
+
+{u'Testeras': Backend => Testeras:D1g9abwqGUmQuZKGGBMfCgw8AUQ}
+```
+
+You can add a backend (e.g. ec2_ap_northeast):
+
+```
+client.add_backend(title="MyBackend", provider="ec2_ap_northeast", key="XXXXXXXXXXXXXXXXXX", secret="xxxxxxxxxxxxxxxxxxxxxxxxxxx")
+
+```
 
