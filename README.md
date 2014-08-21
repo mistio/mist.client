@@ -20,7 +20,7 @@ client = MistClient(mist_uri="http://localhost:8000")
 
 Backends/Providers
 ==================
-You can see a list of all supported providers:
+- Supported providers:
 
 ```
 client.supported_providers
@@ -55,7 +55,7 @@ client.supported_providers
  {u'provider': u'docker', u'title': u'Docker'}]
 ```
 
-You can see which backends you have added in the mist.io service:
+- List backends
 
 ```
 client.backends
@@ -63,7 +63,7 @@ client.backends
 {u'Testeras': Backend => Testeras:D1g9abwqGUmQuZKGGBMfCgw8AUQ}
 ```
 
-You can add a backend (e.g. ec2_ap_northeast):
+- Add Backend (e.g. ec2_ap_northeast):
 
 ```
 client.add_backend(title="MyBackend", provider="ec2_ap_northeast", key="XXXXXXXXXXXXXXXXXX", secret="xxxxxxxxxxxxxxxxxxxxxxxxxxx")
