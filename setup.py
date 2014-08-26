@@ -6,7 +6,6 @@ here = os.path.abspath(os.path.dirname(__file__))
 
 requires = [
     'requests',
-    'sphinx',
     'argparse',
     'pyyaml',
 ]
