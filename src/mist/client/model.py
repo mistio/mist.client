@@ -308,6 +308,16 @@ class Machine(object):
         self.probed = True
         return probe_info
 
+    def associate_key(self, key_id, ssh_user=None):
+        payload = {
+            'ssh_user': ssh_user
+        }
+        data = json.dumps(payload)
+        req = self.request(self.mist_client.uri+"/backends/"+self.backend.id+"/machines/"+self.id+"/keys/"+key_id,
+                           data=data)
+        req.put()
+        self.mist_client.update_keys()
+
     def _toggle_monitoring(self, action):
         """
         Enable or disable monitoring on a machine
