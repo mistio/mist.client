@@ -6,6 +6,7 @@ here = os.path.abspath(os.path.dirname(__file__))
 
 requires = [
     'requests',
+    'sphinx',
 ]
 
 
@@ -31,6 +32,7 @@ setup(
     author_email='commixon@gmail.com',
     license='AGPLv3',
     packages=find_packages('src'),
+    scripts=['src/mist/cmd/mistio'],
     package_dir={'': 'src'},
     namespace_packages=['mist'],
     install_requires=requires,
