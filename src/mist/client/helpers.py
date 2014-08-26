@@ -55,3 +55,20 @@ class RequestsHandler(object):
         resp = requests.delete(self.uri, data=self.data, headers=self.headers, timeout=self.timeout)
         return self.response(resp)
 
+
+def machine_from_id(backend, id):
+    machines = backend.machines
+    for key in machines.keys():
+        machine = machines[key]
+        if id == machine.id:
+            return machine
+    return None
+
+
+def backend_from_id(client, id):
+    backends = client.backends
+    for key in backends.keys():
+        backend = backends[key]
+        if id == backend.id:
+            return backend
+    return

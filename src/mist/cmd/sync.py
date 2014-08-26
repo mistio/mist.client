@@ -6,6 +6,7 @@ from yaml import load
 from yaml.scanner import ScannerError
 
 from mist.client import MistClient
+from mist.client.helpers import machine_from_id, backend_from_id
 
 
 def load_dbyaml(path):
@@ -96,9 +97,45 @@ def sync_keys(user_dict, client):
     print
 
 
+def associate_keys(user_dict, client):
+    """
+    This whole function is black magic, had to however cause of the way we keep key-machine association
+    """
+    added_keys = user_dict['keypairs']
+
+    print ">>>Updating Keys-Machines association"
+    for key in added_keys:
+        machines = added_keys[key]['machines']
+        if machines:
+            try:
+                for machine in machines:
+                    backend_id = machine[0]
+                    machine_id = machine[1]
+                    ssh_user = machine[3]
+                    ssh_port = machine[-1]
+                    key = client.keys[key]
+                    backend = backend_from_id(client, backend_id)
+                    backend.update_machines()
+                    mach = machine_from_id(backend, machine_id)
+                    public_ips = mach.info.get('public_ips', None)
+                    if public_ips:
+                        host = public_ips[0]
+                    else:
+                        host = ""
+                    key.associate_to_machine(backend_id=backend_id, machine_id=machine_id, host=host, ssh_port=ssh_port,
+                                             ssh_user=ssh_user)
+
+                    print "associated machine %s" % machine_id
+            except Exception as e:
+                pass
+    client.update_keys()
+    print
+
+
 def sync(path):
 
     user_dict = load_dbyaml(path)
     client = init_client()
     sync_keys(user_dict, client)
     sync_backends(user_dict, client)
+    associate_keys(user_dict, client)

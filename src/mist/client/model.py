@@ -308,9 +308,11 @@ class Machine(object):
         self.probed = True
         return probe_info
 
-    def associate_key(self, key_id, ssh_user=None):
+    def associate_key(self, key_id, host=None, ssh_user=None, ssh_port=22):
         payload = {
-            'ssh_user': ssh_user
+            'ssh_user': ssh_user,
+            'host': host,
+            'ssh_port': ssh_port
         }
         data = json.dumps(payload)
         req = self.request(self.mist_client.uri+"/backends/"+self.backend.id+"/machines/"+self.id+"/keys/"+key_id,
@@ -553,4 +555,16 @@ class Key(object):
         """
         req = self.request(self.mist_client.uri+'/keys/'+self.id)
         req.delete()
+        self.mist_client.update_keys()
+
+    def associate_to_machine(self, backend_id, machine_id, host=None, ssh_user=None, ssh_port=22):
+        payload = {
+            'ssh_user': ssh_user,
+            'host': host,
+            'ssh_port': ssh_port
+        }
+        data = json.dumps(payload)
+        req = self.request(self.mist_client.uri+"/backends/"+backend_id+"/machines/"+machine_id+"/keys/"+self.id,
+                           data=data)
+        req.put()
         self.mist_client.update_keys()
