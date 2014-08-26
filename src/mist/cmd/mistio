@@ -1,0 +1,24 @@
+#!/usr/bin/env python
+import argparse
+import sys
+from mist.cmd.sync import sync
+
+
+def main():
+
+    if len(sys.argv) == 1:
+        print "Mist.io Service"
+        sys.exit(0)
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("action", help="Available actions", type=str, choices=["list", "sync"], default="list")
+    parser.add_argument("vars", nargs="*")
+
+    args = parser.parse_args()
+    if args.action == "sync":
+        sync(sys.argv[-1])
+    else:
+        print "Functionality not yet implemented"
+
+if __name__ == "__main__":
+    main()
