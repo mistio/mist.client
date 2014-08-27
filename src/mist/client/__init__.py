@@ -140,7 +140,7 @@ class MistClient(object):
             'machine_key': machine_key,
             'machine_user': machine_user,
             'compute_endpoint': compute_endpoint,
-            'machine_port': machine_port
+            'machine_port': machine_port,
         }
 
         req = self.request(self.uri+'/backends', data=json.dumps(payload))

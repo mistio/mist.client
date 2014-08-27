@@ -58,6 +58,53 @@ def add_backend(client, backend):
                        compute_endpoint=compute_endpoint, machine_port=machine_port)
 
 
+def add_bare_metal_backend(client, backend, keys):
+    """
+    Black magic is happening here. All of this wil change when we sanitize our API, however, this works until then
+    """
+    title = backend.get('title')
+    provider = backend.get('provider')
+    key = backend.get('apikey', "")
+    secret = backend.get('apisecret', "")
+    tenant_name = backend.get('tenant_name', "")
+    region = backend.get('region', "")
+    apiurl = backend.get('apiurl', "")
+    compute_endpoint = backend.get('compute_endpoint', None)
+    machine_ip = backend.get('machine_ip', None)
+    machine_key = backend.get('machine_key', None)
+    machine_user = backend.get('machine_user', None)
+    machine_port = backend.get('machine_port', None)
+
+    if provider == "bare_metal":
+        machine_ids = backend['machines'].keys()
+        bare_machine = backend['machines'][machine_ids[0]]
+        machine_hostname = bare_machine.get('dns_name', None)
+        if not machine_hostname:
+            machine_hostname = bare_machine['public_ips'][0]
+
+        if not machine_ip:
+            machine_ip = machine_hostname
+        key = machine_hostname
+        machine_name = backend['machines'][machine_ids[0]]['name']
+        machine_id = machine_ids[0]
+
+        keypairs = keys.keys()
+        for i in keypairs:
+            keypair_machines = keys[i]['machines']
+            if keypair_machines:
+                keypair_machs = keys[i]['machines']
+                for mach in keypair_machs:
+                    if mach[1] == machine_id:
+                        machine_key = i
+                        break
+            else:
+                pass
+
+    client.add_backend(title, provider, key, secret, tenant_name=tenant_name, region=region, apiurl=apiurl,
+                       machine_ip=machine_ip, machine_key=machine_key, machine_user=machine_user,
+                       compute_endpoint=compute_endpoint, machine_port=machine_port)
+
+
 def sync_backends(user_dict, client):
     added_backends = user_dict['backends']
     backends = client.backends
@@ -68,7 +115,10 @@ def sync_backends(user_dict, client):
             print "Found %s" % added_backends[key]['title']
         else:
             print "Adding backend %s" % added_backends[key]['title']
-            add_backend(client, added_backends[key])
+            if added_backends[key]['provider'] == "bare_metal":
+                add_bare_metal_backend(client, added_backends[key], user_dict['keypairs'])
+            else:
+                add_backend(client, added_backends[key])
     print
 
 
