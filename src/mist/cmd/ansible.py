@@ -7,6 +7,8 @@ def install_and_import(package):
     import importlib
     try:
         importlib.import_module(package)
+        if package == "ansible":
+            print "<ansible> package already installed"
     except ImportError:
         import pip
         print "Installing..."
