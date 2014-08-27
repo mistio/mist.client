@@ -1,5 +1,5 @@
-Getting Started
-***************
+Getting Started with mist command
+*********************************
 
 The mist.client package, when installed, installs alongside the ``mist`` command.
 

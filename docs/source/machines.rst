@@ -145,12 +145,12 @@ From the list of available locations, you'll need the id of the desired location
 
 Create machines
 ===============
-In order to create a machine you basicaly need to have chosen a backend, a key, image_id, location_id, size_id and a
+In order to create a machine you basically need to have chosen a backend, a key, image_id, location_id, size_id and a
 name for the machine::
 
     backend.create_machine(name="production.server", key=key, image_id=image_id, location_id=location_id, size_id=size_id)
 
-In some backend some extra inforrmation is needed. You can see `create_machine`_ method for more details.
+In some backend some extra information is needed. You can see `create_machine`_ method for more details.
 
 .. _create_machine: mist.client.html#mist.client.model.Backend.create_machine
 

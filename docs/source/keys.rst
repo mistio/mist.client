@@ -23,7 +23,8 @@ Or have mist.io generate a randon one for you::
     private = client.generate_key()
     client.add_key(key_name="MyKey", private=private)
 
-After adding a new key, you have to update the client's keys list::
+After adding a new key, mist.keys will be automatically updated. However, in case you want to manually update the keys
+you can do it::
 
     client.update_keys()
 

@@ -57,9 +57,10 @@ See also `add_backend`_ method for detailed information about the different para
 
 .. _add_backend: mist.client.html#mist.client.MistClient.add_backend
 
-After adding a new backend, you have to update the clients' backend in order to have the new information::
+After adding a new backend, mist.backends are automatically updated. You  can however do it manually in case you want
+to::
 
-    client.update_backend()
+    client.update_backends()
 
 
 Backend actions
