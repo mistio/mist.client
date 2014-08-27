@@ -6,7 +6,7 @@
 Welcome to mist.client's documentation!
 =======================================
 
-:Version: 0.0.1
+:Version: 0.0.2
 :Author: Mist.io Inc
 :Source: https://github.com/mistio/mist.client
 :License: GNU AGPL v3
