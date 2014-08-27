@@ -17,7 +17,7 @@ def readme():
 
 setup(
     name='mist.client',
-    version='0.0.1',
+    version='0.0.2',
     description='Python client for mist.io',
     long_description=readme(),
     classifiers=[
@@ -33,7 +33,7 @@ setup(
     author_email='commixon@gmail.com',
     license='AGPLv3',
     packages=find_packages('src'),
-    scripts=['src/mist/cmd/mistio'],
+    scripts=['src/mist/cmd/mist'],
     package_dir={'': 'src'},
     namespace_packages=['mist'],
     install_requires=requires,

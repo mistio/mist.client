@@ -14,12 +14,9 @@ class MistClient(object):
         and keep the api_token that is returned to be used with the later requests.
 
 
-        :param mist_uri: By default it is 'https://mist.io'. Can be changed if there's a different installation of
-        mist.io
-        :param email: Email to authenticate with mist.io. May be left 'None' if there's a standalone installation of
-        mist.io that does not require authentication.
-        :param password: Password to authenticate with mist.io. May be left 'None' if there's a standalone installation
-        of mist.io that does not require authentication.
+        :param mist_uri: By default it is 'https://mist.io'. Can be changed if there's a different installation of mist.io
+        :param email: Email to authenticate with mist.io. May be left 'None' if there's a standalone installation of mist.io that does not require authentication.
+        :param password: Password to authenticate with mist.io. May be left 'None' if there's a standalone installation of mist.io that does not require authentication.
         """
         self.uri = mist_uri
         self.email = email
@@ -129,6 +126,7 @@ class MistClient(object):
         :param compute_endpoint: Needed by some OpenStack installations.
         :param machine_port: Used when adding a Bare Metal Server
         :returns: Updates self._backends dict.
+
         """
         payload = {
             'title': title,
