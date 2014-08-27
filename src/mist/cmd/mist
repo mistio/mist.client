@@ -2,6 +2,7 @@
 import argparse
 import sys
 from mist.cmd.sync import sync
+from mist.cmd.ansible import ansible
 
 
 def main():
@@ -11,14 +12,19 @@ def main():
         sys.exit(0)
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("action", help="Available actions", type=str, choices=["list", "sync"], default="list")
+    parser.add_argument("action", help="Available actions", type=str, choices=["list", "sync", "ansible"],
+                        default="list")
     parser.add_argument("vars", nargs="*")
+    parser.add_argument("-n", "--name", help="Name for whenever you need to provide one", required=False, type=str)
 
     args = parser.parse_args()
     if args.action == "sync":
         sync(sys.argv[-1])
+    elif args.action == "ansible":
+        ansible(args.vars, args.name)
     else:
         print "Functionality not yet implemented"
+        sys.exit(0)
 
 if __name__ == "__main__":
     main()

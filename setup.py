@@ -8,6 +8,7 @@ requires = [
     'requests',
     'argparse',
     'pyyaml',
+    'gitpython==0.3.2.RC1'
 ]
 
 
