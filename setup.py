@@ -9,7 +9,7 @@ requires = [
     'argparse',
     'pyyaml',
     'gitpython==0.3.2.RC1',
-    'ansible'
+    'ansible',
 ]
 
 
@@ -19,7 +19,7 @@ def readme():
 
 setup(
     name='mist.client',
-    version='0.0.2',
+    version='0.0.3',
     description='Python client for mist.io',
     long_description=readme(),
     classifiers=[
@@ -39,5 +39,8 @@ setup(
     package_dir={'': 'src'},
     namespace_packages=['mist'],
     install_requires=requires,
+    extras_require={
+        'mist.ansible': ['mist.ansible']
+    },
     zip_safe=False
 )
