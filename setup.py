@@ -39,8 +39,5 @@ setup(
     package_dir={'': 'src'},
     namespace_packages=['mist'],
     install_requires=requires,
-    extras_require={
-        'mist.ansible': ['mist.ansible']
-    },
     zip_safe=False
 )
