@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import argparse, argcomplete
+import argparse
 import sys
 from mist.cmd.sync import sync
 from mist.cmd.ansible import ansible
@@ -7,6 +7,7 @@ from mist.cmd.login import user_info
 from mist.cmd.backends import backend_action
 from mist.cmd.providers import provider_action
 from mist.cmd.keys import key_action
+from mist.cmd.machines import machine_action
 
 
 def main():
@@ -18,12 +19,14 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("action", help="Available actions", type=str,
                         choices=["sync", "user", "list", "ls", "add", "delete", "remove", "rm", "del", "rename",
-                                 "create", "add", "show", "describe", "display" "ansible"], default="list")
+                                 "create", "add", "show", "describe", "display", "ansible", "reboot", "start", "stop",
+                                 "destroy", "probe"], default="list")
     parser.add_argument("target", help="Backends, Keys, Machines", type=str, default="backend",
                         choices=["backend", "backends", "machine", "machines", "key", "keys", "info", "providers",
-                                 "supported_providers", "images", "locations", "sizes"])
+                                 "supported_providers", "images", "locations", "sizes", "dbyaml"])
 
     parser.add_argument("vars", nargs="*")
+    parser.add_argument("--dbyaml", help="Used with mist sync. Path of dbyaml file", required=False, type=str)
     parser.add_argument("-n", "--name", help="Name for whenever you need to provide one", required=False, type=str)
     parser.add_argument("-p", "--provider", help="Provider to use", required=False, type=str)
     parser.add_argument("-k", "--key", help="Username or apikey for backend", required=False, type=str)
@@ -31,6 +34,8 @@ def main():
     parser.add_argument("-i", "--id", help="Id of backend, machine or key", required=False, type=str)
     parser.add_argument("-a", "--auto", help="Auto for auto-generation", required=False, action="store_true")
     parser.add_argument("--new_name", help="New name for renaming stuff", required=False, type=str)
+    parser.add_argument("-b", "--backend", help="Backend name or id to be used with machines", required=False,
+                        type=str)
 
     args = parser.parse_args()
     if args.action == "sync":
@@ -45,6 +50,8 @@ def main():
         backend_action(args)
     elif args.target in ["keys", "key"]:
         key_action(args)
+    elif args.target in ["machines", "machine"]:
+        machine_action(args)
     else:
         print "Functionality not yet implemented"
         sys.exit(0)

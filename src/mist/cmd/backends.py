@@ -10,7 +10,7 @@ def show_backend(backend):
     print
 
     print "Machines:"
-    x = PrettyTable(["Name", "id", "State", "Public Ips"])
+    x = PrettyTable(["Name", "ID", "State", "Public Ips"])
     for key in backend.machines.keys():
         machine = backend.machines[key]
         try:

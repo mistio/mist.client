@@ -164,12 +164,14 @@ class Backend(object):
             self._machines = {}
 
     def machine_from_id(self, machine_id):
+        self.machines
         if machine_id in self._machines.keys():
             return self._machines[machine_id]
         else:
             return None
 
     def machine_from_name(self, machine_name):
+        self.machines
         for key in self._machines.keys():
             machine = self._machines[key]
             if machine_name == machine.name:
@@ -178,6 +180,7 @@ class Backend(object):
         return None
 
     def machine_from_ip(self, machine_ip):
+        self.machines
         for key in self._machines.keys():
             machine = self._machines[key]
             public_ips = machine.info.get('public_ips', None)
