@@ -4,6 +4,8 @@ import sys
 from mist.cmd.sync import sync
 from mist.cmd.ansible import ansible
 from mist.cmd.login import user_info
+from mist.cmd.backends import backend_action
+from mist.cmd.providers import provider_action
 
 
 def main():
@@ -16,15 +18,15 @@ def main():
     parser.add_argument("action", help="Available actions", type=str, choices=["sync", "user", "list", "add", "delete",
                                                                                "rename", "create", "ansible"],
                         default="list")
-    parser.add_argument("target", help="Backends, Keys, Machines", type=str, default="backend", choices=["backend",
-                                                                                                         "backends",
-                                                                                                         "machine",
-                                                                                                         "machines",
-                                                                                                         "key",
-                                                                                                         "keys",
-                                                                                                         "info"])
+    parser.add_argument("target", help="Backends, Keys, Machines", type=str, default="backend",
+                        choices=["backend", "backends", "machine", "machines", "key", "keys", "info", "providers",
+                                 "supported_providers"])
+
     parser.add_argument("vars", nargs="*")
     parser.add_argument("-n", "--name", help="Name for whenever you need to provide one", required=False, type=str)
+    parser.add_argument("-p", "--provider", help="Provider to use", required=False, type=str)
+    parser.add_argument("-k", "--key", help="Username or apikey for backend", required=False, type=str)
+    parser.add_argument("-s", "--secret", help="Password or apisecret for backend", required=False, type=str)
 
     args = parser.parse_args()
     if args.action == "sync":
@@ -33,6 +35,10 @@ def main():
         ansible(args.vars, args.name)
     elif args.action == "user" and args.target == "info":
         user_info()
+    elif args.target in ["providers", "supported_providers"]:
+        provider_action(args)
+    elif args.target in ["backends", "backend"]:
+        backend_action(args)
     else:
         print "Functionality not yet implemented"
         sys.exit(0)
