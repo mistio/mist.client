@@ -29,10 +29,10 @@ class Backend(object):
         self._machines = None
 
     def __str__(self):
-        return "%s => %s:%s" % (self.__class__.__name__, self.title, self.id)
+        return "%s => %s, %s, %s" % (self.__class__.__name__, self.title, self.provider, self.id)
 
     def __repr__(self):
-        return "%s => %s:%s" % (self.__class__.__name__, self.title, self.id)
+        return "%s => %s, %s, %s" % (self.__class__.__name__, self.title, self.provider, self.id)
 
     def request(self, *args, **kwargs):
         """

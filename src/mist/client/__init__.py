@@ -78,7 +78,7 @@ class MistClient(object):
         backends = req.get().json()
         if backends:
             for backend in backends:
-                self._backends[backend['title']] = Backend(backend, self)
+                self._backends[backend['id']] = Backend(backend, self)
         else:
             self._backends = {}
 
@@ -94,6 +94,41 @@ class MistClient(object):
             self._list_backends()
 
         return self._backends
+
+    def _backend_from_id(self, backend_id):
+        if backend_id in self._backends.keys():
+            return self._backends[backend_id]
+        else:
+            return None
+
+    def _backend_from_title(self, backend_title):
+        for key in self._backends.keys():
+            backend = self._backends[key]
+            if backend_title == backend.title:
+                return backend
+
+        return None
+
+    def _backend_from_provider(self, backend_provider):
+        for key in self._backends.keys():
+            backend = self._backends[key]
+            if backend_provider == backend.provider:
+                return backend
+
+        return None
+
+    def backend(self, backend_key):
+        backend = self._backend_from_id(backend_key)
+        if backend:
+            return backend
+
+        backend = self._backend_from_title(backend_key)
+        if backend:
+            return backend
+
+        backend = self._backend_from_provider(backend_key)
+        if backend:
+            return backend
 
     def update_backends(self):
         """
