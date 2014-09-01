@@ -188,6 +188,9 @@ class Backend(object):
         return None
 
     def machine(self, machine_key):
+        """
+        Choose a machine by providing a machine's id, name or ip
+        """
         self.machines
         machine = self._machine_from_id(machine_key)
         if machine:

@@ -71,14 +71,20 @@ You can see all of your added backends::
 
 This will return a dict like this::
 
-    {u'DigitalOcean': Backend => DigitalOcean:3aJhBzUtAMnCUmpEHKJsqLdm1Z9p,
-     u'EC2 AP NORTHEAST': Backend => EC2 AP NORTHEAST:D1g9abwqGUmQuZKGGBMfCgw8AUQ,
-     u'NephoScale': Backend => NephoScale:W16qxKErSArH9DSNJyxXU81n35w,
-     u'Rackspace AU': Backend => Rackspace AU:36vp27TVyUCarDNNcta1Knsqcr8Z}
+    {u'2zMXgapqqaw9bSNUzSmuygFLy6Kp': Backend => Rackspace ORD, rackspace, 2zMXgapqqaw9bSNUzSmuygFLy6Kp,
+     u'36vp27TVyUCarDNNcta1Knsqcr8Z': Backend => Rackspace AU, rackspace, 36vp27TVyUCarDNNcta1Knsqcr8Z,
+     u'3aJhBzUtAMnCUmpEHKJsqLdm1Z9p': Backend => DigitalOcean, digitalocean, 3aJhBzUtAMnCUmpEHKJsqLdm1Z9p,
+     u'B3rbEA6bteaqMWJ4obVbgbqrXWf': Backend => Docker, docker, B3rbEA6bteaqMWJ4obVbgbqrXWf,
+     u'W16qxKErSArH9DSNJyxXU81n35w': Backend => NephoScale, nephoscale, W16qxKErSArH9DSNJyxXU81n35w}
 
 You can choose a backend::
 
-    backend = client.backends['DigitalOcean']
+    backend = client.backends['2zMXgapqqaw9bSNUzSmuygFLy6Kp']
+
+You can also choose a backend by providing either the backend's name, id or provider::
+
+    backend = client.backend("Docker")
+
 
 Your new backend object has a lot of attributes and methods::
 

@@ -118,6 +118,9 @@ class MistClient(object):
         return None
 
     def backend(self, backend_key):
+        """
+        Choose a backend by providing a backend's id, title or provider
+        """
         self.backends
         backend = self._backend_from_id(backend_key)
         if backend:

@@ -164,6 +164,11 @@ You can choose one::
 
     machine = backend.machines['production.server']
 
+Or you can choose a machine by providing the machine's id, name or public_ip::
+
+    machine = backend.machine("132.34.65.0")
+    machine = backend.machine("prodServer1')
+
 Machines support actions like::
 
     machine.reboot()
