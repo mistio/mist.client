@@ -16,8 +16,9 @@ def main():
         sys.exit(0)
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("action", help="Available actions", type=str, choices=["sync", "user", "list", "add", "delete",
-                                                                               "rename", "create", "ansible"],
+    parser.add_argument("action", help="Available actions", type=str,
+                        choices=["sync", "user", "list", "ls", "add", "delete", "remove", "rm", "del", "rename",
+                                 "create", "add", "ansible"],
                         default="list")
     parser.add_argument("target", help="Backends, Keys, Machines", type=str, default="backend",
                         choices=["backend", "backends", "machine", "machines", "key", "keys", "info", "providers",
@@ -30,6 +31,7 @@ def main():
     parser.add_argument("-s", "--secret", help="Password or apisecret for backend", required=False, type=str)
     parser.add_argument("-i", "--id", help="Id of backend, machine or key", required=False, type=str)
     parser.add_argument("-a", "--auto", help="Auto for auto-generation", required=False, action="store_true")
+    parser.add_argument("--new_name", help="New name for renaming stuff", required=False, type=str)
 
     args = parser.parse_args()
     if args.action == "sync":

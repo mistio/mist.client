@@ -25,9 +25,8 @@ def provider_action(args):
 
     client = init_client(mist_uri, email, password)
 
-    if args.action == "list" and args.target in ["providers", "supported_providers"]:
+    if args.action in ["list", "ls"] and args.target in ["providers", "supported_providers"]:
         list_providers(client)
     else:
         print "Action not supported"
-        print
         sys.exit(1)

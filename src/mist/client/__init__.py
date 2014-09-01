@@ -95,13 +95,13 @@ class MistClient(object):
 
         return self._backends
 
-    def _backend_from_id(self, backend_id):
+    def backend_from_id(self, backend_id):
         if backend_id in self._backends.keys():
             return self._backends[backend_id]
         else:
             return None
 
-    def _backend_from_title(self, backend_title):
+    def backend_from_title(self, backend_title):
         for key in self._backends.keys():
             backend = self._backends[key]
             if backend_title == backend.title:
@@ -109,7 +109,7 @@ class MistClient(object):
 
         return None
 
-    def _backend_from_provider(self, backend_provider):
+    def backend_from_provider(self, backend_provider):
         for key in self._backends.keys():
             backend = self._backends[key]
             if backend_provider == backend.provider:
@@ -117,20 +117,20 @@ class MistClient(object):
 
         return None
 
-    def backend(self, backend_key):
+    def search_backend(self, backend_key):
         """
         Choose a backend by providing a backend's id, title or provider
         """
         self.backends
-        backend = self._backend_from_id(backend_key)
+        backend = self.backend_from_id(backend_key)
         if backend:
             return backend
 
-        backend = self._backend_from_title(backend_key)
+        backend = self.backend_from_title(backend_key)
         if backend:
             return backend
 
-        backend = self._backend_from_provider(backend_key)
+        backend = self.backend_from_provider(backend_key)
         if backend:
             return backend
 

@@ -6,7 +6,6 @@ from mist.cmd.login import parse_config, init_client, prompt_login
 def list_backends(client):
     if not client.backends:
         print "No backends found"
-        print
         sys.exit(0)
 
     x = PrettyTable(["Title", "ID", "Provider", "State"])
@@ -34,28 +33,41 @@ def backend_action(args):
 
     client = init_client(mist_uri, email, password)
 
-    if args.action == "list" and args.target == "backends":
+    if args.action in ["list", "ls"] and args.target == "backends":
         list_backends(client)
-    elif args.action == "add" and args.target == "backend":
+    elif args.action in ["add", "create"] and args.target == "backend":
         title = args.name
         provider = args.provider
         key = args.key
         secret = args.secret
-
         client.add_backend(title=title, provider=provider, key=key, secret=secret)
         print "Added backend %s" % title
-        print
-    elif args.action == "delete" and args.target == "backend":
+    elif args.action in ["delete", "remove", "rm", "del"] and args.target == "backend":
         title = args.name
         backend_id = args.id
         if title:
-            backend = client.backend(title)
+            backend = client.backend_from_title(title)
         elif backend_id:
-            backend = client.backend(backend_id)
+            backend = client.backend_from_id(backend_id)
         else:
             print "You have to provide backend name or id"
-            print
             sys.exit(1)
         backend.delete()
         print "Deleted backend %s" % backend.title
-        print
+    elif args.action == "rename" and args.target == "backend":
+        title = args.name
+        backend_id = args.id
+        if title:
+            backend = client.backend_from_title(title)
+        elif backend_id:
+            backend = client.backend_from_id(backend_id)
+        else:
+            print "You have to provide backend name or id"
+            sys.exit(1)
+        new_name = args.new_name
+        if not new_name:
+            print "You have to provide new name"
+            sys.exit(1)
+
+        backend.rename(new_name)
+        print "Renamed backend %s to %s" % (backend.title, new_name)

@@ -6,7 +6,6 @@ from mist.cmd.login import parse_config, init_client, prompt_login
 def list_keys(client):
     if not client.keys:
         print "No keys found"
-        print
         sys.exit(0)
 
     x = PrettyTable(["Name", "Is Default"])
@@ -15,7 +14,6 @@ def list_keys(client):
         x.add_row([key.id, key.is_default])
 
     print x
-    print
 
 
 def key_action(args):
@@ -30,9 +28,9 @@ def key_action(args):
 
     client = init_client(mist_uri, email, password)
 
-    if args.action == "list" and args.target == "keys":
+    if args.action in ["list", "ls"] and args.target == "keys":
         list_keys(client)
-    elif args.action == "add" and args.target == "key":
+    elif args.action in ["add", "create"] and args.target == "key":
         name = args.name
         key = args.key
 
@@ -45,18 +43,28 @@ def key_action(args):
 
         client.add_key(key_name=name, private=private)
         print "Added key %s" % name
-        print
-    elif args.action == "delete" and args.target == "backend":
-        title = args.name
-        backend_id = args.id
-        if title:
-            backend = client.backend(title)
-        elif backend_id:
-            backend = client.backend(backend_id)
-        else:
-            print "You have to provide backend name or id"
-            print
+    elif args.action in ["delete", "remove", "rm", "del"] and args.target == "key":
+        key_name = args.name
+        if not key_name:
+            print "You have to provide key name"
             sys.exit(1)
-        backend.delete()
-        print "Deleted backend %s" % backend.title
-        print
+        key = client.keys[key_name]
+        key.delete()
+        print "Deleted key %s" % key_name
+    elif args.action == "rename" and args.target == "key":
+        key_name = args.name
+        if not key_name:
+            print "You have to provide key name"
+            sys.exit(1)
+
+        new_name = args.new_name
+        if not new_name:
+            print "You have to provide new name for the key"
+            sys.exit(1)
+
+        key = client.keys[key_name]
+        key.rename(new_name)
+        print "Renamed %s to %s" % (key_name, new_name)
+    else:
+        print "Action not supported"
+        sys.exit(1)

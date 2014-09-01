@@ -163,13 +163,13 @@ class Backend(object):
         else:
             self._machines = {}
 
-    def _machine_from_id(self, machine_id):
+    def machine_from_id(self, machine_id):
         if machine_id in self._machines.keys():
             return self._machines[machine_id]
         else:
             return None
 
-    def _machine_from_name(self, machine_name):
+    def machine_from_name(self, machine_name):
         for key in self._machines.keys():
             machine = self._machines[key]
             if machine_name == machine.name:
@@ -177,7 +177,7 @@ class Backend(object):
 
         return None
 
-    def _machine_from_ip(self, machine_ip):
+    def machine_from_ip(self, machine_ip):
         for key in self._machines.keys():
             machine = self._machines[key]
             public_ips = machine.info.get('public_ips', None)
@@ -187,20 +187,20 @@ class Backend(object):
 
         return None
 
-    def machine(self, machine_key):
+    def search_machine(self, machine_key):
         """
         Choose a machine by providing a machine's id, name or ip
         """
         self.machines
-        machine = self._machine_from_id(machine_key)
+        machine = self.machine_from_id(machine_key)
         if machine:
             return machine
 
-        machine = self._machine_from_name(machine_key)
+        machine = self.machine_from_name(machine_key)
         if machine:
             return machine
 
-        machine = self._machine_from_ip(machine_key)
+        machine = self.machine_from_ip(machine_key)
         if machine:
             return machine
 
