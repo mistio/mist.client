@@ -99,5 +99,4 @@ def backend_action(args):
         else:
             print "You have to provide backend name or id"
             sys.exit(1)
-
         show_backend(backend)

@@ -8,6 +8,7 @@ from mist.cmd.backends import backend_action
 from mist.cmd.providers import provider_action
 from mist.cmd.keys import key_action
 from mist.cmd.machines import machine_action
+from mist.cmd.images import image_action
 
 
 def main():
@@ -36,6 +37,7 @@ def main():
     parser.add_argument("--new_name", help="New name for renaming stuff", required=False, type=str)
     parser.add_argument("-b", "--backend", help="Backend name or id to be used with machines", required=False,
                         type=str)
+    parser.add_argument("--search", help="When searching specifically (e.g. images)", required=False, type=str)
 
     args = parser.parse_args()
     if args.action == "sync":
@@ -52,6 +54,8 @@ def main():
         key_action(args)
     elif args.target in ["machines", "machine"]:
         machine_action(args)
+    elif args.target in ["images", "image"]:
+        image_action(args)
     else:
         print "Functionality not yet implemented"
         sys.exit(0)

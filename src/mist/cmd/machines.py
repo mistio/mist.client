@@ -86,3 +86,11 @@ def machine_action(args):
             print "You have to provide either machine name or machine id"
             sys.exit(1)
         machine_take_action(machine, args.action)
+    elif args.action in ["create", "add"] and args.target == "machine":
+        if not backend_value:
+            print "You have to provide either backend name or backend id"
+            sys.exit(1)
+        else:
+            backend = client.search_backend(backend_value)
+
+
