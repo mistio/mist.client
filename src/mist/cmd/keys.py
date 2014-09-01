@@ -3,6 +3,18 @@ from prettytable import PrettyTable
 from mist.cmd.login import parse_config, init_client, prompt_login
 
 
+def show_key(key):
+    print "Name: %s" % key.id
+    print
+
+    print "Private key:"
+    print key.private
+    print
+
+    print "Puclic key:"
+    print key.public
+
+
 def list_keys(client):
     if not client.keys:
         print "No keys found"
@@ -65,6 +77,14 @@ def key_action(args):
         key = client.keys[key_name]
         key.rename(new_name)
         print "Renamed %s to %s" % (key_name, new_name)
+    elif args.action in ["show", "describe", "display"] and args.target == "key":
+        key_name = args.name
+        if not key_name:
+            print "You have to provide key name"
+            sys.exit(1)
+
+        key = client.keys[key_name]
+        show_key(key)
     else:
         print "Action not supported"
         sys.exit(1)
