@@ -27,6 +27,7 @@ def main():
     parser.add_argument("-p", "--provider", help="Provider to use", required=False, type=str)
     parser.add_argument("-k", "--key", help="Username or apikey for backend", required=False, type=str)
     parser.add_argument("-s", "--secret", help="Password or apisecret for backend", required=False, type=str)
+    parser.add_argument("-i", "--id", help="Id of backend, machine or key", required=False, type=str)
 
     args = parser.parse_args()
     if args.action == "sync":

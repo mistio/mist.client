@@ -21,10 +21,10 @@ def init_client(mist_uri, email, password):
 
 def parse_config():
     home_path = os.getenv("HOME")
-    config_path = os.path.join(home_path, ".mistio")
+    config_path = os.path.join(home_path, ".mist")
 
     if not os.path.isfile(config_path):
-        print "No config file found <%s>" % config_path
+        print "No config file found at: %s" % config_path
         return None
 
     config = ConfigParser.ConfigParser()

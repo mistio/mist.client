@@ -43,3 +43,19 @@ def backend_action(args):
         secret = args.secret
 
         client.add_backend(title=title, provider=provider, key=key, secret=secret)
+        print "Added backend %s" % title
+        print
+    elif args.action == "delete" and args.target == "backend":
+        title = args.name
+        backend_id = args.id
+        if title:
+            backend = client.backend(title)
+        elif backend_id:
+            backend = client.backend(backend_id)
+        else:
+            print "You have to provide backend name or id"
+            print
+            sys.exit(1)
+        backend.delete()
+        print "Deleted backend %s" % backend.title
+        print
