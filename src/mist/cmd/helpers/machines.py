@@ -182,10 +182,14 @@ def machine_action(args):
             sys.exit(1)
 
         if not args.plugin:
-            print "You have to provide plugin id"
+            print "You have to provide plugin id or name"
             sys.exit(1)
         else:
             plugin_id = args.plugin
 
-        machine.add_metric(plugin_id)
-        print "Added Plugin %s to monitored machine %s" % (plugin_id, machine.name)
+            if not args.custom_plugin:
+                machine.add_metric(plugin_id)
+                print "Added Plugin %s to monitored machine %s" % (plugin_id, machine.name)
+            else:
+                machine.add_python_plugin(name=plugin_id, python_file=args.custom_plugin)
+                print "Added %s file as custom plugin" % args.custom_plugin

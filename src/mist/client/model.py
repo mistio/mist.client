@@ -471,9 +471,6 @@ class Machine(object):
         with open(python_file) as f:
             script = f.read()
 
-        print "Script:"
-        print script
-
         payload = {
             'plugin_type': 'python',
             'name': name,
@@ -504,7 +501,6 @@ class Machine(object):
         if plugin_id[0] == "_":
             plugin_id = plugin_id[1:]
 
-        print "Plugin_id:", plugin_id
         req = self.request(self.mist_client.uri+"/backends/"+self.backend.id+"/machines/"+self.id+"/plugins/"+plugin_id,
                            data=data)
         req.post()

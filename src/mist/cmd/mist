@@ -46,6 +46,7 @@ def main():
     parser.add_argument("--size", help="Size id for machine creation", required=False, type=str)
     parser.add_argument("--location", help="Location id for machine creation", required=False, type=str)
     parser.add_argument("--plugin", help="Plugin Id to be added", required=False, type=str)
+    parser.add_argument("--custom_plugin", help="Used if adding custom plugin", required=False, type=str)
 
     args = parser.parse_args()
     if args.action == "sync":
