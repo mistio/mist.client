@@ -40,6 +40,9 @@ def main():
     parser.add_argument("-b", "--backend", help="Backend name or id to be used with machines", required=False,
                         type=str)
     parser.add_argument("--search", help="When searching specifically (e.g. images)", required=False, type=str)
+    parser.add_argument("--image", help="Image id to be used with machine creation", required=False, type=str)
+    parser.add_argument("--size", help="Size id for machine creation", required=False, type=str)
+    parser.add_argument("--location", help="Location id for machine creation", required=False, type=str)
 
     args = parser.parse_args()
     if args.action == "sync":

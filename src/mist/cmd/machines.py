@@ -93,4 +93,19 @@ def machine_action(args):
         else:
             backend = client.search_backend(backend_value)
 
+        for arg in [args.name, args.image, args.size, args.key, args.location]:
+            if not arg:
+                print "You have to provide name, image id, size id, location id, size id and key id"
+                sys.exit(1)
+
+        name = args.name
+        key = client.keys[args.key]
+        image_id = args.image
+        size_id = args.size
+        location_id = args.location
+
+        backend.create_machine(name=name, key=key, image_id=image_id, location_id=location_id, size_id=size_id)
+        print "Created machine %s" % name
+
+
 
