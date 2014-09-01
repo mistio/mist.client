@@ -1,6 +1,7 @@
 import sys
+
 from prettytable import PrettyTable
-from mist.cmd.login import parse_config, init_client, prompt_login
+from mist.cmd.helpers.login import parse_config, init_client, prompt_login
 
 
 def list_sizes(backend):
