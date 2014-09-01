@@ -9,6 +9,8 @@ from mist.cmd.providers import provider_action
 from mist.cmd.keys import key_action
 from mist.cmd.machines import machine_action
 from mist.cmd.images import image_action
+from mist.cmd.sizes import size_action
+from mist.cmd.locations import location_action
 
 
 def main():
@@ -56,6 +58,10 @@ def main():
         machine_action(args)
     elif args.target in ["images", "image"]:
         image_action(args)
+    elif args.target in ["locations", "location"]:
+        location_action(args)
+    elif args.target in ["sizes", "size"]:
+        size_action(args)
     else:
         print "Functionality not yet implemented"
         sys.exit(0)
