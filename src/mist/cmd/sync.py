@@ -111,7 +111,7 @@ def sync_backends(user_dict, client):
 
     print ">>>Syncing backends"
     for key in added_backends:
-        if added_backends[key]['title'] in backends.keys():
+        if key in backends.keys():
             print "Found %s" % added_backends[key]['title']
         else:
             print "Adding backend %s" % added_backends[key]['title']
