@@ -3,6 +3,7 @@ import argparse
 import sys
 from mist.cmd.sync import sync
 from mist.cmd.ansible import ansible
+from mist.cmd.login import user_info
 
 
 def main():
@@ -12,8 +13,16 @@ def main():
         sys.exit(0)
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("action", help="Available actions", type=str, choices=["list", "sync", "ansible"],
+    parser.add_argument("action", help="Available actions", type=str, choices=["sync", "user", "list", "add", "delete",
+                                                                               "rename", "create", "ansible"],
                         default="list")
+    parser.add_argument("target", help="Backends, Keys, Machines", type=str, default="backend", choices=["backend",
+                                                                                                         "backends",
+                                                                                                         "machine",
+                                                                                                         "machines",
+                                                                                                         "key",
+                                                                                                         "keys",
+                                                                                                         "info"])
     parser.add_argument("vars", nargs="*")
     parser.add_argument("-n", "--name", help="Name for whenever you need to provide one", required=False, type=str)
 
@@ -22,6 +31,8 @@ def main():
         sync(sys.argv[-1])
     elif args.action == "ansible":
         ansible(args.vars, args.name)
+    elif args.action == "user" and args.target == "info":
+        user_info()
     else:
         print "Functionality not yet implemented"
         sys.exit(0)
