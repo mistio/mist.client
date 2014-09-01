@@ -73,6 +73,8 @@ def user_info():
     x = PrettyTable(current_plan.keys())
     expiration = current_plan['expiration']
     current_plan['expiration'] = time.ctime(expiration)
+    started = current_plan['started']
+    current_plan['started'] = time.ctime(started)
     x.add_row(current_plan.values())
     print x
     print

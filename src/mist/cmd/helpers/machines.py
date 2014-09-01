@@ -55,6 +55,27 @@ def machine_take_action(machine, action):
             print "Not probed"
 
 
+def toggle_monitoring(machine, action):
+    if action == "enable-monitoring":
+        machine.enable_monitoring()
+        print "Enabled monitoring to machine %s" % machine.name
+    else:
+        machine.disable_monitoring()
+        print "Disabled monitoring from machine %s" % machine.name
+
+
+def list_plugins(machine):
+    plugins = machine.available_metrics
+
+    x = PrettyTable(["Plugin Name", "Plugin ID"])
+
+    for key in plugins.keys():
+        plugin = plugins[key]
+        x.add_row([plugin['name'], key])
+
+    print x
+
+
 def machine_action(args):
     config = parse_config()
     if not config:
@@ -107,6 +128,64 @@ def machine_action(args):
 
         backend.create_machine(name=name, key=key, image_id=image_id, location_id=location_id, size_id=size_id)
         print "Created machine %s" % name
+    elif args.action in ["enable-monitoring", "disable-monitoring"] and args.target == "machine":
+        if not backend_value:
+            print "You have to provide either backend name or backend id"
+            sys.exit(1)
+        else:
+            backend = client.search_backend(backend_value)
 
+        machine_name = args.name
+        machine_id = args.id
+        if machine_name:
+            machine = backend.machine_from_name(machine_name)
+        elif machine_id:
+            machine = backend.machine_from_id(machine_id)
+        else:
+            print "You have to provide either machine name or machine id"
+            sys.exit(1)
 
+        toggle_monitoring(machine, args.action)
+    elif args.action in ["list", "ls"] and args.target == "plugins":
+        if not backend_value:
+            print "You have to provide either backend name or backend id"
+            sys.exit(1)
+        else:
+            backend = client.search_backend(backend_value)
 
+        machine_name = args.name
+        machine_id = args.id
+        if machine_name:
+            machine = backend.machine_from_name(machine_name)
+        elif machine_id:
+            machine = backend.machine_from_id(machine_id)
+        else:
+            print "You have to provide either machine name or machine id"
+            sys.exit(1)
+
+        list_plugins(machine)
+    elif args.action in ["add", "create"] and args.target == "plugin":
+        if not backend_value:
+            print "You have to provide either backend name or backend id"
+            sys.exit(1)
+        else:
+            backend = client.search_backend(backend_value)
+
+        machine_name = args.name
+        machine_id = args.id
+        if machine_name:
+            machine = backend.machine_from_name(machine_name)
+        elif machine_id:
+            machine = backend.machine_from_id(machine_id)
+        else:
+            print "You have to provide either machine name or machine id"
+            sys.exit(1)
+
+        if not args.plugin:
+            print "You have to provide plugin id"
+            sys.exit(1)
+        else:
+            plugin_id = args.plugin
+
+        machine.add_metric(plugin_id)
+        print "Added Plugin %s to monitored machine %s" % (plugin_id, machine.name)

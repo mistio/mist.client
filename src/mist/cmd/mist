@@ -2,8 +2,8 @@
 import argparse
 import sys
 
-from mist.cmd.sync import sync
-from mist.cmd.ansible import ansible
+from mist.cmd.helpers.sync import sync
+from mist.cmd.helpers.ansible import ansible
 from mist.cmd.helpers.login import user_info
 from mist.cmd.helpers.backends import backend_action
 from mist.cmd.helpers.providers import provider_action
@@ -28,7 +28,7 @@ def main():
                                  "disable-monitoring"], default="list")
     parser.add_argument("target", help="Backends, Keys, Machines", type=str, default="backend",
                         choices=["backend", "backends", "machine", "machines", "key", "keys", "info", "providers",
-                                 "supported_providers", "images", "locations", "sizes", "dbyaml"])
+                                 "supported_providers", "images", "locations", "sizes", "dbyaml", "plugins", "plugin"])
 
     parser.add_argument("vars", nargs="*")
     parser.add_argument("--dbyaml", help="Used with mist sync. Path of dbyaml file", required=False, type=str)
@@ -45,6 +45,7 @@ def main():
     parser.add_argument("--image", help="Image id to be used with machine creation", required=False, type=str)
     parser.add_argument("--size", help="Size id for machine creation", required=False, type=str)
     parser.add_argument("--location", help="Location id for machine creation", required=False, type=str)
+    parser.add_argument("--plugin", help="Plugin Id to be added", required=False, type=str)
 
     args = parser.parse_args()
     if args.action == "sync":
@@ -59,7 +60,7 @@ def main():
         backend_action(args)
     elif args.target in ["keys", "key"]:
         key_action(args)
-    elif args.target in ["machines", "machine"]:
+    elif args.target in ["machines", "machine", "plugins", "plugin"]:
         machine_action(args)
     elif args.target in ["images", "image"]:
         image_action(args)
