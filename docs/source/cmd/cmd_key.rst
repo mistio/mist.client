@@ -19,7 +19,7 @@ To list all of your added keys::
 
     mist list keys
 
-You can also ispect a specific key to::
+You can also inspect a specific key::
 
     mist show key --name MyKey
 

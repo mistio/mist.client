@@ -9,8 +9,8 @@ The ``mist`` command line tool will look for the config file ~/.mist::
     mist_uri=https://mist.io
 
     [mist.credentials]
-    email=bluebusforever@gmail.com
-    password=lida1234
+    email=user@mist.io
+    password=mist_password
 
 If no file is found, then it will fall back in interactive mode and ask for email and password.
 
