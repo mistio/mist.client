@@ -37,6 +37,7 @@ mist - command line tool:
 
    cmd/cmd
    cmd/cmd_backend
+   cmd/cmd_key
    cmd/sync
 
 
