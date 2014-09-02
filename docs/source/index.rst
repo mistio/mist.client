@@ -36,6 +36,7 @@ mist - command line tool:
    :maxdepth: 1
 
    cmd
+   cmd_backend
    sync
 
 
