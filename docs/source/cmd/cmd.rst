@@ -3,7 +3,7 @@ Getting Started with mist command
 
 The ``mist`` command line tool gets installed alongside mist.client package.
 In order to authenticate to a mist.io installation you need to create a config
-file ``~/.mist``:
+file ``~/.mist``::
 
     [mist.io]
     mist_uri=https://mist.io
