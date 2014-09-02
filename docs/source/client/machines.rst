@@ -171,8 +171,8 @@ Or you can choose a machine by providing the machine's id, name or public_ip::
     machine = backend.machine_from_id("i-7983873")
 
 
-You can also use the overloaded function backend.search_machine by providing either id, name or ip and it will return
-the first machine instance that it finds.
+You can also use the overloaded function ``backend.search_machine("search_term")`` by providing either id, name or ip and it
+will return the first machine instance that it finds with a matching id, name or ip.
 
 Machines support actions like::
 

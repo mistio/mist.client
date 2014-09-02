@@ -86,8 +86,9 @@ You can also choose a backend by providing either the backend's name, id or prov
     backend = client.backend_from_id("2zMXgapqqaw9bSNUzSmuygFLy6Kp")
     backend = client.backend_from_name("DigitalOcean")
 
-You can also use the overloaded function client.search_backend by providing either an id or a name and it will return
-the first backend with that has either an id or name that matches the given parameter.
+You can also use the overloaded function ``client.search_backend("search_term")`` by providing either an id
+or a name and it will return the first backend with that has either an id or name that matches the given
+parameter.
 
 Your new backend object has a lot of attributes and methods::
 
