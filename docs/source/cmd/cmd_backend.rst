@@ -1,6 +1,10 @@
 mist backends
 *************
 
+Mist giver you the opportunity to handle multiple machines on multiple providers from one interface, the mist.io service.
+In order to do so, the very first thing to do when using mist.io is to ensure that you have added your backends.
+After doing that you'll be able to provision, monitor and in general handle machine on all those providers.
+
 Supported Providers
 ===================
 Before you add a new backend, you'll find it useful to see a list of all the providers that mist.io supports::

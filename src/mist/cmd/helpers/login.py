@@ -69,7 +69,7 @@ def user_info():
     print x
     print
 
-    print "Current Plan"
+    print "Current Plan:"
     x = PrettyTable(current_plan.keys())
     expiration = current_plan['expiration']
     current_plan['expiration'] = time.ctime(expiration)
