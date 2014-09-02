@@ -28,7 +28,7 @@ def list_backends(client):
         print "No backends found"
         sys.exit(0)
 
-    x = PrettyTable(["Title", "ID", "Provider", "State"])
+    x = PrettyTable(["Name", "ID", "Provider", "State"])
     for id in client.backends.keys():
         backend_info = []
         backend = client.backends[id]

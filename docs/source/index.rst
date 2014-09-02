@@ -23,21 +23,21 @@ mist.client:
 .. toctree::
    :maxdepth: 1
 
-   installation
-   getting_started
-   backends
-   keys
-   machines
-   monitoring
+   client/installation
+   client/getting_started
+   client/backends
+   client/keys
+   client/machines
+   client/monitoring
 
 mist - command line tool:
 
 .. toctree::
    :maxdepth: 1
 
-   cmd
-   cmd_backend
-   sync
+   cmd/cmd
+   cmd/cmd_backend
+   cmd/sync
 
 
 Indices and tables
