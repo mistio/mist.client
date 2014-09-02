@@ -38,3 +38,23 @@ the newly created machine::
 
     mist create machine --backend EC2 --name dev.machine --image ami-bddaa2bc --size t1.micro --location 0 --key MyKey
 
+Machine Actions
+===============
+You can list all your machines on all your Backends, or list machines on a specific backend::
+
+    mist ls machines
+    mist ls machines --backend Docker
+You can start, stop, reboot or destroy a machine::
+
+    mist reboot machine --backend Docker --name db-server-1
+    mist destroy machine --backend Docker --name db-server-1
+
+You can also probe a machine. By probing a machine you verify that sshd is up an running and that you have access to the
+machine with the previously assigned key. A successful probe will return the machine's uptime::
+
+    mist probe machine --name db-server-1 --backend Docker
+
+
+You can see a full example `here`_
+
+.. _here: http://asciinema.org/a/11885
