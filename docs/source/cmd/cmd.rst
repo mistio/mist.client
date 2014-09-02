@@ -1,9 +1,9 @@
 Getting Started with mist command
 *********************************
 
-The mist.client package, when installed, installs alongside the ``mist`` command.
-
-The ``mist`` command line tool will look for the config file ~/.mist::
+The ``mist`` command line tool gets installed alongside mist.client package.
+In order to authenticate to a mist.io installation you need to create a config
+file ``~/.mist``:
 
     [mist.io]
     mist_uri=https://mist.io
@@ -12,7 +12,8 @@ The ``mist`` command line tool will look for the config file ~/.mist::
     email=user@mist.io
     password=mist_password
 
-If no file is found, then it will fall back in interactive mode and ask for email and password.
+If you do not wish to write your credentials, you will be asked to provide them
+interactively.
 
 For an example you can see `here`_
 

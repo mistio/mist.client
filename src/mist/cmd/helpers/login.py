@@ -23,43 +23,47 @@ def parse_config():
     home_path = os.getenv("HOME")
     config_path = os.path.join(home_path, ".mist")
 
-    if not os.path.isfile(config_path):
-        print "No config file found at: %s" % config_path
-        return None
-
     config = ConfigParser.ConfigParser()
-    config.readfp(open(config_path))
 
-    mist_uri = config.get("mist.io", "mist_uri")
-    email = config.get("mist.credentials", "email")
-    password = config.get("mist.credentials", "password")
+    # Set default mist uri
+    config.add_section("mist.io")
+    config.set("mist.io", "mist_uri", "https://mist.io")
+
+    # Set default credentials
+    config.add_section("mist.credentials")
+    config.set("mist.credentials", "email", None)
+    config.set("mist.credentials", "password", None)
+
+    # Read configuration file
+    if os.path.isfile(config_path):
+        config.readfp(open(config_path))
+    else:
+        print "No config file found at: %s" % config_path
 
     return {
-        'mist_uri': mist_uri,
-        'email': email,
-        'password': password
+        'mist_uri': config.get("mist.io", "mist_uri"),
+        'email': config.get("mist.credentials", "email") or prompt_email(),
+        'password': config.get("mist.credentials", "password") or prompt_password(),
     }
 
 
-def prompt_login():
-    email = raw_input("Email: ")
-    password = getpass.getpass("Password: ")
-    print
+def prompt_email():
+    return raw_input("Email: ")
 
-    return email, password
+
+def prompt_password():
+    return getpass.getpass("Password: ")
+
+
+def authenticate():
+    config = parse_config()
+    return init_client(config["mist_uri"], config["email"], config["password"])
 
 
 def user_info():
-    result = parse_config()
-    if not result:
-        mist_uri = "https://mist.io"
-        email, password = prompt_login()
-    else:
-        mist_uri = result['mist_uri']
-        email = result['email']
-        password = result['password']
 
-    client = init_client(mist_uri, email, password)
+    client = authenticate()
+
     current_plan = client.user_details.get('current_plan')
     user_details = client.user_details.get('user_details')
 
