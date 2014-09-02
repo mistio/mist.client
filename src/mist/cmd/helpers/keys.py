@@ -1,7 +1,7 @@
 import sys
 
 from prettytable import PrettyTable
-from mist.cmd.helpers.login import parse_config, init_client, prompt_login
+from mist.cmd.helpers.login import authenticate
 
 
 def show_key(key):
@@ -30,16 +30,8 @@ def list_keys(client):
 
 
 def key_action(args):
-    config = parse_config()
-    if not config:
-        mist_uri = "https://mist.io"
-        email, password = prompt_login()
-    else:
-        mist_uri = config['mist_uri']
-        email = config['email']
-        password = config['password']
 
-    client = init_client(mist_uri, email, password)
+    client = authenticate()
 
     if args.action in ["list", "ls"] and args.target == "keys":
         list_keys(client)
