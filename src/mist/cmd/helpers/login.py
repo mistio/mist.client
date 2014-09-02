@@ -37,7 +37,7 @@ def parse_config():
     # Read configuration file
     if os.path.isfile(config_path):
         config.readfp(open(config_path))
-    else
+    else:
         print "No config file found at: %s" % config_path
 
     return {
