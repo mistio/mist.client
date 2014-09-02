@@ -166,8 +166,13 @@ You can choose one::
 
 Or you can choose a machine by providing the machine's id, name or public_ip::
 
-    machine = backend.machine("132.34.65.0")
-    machine = backend.machine("prodServer1')
+    machine = backend.machine_from_ip("132.34.65.0")
+    machine = backend.machine_from_name("prodServer1')
+    machine = backend.machine_from_id("i-7983873")
+
+
+You can also use the overloaded function backend.search_machine by providing either id, name or ip and it will return
+the first machine instance that it finds.
 
 Machines support actions like::
 
