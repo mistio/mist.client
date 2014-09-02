@@ -55,6 +55,9 @@ machine with the previously assigned key. A successful probe will return the mac
     mist probe machine --name db-server-1 --backend Docker
 
 
+After creating a new machine it might take a little time for the probe to be successful.
+
+
 You can see a full example `here`_
 
 .. _here: http://asciinema.org/a/11885

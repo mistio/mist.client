@@ -1,9 +1,22 @@
 Sync
 ****
+Mist.io is an open source project and you can find the code `here`_.
 
-``mist sync`` is used when you have a custom installation of mist.io that keeps all of the data in a yaml file, called
-``db.yaml``. In case you want to sync your local db.yaml with your account in https://mist.io you could use the ``sync``
+.. _here: https://github.com/mistio/mist.io
+
+
+You can, if you want, have your own installation of mist.io to provision machines. *See the README for installation instructions.*
+If you have such a custom installation of mist.io, all your data is saved in a ``db.yaml`` file.
+
+
+``mist sync`` is used when you have such a custom installation of mist.io that keeps all of the data in a yaml file
+In case you want to sync your local db.yaml with your account in https://mist.io you could use the ``sync``
 action::
 
-    mist sync /path/to/db.yaml
+    mist sync dbyaml --dbyaml /path/to/local/db.yaml
 
+
+``mist sync`` will only add Keys and Backends that are added in your local mist.io installation and not in the `mist.io`_
+service. It will not remove Backends and Keys that are added in the service and are absent in your local installation.
+
+.. _mist.io: https://mist.io
