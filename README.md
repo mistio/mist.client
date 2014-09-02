@@ -10,4 +10,4 @@ pip install mist.client
 
 Documentation
 =============
-http://mistclient.readthedocs.org/en/latest/
+http://mistclient.readthedocs.org
