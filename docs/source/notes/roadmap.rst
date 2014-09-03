@@ -8,6 +8,7 @@ Features to be added:
 
 * Save api_token in tmp file and use it to reconnect rather than opening a new connection upon each request
 * Add ansible capabilities to ``mist`` command (.e.g ``mist run ansible playbook.yml``)
+* Add tests
 
 Upcoming Release 0.1.1
 ======================
