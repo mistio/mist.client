@@ -9,7 +9,6 @@ requires = [
     'argparse',
     'pyyaml',
     'gitpython==0.3.2.RC1',
-    # 'ansible',
     'prettytable',
 ]
 

@@ -4,7 +4,7 @@
    contain the root `toctree` directive.
 
 Welcome to mist.client's documentation!
-=======================================
+***************************************
 
 :Version: 0.1.0
 :Author: Mist.io Inc
@@ -43,6 +43,14 @@ mist - command line interface
    cmd/cmd_monitor
    cmd/sync
 
+Package Info
+============
+
+.. toctree::
+   :maxdepth: 1
+
+   notes/changelog
+   notes/roadmap
 
 Indices and tables
 ==================
