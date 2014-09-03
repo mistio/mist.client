@@ -60,7 +60,7 @@ See also ``mist.client.add_backend`` method for detailed information about the d
 After adding a new backend, mist.backends are automatically updated.
 
 Backend actions
-==============
+===============
 You can see all of your added backends::
 
     client.backends

@@ -40,11 +40,49 @@ def parse_config():
     else:
         print "No config file found at: %s" % config_path
 
+    mist_uri = config.get("mist.io", "mist_uri")
+    email = config.get("mist.credentials", "email") or prompt_email()
+    password = config.get("mist.credentials", "password") or prompt_password()
+
+    if not os.path.isfile(config_path):
+        prompt_save_config(mist_uri, email, password, config_path)
+
     return {
-        'mist_uri': config.get("mist.io", "mist_uri"),
-        'email': config.get("mist.credentials", "email") or prompt_email(),
-        'password': config.get("mist.credentials", "password") or prompt_password(),
+        'mist_uri': mist_uri,
+        'email': email,
+        'password': password,
     }
+
+
+def prompt_save_config(mist_uri, email, password, config_path):
+    answered = None
+    while not answered:
+        answer = raw_input("Save config [Y/n]: ")
+        if answer in ["y", "Y", "Yes"]:
+            answer = True
+            answered = True
+        elif answer in ["n", "N", "No"]:
+            answer = False
+            answered = True
+        else:
+            print "Wrong answer!"
+
+    config_template = """[mist.io]
+mist_uri=%s
+
+[mist.credentials]
+email=%s
+password=%s
+
+""" % (mist_uri, email, password)
+
+    if answer:
+        with open(config_path, "w") as f:
+            f.write(config_template)
+        print "Saved config at %s" % config_path
+        return
+    else:
+        return
 
 
 def prompt_email():
