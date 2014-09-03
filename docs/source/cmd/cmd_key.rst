@@ -1,7 +1,8 @@
 mist keys
 *********
-In order to provision multiple machines on different backends mist.io let's you upload your keys to be assigned to your provisioned
-machines. You can also have mist.io service auto-generate new ssh-keys that'll be assigned to your new machines.
+By uploading your SSH keys to mist.io you can access all your machines through mist.io, have a shell prompt from your browser
+and even let mist.io take care of enabling monitoring to your machines. You also can have mist.io run commands to your machines
+during provisiong or after an alert is triggered.
 
 Add a new key
 =============
@@ -19,9 +20,56 @@ To list all of your added keys::
 
     mist list keys
 
+Output::
+
+    +------------+------------+
+    |    Name    | Is Default |
+    +------------+------------+
+    |   newKey   |    True    |
+    |    Yeah    |   False    |
+    |    asd     |   False    |
+    |   MyKey    |   False    |
+    +------------+------------+
+
 You can also inspect a specific key::
 
     mist show key --name MyKey
+
+Output::
+
+    Name: newKey
+
+    Private key:
+    -----BEGIN RSA PRIVATE KEY-----
+    MIIEpAIBAAKCAQEAz1aWE6y8uB3PQJhlVdc1RpZyRlBFQpN8c2edGIP/SfdAeGT3
+    QdOoTJFkVZTxk99YJG/cRPzanl9PAjZXJjYX1CiyFSYpJivRfN7j/QzzMJv6ouK/
+    62WXyjwWxDa9pixAQj2na9N0Gn8sqIIFxFqEXW0wFkac3A4I8vke8AZrRitGw3MO
+    FoIfrZjcicW6U2b4XLgK3vLSIe5myN9bgAqTPYPOLm/m8Rz3cv+1B0qCbPZEHBG3
+    2zoLTG40F6JgmekUrNSQhKaEWJJwLJRRj4aEtw7WeSbP3lnVNm0ch34j4+vVIp0L
+    +hFYAt9gjI2p/aa/YRg++H5Wfpvz21POWw4pTQIDAQABAoIBAA4ai7bm5yd3D6QL
+    OclvDDazAS77QtrWgX6wK6WBRRpY8U+/PnqB1U7wDO0tZolyheJkoY0nzg872HoE
+    DEWTJGfQJNz/bYklLejamJOcD+bclV4DIp72mC6vi7TpLFljZTOcUgkppxouUHFd
+    9tp2dc6NINpDD2SAp+cvPwWAykdJhuKI/cruyZ2y6b+FNCoJPF0f1yB6gwD3KAj0
+    YjcvDRjDaZKwFej+97YaKt37FuQaUjOKIruMytlcxm9qzQfSPeubfHEya61dL+Za
+    epJjm4NN5+x9PqSGhNpSbj1KwEbI67zNLLovEep7IC/7Et4rXm3/OtbNglKb/s67
+    YAifgVkCgYEA1H6PgSHp2Y12m+fIBFLyQqWOW3DjBV267h+R26pLOLfQCBaONZjS
+    35Ru+prQEcIGRbGD5BC/DP19qkk0VIuVYlKIRfgryEmS2Uq+h24htpaqw+Ehqes6
+    yN7q5pqikONP8wJ+y25u8TN8kssZm8U8Q3qOCgnZ2prP/ctB1eefkvcCgYEA+cnG
+    7ygDoHv7sdmGDkAAkuU0skhpaZD4CV2XvWtS61vAu4V3xFkLAAi43rUuPqO/R7LG
+    br3CaDDe3PJOjXSzJtGpM6eIz5hsglm3aoaQ6cDBJS1B9B488eDLkT8l6CH2IAuf
+    XsmqNKWFVcn+oWLlkYdZWP49+S8er7ulKfOEENsCgYB8RRO5qlKvdyqxXKi91qB1
+    V4rccTVjMwCaN/4+H+Zj4iOYR1CdiaVxOcZ5asZaTEUMxxbh7uU8PJccWjlvZD5V
+    xPyLJuq79EMcLrkkTMUMmip96ZCdZcL4LF3lxPNjlnxwGrp6UDgzeS/WTU7JqVxn
+    /ilJN5+fV8BhpVf4N8A72wKBgQDrP2eF8W+JA3uGglDItupTbl500dHFRGz1lRnF
+    oYBUfPNFKGwllZ7Qh2ZlCMnm4JzTT8Gmpjyjl/Msr1/fxVq8YpUyOsSUjv8SvKAL
+    SXTNUWYWN0t4N8o6GvZdctWmi+WbRJbx1IfiUUkEBNs070k6B/jT4Y5IUmJaKyVg
+    HyHwJQKBgQDOBYoJjancXX4H7sW8rah5j7Lj3LYfTc2kwLUv9NeROd+gdVPZt9PT
+    SWbT/d+7foCyMwWIK3eCT7lFHsiR8nNIvet8AFjnM3aa8xTgvJwZlCLhvyWA3FHt
+    8NpVCBubPk4+fs2x0j/D3Uwqho51XXztnqE/R3nr1XeB7xDSJm1iEA==
+    -----END RSA PRIVATE KEY-----
+
+    Puclic key:
+    ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDPVpYTrLy4Hc9AmGVV1zVGlnJGUEVCk3xzZ50Yg/9J90B4ZPdB06hMkWRVlPGT31gkb9xE/NqeX08CNlcmNhfUKLIVJikmK9F83uP9DPMwm/qi4r/rZZfKPBbENr2mLEBCPadr03QafyyoggXEWoRdbTAWRpzcDgjy+R7wBmtGK0bDcw4Wgh+tmNyJxbpTZvhcuAre8tIh7mbI31uACpM9g84ub+bxHPdy/7UHSoJs9kQcEbfbOgtMbjQXomCZ6RSs1JCEpoRYknAslFGPhoS3DtZ5Js/eWdU2bRyHfiPj69UinQv6EVgC32CMjan9pr9hGD74flZ+m/PbU85bDilN
 
 You have the option to rename a key::
 

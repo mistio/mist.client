@@ -22,11 +22,11 @@ To disable monitoring on a machine::
     mist disable-monitoring machine --backend EC2 --name dbServer
 
 
-Add Plugins
+Add Metrics
 ===========
-Collectd supports a huge list of custom plugins. To see all available plugins for a monitored machine::
+Collectd supports a huge list of custom metrics/plugins. To see all available plugins/metrics for a monitored machine::
 
-    mist ls plugins --backend EC2 --name dbServer
+    mist list plugins --backend EC2 --name dbServer
 
 If you wish to add one of those plugins you have to use the plugin's id. For example, to add the plugin ``users``::
 
@@ -45,5 +45,3 @@ You can add it by providing the ``--custom_plugin`` parameter and providing a pl
     mist add plugin --backend EC2 --name dbServer --plugin MyPlugin --custom_plugin ~/plugin.py
 
 
-*Note: mist.io supports adding rules and actions for your monitored machines. The mist command line tool will support
-those features together with viewing your current monitor stats in the next major release*
