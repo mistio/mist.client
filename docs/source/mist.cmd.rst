@@ -1,17 +1,12 @@
 mist.cmd package
 ================
 
-Submodules
-----------
+Subpackages
+-----------
 
-mist.cmd.sync module
---------------------
+.. toctree::
 
-.. automodule:: mist.cmd.sync
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
+    mist.cmd.helpers
 
 Module contents
 ---------------

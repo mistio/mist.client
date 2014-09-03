@@ -29,10 +29,10 @@ class Backend(object):
         self._machines = None
 
     def __str__(self):
-        return "%s => %s:%s" % (self.__class__.__name__, self.title, self.id)
+        return "%s => %s, %s, %s" % (self.__class__.__name__, self.title, self.provider, self.id)
 
     def __repr__(self):
-        return "%s => %s:%s" % (self.__class__.__name__, self.title, self.id)
+        return "%s => %s, %s, %s" % (self.__class__.__name__, self.title, self.provider, self.id)
 
     def request(self, *args, **kwargs):
         """
@@ -159,9 +159,53 @@ class Backend(object):
 
         if machines:
             for machine in machines:
-                self._machines[machine['name']] = Machine(machine, self)
+                self._machines[machine['id']] = Machine(machine, self)
         else:
             self._machines = {}
+
+    def machine_from_id(self, machine_id):
+        self.machines
+        if machine_id in self._machines.keys():
+            return self._machines[machine_id]
+        else:
+            return None
+
+    def machine_from_name(self, machine_name):
+        self.machines
+        for key in self._machines.keys():
+            machine = self._machines[key]
+            if machine_name == machine.name:
+                return machine
+
+        return None
+
+    def machine_from_ip(self, machine_ip):
+        self.machines
+        for key in self._machines.keys():
+            machine = self._machines[key]
+            public_ips = machine.info.get('public_ips', None)
+            if public_ips:
+                if machine_ip == public_ips[0]:
+                    return machine
+
+        return None
+
+    def search_machine(self, machine_key):
+        """
+        Choose a machine by providing a machine's id, name or ip
+        """
+        self.machines
+        machine = self.machine_from_id(machine_key)
+        if machine:
+            return machine
+
+        machine = self.machine_from_name(machine_key)
+        if machine:
+            return machine
+
+        machine = self.machine_from_ip(machine_key)
+        if machine:
+            return machine
 
     @property
     def machines(self):
@@ -237,10 +281,10 @@ class Machine(object):
         self.probed = None
 
     def __str__(self):
-        return "%s => %s:%s" % (self.__class__.__name__, self.name, self.id)
+        return "%s => %s, %s" % (self.__class__.__name__, self.name, self.id)
 
     def __repr__(self):
-        return "%s => %s:%s" % (self.__class__.__name__, self.name, self.id)
+        return "%s => %s, %s" % (self.__class__.__name__, self.name, self.id)
 
     def request(self, *args, **kwargs):
         """
@@ -427,9 +471,6 @@ class Machine(object):
         with open(python_file) as f:
             script = f.read()
 
-        print "Script:"
-        print script
-
         payload = {
             'plugin_type': 'python',
             'name': name,
@@ -460,7 +501,6 @@ class Machine(object):
         if plugin_id[0] == "_":
             plugin_id = plugin_id[1:]
 
-        print "Plugin_id:", plugin_id
         req = self.request(self.mist_client.uri+"/backends/"+self.backend.id+"/machines/"+self.id+"/plugins/"+plugin_id,
                            data=data)
         req.post()

@@ -78,7 +78,7 @@ class MistClient(object):
         backends = req.get().json()
         if backends:
             for backend in backends:
-                self._backends[backend['title']] = Backend(backend, self)
+                self._backends[backend['id']] = Backend(backend, self)
         else:
             self._backends = {}
 
@@ -94,6 +94,48 @@ class MistClient(object):
             self._list_backends()
 
         return self._backends
+
+    def backend_from_id(self, backend_id):
+        self.backends
+        if backend_id in self._backends.keys():
+            return self._backends[backend_id]
+        else:
+            return None
+
+    def backend_from_title(self, backend_title):
+        self.backends
+        for key in self._backends.keys():
+            backend = self._backends[key]
+            if backend_title == backend.title:
+                return backend
+
+        return None
+
+    def backend_from_provider(self, backend_provider):
+        self.backends
+        for key in self._backends.keys():
+            backend = self._backends[key]
+            if backend_provider == backend.provider:
+                return backend
+
+        return None
+
+    def search_backend(self, backend_key):
+        """
+        Choose a backend by providing a backend's id, title or provider
+        """
+        self.backends
+        backend = self.backend_from_id(backend_key)
+        if backend:
+            return backend
+
+        backend = self.backend_from_title(backend_key)
+        if backend:
+            return backend
+
+        backend = self.backend_from_provider(backend_key)
+        if backend:
+            return backend
 
     def update_backends(self):
         """
@@ -140,7 +182,7 @@ class MistClient(object):
             'machine_key': machine_key,
             'machine_user': machine_user,
             'compute_endpoint': compute_endpoint,
-            'machine_port': machine_port
+            'machine_port': machine_port,
         }
 
         req = self.request(self.uri+'/backends', data=json.dumps(payload))
