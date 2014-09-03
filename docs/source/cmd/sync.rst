@@ -1,14 +1,5 @@
 Sync
 ****
-Mist.io is an open source project and you can find the code `here`_.
-
-.. _here: https://github.com/mistio/mist.io
-
-
-You can, if you want, have your own installation of mist.io to provision machines. *See the README for installation instructions.*
-If you have such a custom installation of mist.io, all your data is saved in a ``db.yaml`` file.
-
-
 ``mist sync`` is used when you have such a custom installation of mist.io that keeps all of the data in a yaml file
 In case you want to sync your local db.yaml with your account in https://mist.io you could use the ``sync``
 action::
