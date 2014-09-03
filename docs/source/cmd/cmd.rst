@@ -2,8 +2,10 @@ Getting Started with mist command
 *********************************
 
 The ``mist`` command line tool gets installed alongside mist.client package.
-In order to authenticate to a mist.io installation you need to create a config
-file ``~/.mist``::
+
+``mist`` will prompt for your mist email and password. At the end it will ask you to create a config file ``~/.mist``.
+By having the config file you'll be able to use mist command without providing your credentials every time. The config
+file will look like this::
 
     [mist.io]
     mist_uri=https://mist.io
@@ -12,15 +14,9 @@ file ``~/.mist``::
     email=user@mist.io
     password=mist_password
 
-If you do not wish to write your credentials, you will be asked to provide them
-interactively.
+.. Note:: *In case you have a private installation of mist.io you can change the mist_uri to point to your custom url*
 
-For an example you can see `here`_
-
-.. _here: http://asciinema.org/a/11883
-
-
-To see your accounts specific information::
+To see your accounts' specific information::
 
     mist user info
 
