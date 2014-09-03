@@ -17,7 +17,8 @@ source installation of `mist.io`_.
 
 .. _mist.io: https://github.com/mistio/mist.io
 
-mist.client - Python interface:
+mist.client - Python interface
+==============================
 
 .. toctree::
    :maxdepth: 1
@@ -29,7 +30,8 @@ mist.client - Python interface:
    client/machines
    client/monitoring
 
-mist - command line interface:
+mist - command line interface
+=============================
 
 .. toctree::
    :maxdepth: 1
