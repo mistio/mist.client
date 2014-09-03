@@ -20,46 +20,65 @@ To see your accounts' specific information::
 
     mist user info
 
+Output::
+
+    User Details:
+    +---------+--------------+-------------------+--------------+------------------+
+    | country | company_name | number_of_servers |     name     | number_of_people |
+    +---------+--------------+-------------------+--------------+------------------+
+    |  Greece |     Mist     |        1-5        | John Doe     |       1-5        |
+    +---------+--------------+-------------------+--------------+------------------+
+
+    Current Plan:
+    +---------------+------------+---------+--------------------------+---------+-------------+---------------------------+
+    | machine_limit | promo_code |  title  |         started          | isTrial | has_expired |         expiration        |
+    +---------------+------------+---------+--------------------------+---------+-------------+---------------------------+
+    |       20      |            | Startup | Mon Oct 28 18:49:50 2013 |   True  |    False    | Mon Jun 24 19:41:35 29393 |
+    |               |            |         |                          |         |             |                           |
+    +---------------+------------+---------+--------------------------+---------+-------------+---------------------------+
 
 General Usage
 =============
-The command line tool is used in as ``mist <action> <target> [--extra-params...]``
+The command line tool is used as ``mist <action> <target> [--extra-params...]``
+
+A few examples of actions and targets:
 
 List backends, machines, keys:
 
 * mist list
-* mist ls
 ::
 
-    mist ls providers
+    mist list providers
 
 
 Display specific information:
 
 * mist show
-* mist display
-* mist describe
 ::
 
     mist show backend --name EC2NorthEast
 
 
-Add backends, keys, machines:
+Add new backends, keys:
 
 * mist add
-* mist create
 ::
 
     mist add backend --name EC2 --provider ec2_ap_northeast --key IUOOLK9098OLIU --secret sahkjlhadoiu098098lLKlkjlkj
 
 
-Delete/remove:
+Create a new machine:
 
-* mist rm
-* mist delete
-* mist del
-* mist remove
+* mist create
 ::
 
-    mist rm backend --id 3aJoiuYB9mpEHKJsqLdm1Z9p
+    mist create machine --name dbServer
+
+Delete/remove:
+
+* mist delete
+::
+
+    mist delete backend --id 3aJoiuYB9mpEHKJsqLdm1Z9p
+
 
