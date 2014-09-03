@@ -2,14 +2,14 @@ Machines
 ********
 
 Before you can provision a machine, you have to know some data that are necessary for the creation of a machine. Every
-backend has different images, locations, machine sizes. You can list all the available options after you have chosen
+backend has different OS Images, locations, machine sizes. You can list all the available options after you have chosen
 a backend::
 
-    backend = client.backends['NephoScale']
+    backend = client.backend_from_name("NephoScale")
 
 Images
 ======
-You can list all available images in a backend::
+You can list all available OS Images in a backend::
 
     backend.images
 
@@ -150,19 +150,17 @@ name for the machine::
 
     backend.create_machine(name="production.server", key=key, image_id=image_id, location_id=location_id, size_id=size_id)
 
-In some backend some extra information is needed. You can see `create_machine`_ method for more details.
-
-.. _create_machine: mist.client.html#mist.client.model.Backend.create_machine
+In some backends some extra information is needed. You can see ``mist.client.model.Backend.create_machine`` method for more details.
 
 Machine actions
 ===============
-You can see a list of all your created machine for a given backend::
+You can see a list of all your created machines for a given backend::
 
     backend.machines
 
 You can choose one::
 
-    machine = backend.machines['production.server']
+    machine = backend.machines[machine_id]
 
 Or you can choose a machine by providing the machine's id, name or public_ip::
 
@@ -182,8 +180,8 @@ Machines support actions like::
     machine.destroy()
 
 After creating a machine, the machine may take some time to be up and running. You can see that by using ``machine.probe()``.
-Machine probe, if successful will show that the machine is up and running, that the key association was successful. It
-also returns some useful information about the machine like the machine's uptime etc.
+Machine probe, if successful will show that the machine is up and running and that the key association was successful. It will
+also return some useful information about the machine like the machine's uptime etc.
 
 In case you want, you can associate another ssh-key to the machine, provided you have uploaded that key to mist.io service::
 

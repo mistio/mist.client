@@ -9,16 +9,15 @@ Welcome to mist.client's documentation!
 :Version: 0.1.0
 :Author: Mist.io Inc
 :Source: https://github.com/mistio/mist.client
-:License: GNU AGPL v3
-:Keywords: mist.io client python cloud mobile libcloud pyramid amazon rackspace openstack linode
+:License: GPL v3
 
-Mist.client is a python client for the mist.io service. Mist.io helps you manage and monitor servers across clouds from
-anywhere, using any device that can access the web. Check out the freemium service
-at `mist.io`__.
+Mist.client is a Python and a command line interface for managing and monitoring servers across clouds from any device
+that can access the web. To use it you need an account to the freemium https://mist.io service or a private open
+source installation of `mist.io`_.
 
-__ https://mist.io
+.. _mist.io: https://github.com/mistio/mist.io
 
-mist.client:
+mist.client - Python interface:
 
 .. toctree::
    :maxdepth: 1
@@ -30,7 +29,7 @@ mist.client:
    client/machines
    client/monitoring
 
-mist - command line tool:
+mist - command line interface:
 
 .. toctree::
    :maxdepth: 1

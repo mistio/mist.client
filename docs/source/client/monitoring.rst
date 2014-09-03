@@ -3,7 +3,7 @@ Monitoring
 
 Enable monitoring
 =================
-In case you have an account with the mist.io service (https://mist.io), you can enable monitoring::
+In case you have an account with the mist.io service (https://mist.io), you can enable monitoring to a machine::
 
     machine.enable_monitoring()
 
@@ -21,14 +21,14 @@ supports a huge list of collectd plugins that you can choose from::
 
     machine.available_metrics
 
-Using your desired metrics's id, you can add that to a monitored machine. For example to have data about the number of
+Using your desired metric id, you can add that to a monitored machine. For example to have data about the number of
 users that are currently logged in, we can use the ``users`` metric::
 
     machine.add_metric("users")
 
-Custom plugins
+Custom metrics
 ==============
-Since the last updates of mist.io, you can now upload custom python plugins that can literally monitor anything. These
+Since the last updates of mist.io, you can now upload custom python metrics that can literally monitor anything. These
 plugins are simple python files that you can upload to the machine. They can be as simple as::
 
     import random
@@ -44,7 +44,5 @@ for the plugin::
 
     machine.add_python_plugin(name="Random", python_file="/home/user/random.py")
 
-Some more advanced options can be used, determining the value_type, the unit etc. You can see `add_python_plugin`_ method
-for more info.
-
-.. _add_python_plugin: mist.client.html#mist.client.model.Machine.add_python_plugin
+Some more advanced options can be used, determining the value_type, the unit etc. You can see ``mist.client.model.Machine.add_python_plugin``
+method for more info.

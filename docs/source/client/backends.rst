@@ -1,10 +1,12 @@
 Backends
 ********
 
+A backend can be an IaaS cloud, a Docker host, or any single server.
+
 Supported Providers
 ===================
 Mist.io supports a big list of providers including EC2, Rackspace, SoftLayer, Digital Ocean, Nephoscale, Openstack,
-Docker, HP Cloud and even Bare Metal Servers.
+Docker, HP Cloud and any single server.
 
 In order to see the list of all supported providers::
 
@@ -53,15 +55,9 @@ example to add a "Rackspace LON" backend::
 
 
 
-See also `add_backend`_ method for detailed information about the different params for each backend.
+See also ``mist.client.add_backend`` method for detailed information about the different params for each backend.
 
-.. _add_backend: mist.client.html#mist.client.MistClient.add_backend
-
-After adding a new backend, mist.backends are automatically updated. You  can however do it manually in case you want
-to::
-
-    client.update_backends()
-
+After adding a new backend, mist.backends are automatically updated.
 
 Backend actions
 ==============
@@ -81,7 +77,7 @@ You can choose a backend::
 
     backend = client.backends['2zMXgapqqaw9bSNUzSmuygFLy6Kp']
 
-You can also choose a backend by providing either the backend's name, id or provider::
+You can also choose a backend by providing either the backend's name or id::
 
     backend = client.backend_from_id("2zMXgapqqaw9bSNUzSmuygFLy6Kp")
     backend = client.backend_from_name("DigitalOcean")
@@ -97,9 +93,12 @@ Your new backend object has a lot of attributes and methods::
     backend.images
     ...
 
-See `Backend`_ class for detailed information.
+See ``mist.client.model.Backend`` class for detailed information.
 
-.. _Backend: mist.client.html#mist.client.model.Backend
+You have the option to rename a backend::
+
+    backend.rename("newName"
+
 
 Finally, you can delete a backend::
 

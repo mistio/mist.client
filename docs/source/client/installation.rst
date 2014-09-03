@@ -12,10 +12,9 @@ You now have the ``mist.client`` module and the ``mist`` command line tool insta
 Clone from Github
 =================
 
-mist.client is an opensource project and can be found here on its github page here: https://github.com/mistio/mist.client ::
+mist.client is an opensource project and can be found here on its github page: https://github.com/mistio/mist.client ::
 
     git clone https://github.com/mistio/mist.client
-
 
 
 Install mist.client::
