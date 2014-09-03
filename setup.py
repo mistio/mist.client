@@ -34,7 +34,7 @@ setup(
     keywords='web cloud server management monitoring automation mobile libcloud pyramid amazon aws rackspace openstack linode softlayer digitalocean gce',
     author='Chris Loukas',
     author_email='commixon@gmail.com',
-    license='AGPLv3',
+    license='GPLv3',
     packages=find_packages('src'),
     scripts=['src/mist/cmd/mist'],
     package_dir={'': 'src'},
