@@ -43,6 +43,12 @@ mist - command line interface
    cmd/cmd_monitor
    cmd/sync
 
+mist.ansible - Ansible modules for mist.io service
+==================================================
+You can see the mist.ansible documentation `here`_
+
+.. _here: http://mistansible.readthedocs.org/
+
 Package Info
 ============
 
