@@ -122,6 +122,17 @@ class Backend(object):
         return locations
 
     @property
+    def networks(self):
+        """
+        Available networks.
+
+        :returns: A list of available networks associated to a provider.
+        """
+        req = self.request(self.mist_client.uri+'/backends/'+self.id+'/networks')
+        networks = req.get().json()
+        return networks
+
+    @property
     def images(self):
         """
         Available images to be used when creating a new machine.
@@ -233,7 +244,9 @@ class Backend(object):
         self._list_machines()
         return self._machines
 
-    def create_machine(self, name, key, image_id, location_id, size_id, image_extra="", disk=""):
+    def create_machine(self, name, key, image_id, location_id, size_id, 
+                       image_extra="", disk="", script="", monitoring=False, 
+                       ips=[]):
         """
         Create a new machine on the given backend
 
@@ -253,7 +266,10 @@ class Backend(object):
             'location': location_id,
             'size': size_id,
             'image_extra': image_extra,
-            'disk': disk
+            'disk': disk,
+            'script': script,
+            'monitoring': monitoring,
+            'ips': ips
         }
         data = json.dumps(payload)
         req = self.request(self.mist_client.uri+'/backends/'+self.id+'/machines', data=data)
