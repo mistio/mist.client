@@ -150,8 +150,10 @@ class MistClient(object):
         self._list_backends()
         return self._backends
 
-    def add_backend(self, title, provider, key, secret, tenant_name=None, region=None, apiurl=None, machine_ip=None,
-                    machine_key=None, machine_user=None, compute_endpoint=None, machine_port=None):
+    def add_backend(self, title, provider, key, secret, tenant_name=None, 
+                    region=None, apiurl=None, machine_ip=None, machine_key=None, 
+                    machine_user=None, compute_endpoint=None, machine_port=None,
+                    remove_on_error=True):
         """
         Add a backend (hint: run supported_providers first in order to see all the available options)
 
@@ -183,6 +185,7 @@ class MistClient(object):
             'machine_user': machine_user,
             'compute_endpoint': compute_endpoint,
             'machine_port': machine_port,
+            'remove_on_error': remove_on_error
         }
 
         req = self.request(self.uri+'/backends', data=json.dumps(payload))
