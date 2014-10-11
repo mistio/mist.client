@@ -383,7 +383,7 @@ class Machine(object):
         req.put()
         self.mist_client.update_keys()
 
-    def _toggle_monitoring(self, action):
+    def _toggle_monitoring(self, action, no_ssh=False):
         """
         Enable or disable monitoring on a machine
 
@@ -391,6 +391,7 @@ class Machine(object):
         """
         payload = {
             'action': action,
+            'no_ssh': no_ssh,
             'name': self.name,
             'public_ips': self.info['public_ips'],
             'dns_name': self.info['extra'].get('dns_name', 'n/a')
@@ -405,17 +406,17 @@ class Machine(object):
             raise Exception("Error trying to %s monitoring: %s" % (action, resp.text))
         return resp.json()
 
-    def enable_monitoring(self):
+    def enable_monitoring(self, no_ssh=False):
         """
         Enable monitoring
         """
-        return self._toggle_monitoring(action="enable")
+        return self._toggle_monitoring(action="enable", no_ssh=no_ssh)
 
-    def disable_monitoring(self):
+    def disable_monitoring(self, no_ssh=False):
         """
         Disable monitoring
         """
-        return self._toggle_monitoring(action="disable")
+        return self._toggle_monitoring(action="disable", no_ssh=no_ssh)
 
     def get_stats(self, start=int(time()), stop=int(time())+10, step=10):
         """
