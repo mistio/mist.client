@@ -391,7 +391,7 @@ class Machine(object):
         """
         payload = {
             'action': action,
-            'machine_name': self.name,
+            'name': self.name,
             'public_ips': self.info['public_ips'],
             'dns_name': self.info['extra'].get('dns_name', 'n/a')
         }
