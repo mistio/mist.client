@@ -400,19 +400,22 @@ class Machine(object):
 
         req = self.request(self.mist_client.uri+"/backends/"+self.backend.id+"/machines/"+self.id+"/monitoring",
                            data=data)
-        req.post()
+        resp = req.post()
+        if not resp.ok:
+            raise Exception("Error trying to %s monitoring: %s" % (action, resp.text))
+        return resp.json()
 
     def enable_monitoring(self):
         """
         Enable monitoring
         """
-        self._toggle_monitoring(action="enable")
+        return self._toggle_monitoring(action="enable")
 
     def disable_monitoring(self):
         """
         Disable monitoring
         """
-        self._toggle_monitoring(action="disable")
+        return self._toggle_monitoring(action="disable")
 
     def get_stats(self, start=int(time()), stop=int(time())+10, step=10):
         """
