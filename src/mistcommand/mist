@@ -2,16 +2,16 @@
 import argparse
 import sys
 
-from mist.cmd.helpers.sync import sync
-from mist.cmd.helpers.ansible import ansible
-from mist.cmd.helpers.login import user_info
-from mist.cmd.helpers.backends import backend_action
-from mist.cmd.helpers.providers import provider_action
-from mist.cmd.helpers.keys import key_action
-from mist.cmd.helpers.machines import machine_action
-from mist.cmd.helpers.images import image_action
-from mist.cmd.helpers.sizes import size_action
-from mist.cmd.helpers.locations import location_action
+from mistcommand.helpers.sync import sync
+from mistcommand.helpers.ansible import ansible
+from mistcommand.helpers.login import user_info
+from mistcommand.helpers.backends import backend_action
+from mistcommand.helpers.providers import provider_action
+from mistcommand.helpers.keys import key_action
+from mistcommand.helpers.machines import machine_action
+from mistcommand.helpers.images import image_action
+from mistcommand.helpers.sizes import size_action
+from mistcommand.helpers.locations import location_action
 
 
 def main():

@@ -4,7 +4,7 @@ import re
 
 from time import time
 
-from mist.client.helpers import RequestsHandler
+from mistclient.helpers import RequestsHandler
 
 
 class Backend(object):

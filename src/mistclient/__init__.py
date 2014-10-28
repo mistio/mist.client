@@ -1,7 +1,7 @@
 import json
 
-from mist.client.helpers import RequestsHandler
-from mist.client.model import Backend, Key
+from mistclient.helpers import RequestsHandler
+from mistclient.model import Backend, Key
 
 
 class MistClient(object):
