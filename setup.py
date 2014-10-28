@@ -8,7 +8,6 @@ requires = [
     'requests',
     'argparse',
     'pyyaml',
-    'gitpython==0.3.2.RC1',
     'prettytable',
 ]
 
@@ -18,8 +17,8 @@ def readme():
         return f.read()
 
 setup(
-    name='mist.client',
-    version='0.1.1',
+    name='mist',
+    version='0.1.0',
     description='Python client for mist.io',
     long_description=readme(),
     classifiers=[
@@ -35,9 +34,8 @@ setup(
     author_email='commixon@gmail.com',
     license='GPLv3',
     packages=find_packages('src'),
-    scripts=['src/mist/cmd/mist'],
+    scripts=['src/mistcommand/mist'],
     package_dir={'': 'src'},
-    namespace_packages=['mist'],
     install_requires=requires,
     zip_safe=False
 )

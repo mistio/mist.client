@@ -6,7 +6,7 @@ Python Client for mist.io
 Installation
 ============
 
-pip install mist.client
+pip install mist
 
 Documentation
 =============
