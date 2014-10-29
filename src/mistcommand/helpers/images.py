@@ -2,6 +2,7 @@ import sys
 
 from prettytable import PrettyTable
 from mistcommand.helpers.login import authenticate
+from mistcommand.helpers.backends import choose_backend
 
 
 def list_images(backend, search_term):
@@ -24,16 +25,9 @@ def list_images(backend, search_term):
 
 def image_action(args):
 
-    client = authenticate()
-
-    backend_value = args.backend
-    search_term = args.search
-
-    if args.action in ["list", "ls"] and args.target == "images":
-        if not backend_value:
-            print "You have to provide either backend name or backend id"
-            sys.exit(1)
-        else:
-            backend = client.search_backend(backend_value)
+    if args.action == 'list':
+        client = authenticate()
+        backend = choose_backend(client, args)
+        search_term = args.search
 
         list_images(backend, search_term)

@@ -114,6 +114,25 @@ def main():
         description="List all backends that are added to mist.io"
     )
 
+    p_list_locations = subparsers.add_parser(
+        'locations',
+        description="List locations for the given backend"
+    )
+
+    p_list_images = subparsers.add_parser(
+        'images',
+        description="List available OS Images for the given backend"
+    )
+    p_list_images.add_argument(
+        '--search', required=False,
+        help="Search for OS Images that contain this."
+    )
+
+    p_list_sizes = subparsers.add_parser(
+        'sizes',
+        description="List available machine sizes for the given backend"
+    )
+
     # ----------------DISPLAY TARGETS------------------
     subparsers = p_display.add_subparsers(
         dest='target',
@@ -338,7 +357,8 @@ def main():
     )
 
     #---------------BACKEND OPTIONS---------------------
-    for parser in [p_rename_backend, p_delete_backend, p_display_backend]:
+    for parser in [p_rename_backend, p_delete_backend, p_display_backend, p_list_locations,
+                   p_list_images, p_list_sizes]:
         group = parser.add_mutually_exclusive_group(required=True)
         group.add_argument(
             '--backend',
@@ -362,6 +382,12 @@ def main():
         provider_action(args)
     elif args.target in ['backends', 'backend']:
         backend_action(args)
+    elif args.target == 'locations':
+        location_action(args)
+    elif args.target == 'images':
+        image_action(args)
+    elif args.target == 'sizes':
+        size_action(args)
 
 
     # if len(sys.argv) == 1:

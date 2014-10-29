@@ -2,6 +2,7 @@ import sys
 
 from prettytable import PrettyTable
 from mistcommand.helpers.login import authenticate
+from mistcommand.helpers.backends import choose_backend
 
 
 def list_sizes(backend):
@@ -15,15 +16,8 @@ def list_sizes(backend):
 
 def size_action(args):
 
-    client = authenticate()
-
-    backend_value = args.backend
-
-    if args.action in ["list", "ls"] and args.target == "sizes":
-        if not backend_value:
-            print "You have to provide either backend name or backend id"
-            sys.exit(1)
-        else:
-            backend = client.search_backend(backend_value)
+    if args.action == 'list':
+        client = authenticate()
+        backend = choose_backend(client, args)
 
         list_sizes(backend)
