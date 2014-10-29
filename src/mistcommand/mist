@@ -13,7 +13,7 @@ from mistcommand.helpers.machines import machine_action
 from mistcommand.helpers.images import image_action
 from mistcommand.helpers.sizes import size_action
 from mistcommand.helpers.locations import location_action
-
+from mistcommand.helpers.plugins import plugin_action
 
 def main():
 
@@ -24,7 +24,7 @@ def main():
     # --------------ACTiONS----------------------------
     p_list = subparsers.add_parser(
         'list',
-        description="List supported providers, images, sizes, locations, networks, backends, keys or machines",
+        description="List supported providers, images, sizes, locations, networks, backends, keys, machines, plugins",
     )
 
     p_display = subparsers.add_parser(
@@ -33,7 +33,7 @@ def main():
     )
     p_add = subparsers.add_parser(
         'add',
-        description="Add backend or key",
+        description="Add backend, key or plugin to machine",
     )
 
     p_create = subparsers.add_parser(
@@ -156,6 +156,10 @@ def main():
         help="Sepcify a backend's name"
     )
 
+    p_list_plugins = subparsers.add_parser(
+        'plugins',
+        help="List available plugins for a machine"
+    )
     # ----------------DISPLAY TARGETS------------------
     subparsers = p_display.add_subparsers(
         dest='target',
@@ -367,6 +371,16 @@ def main():
         help="If given, then mist.io will auto-generate an SSH Key"
     )
 
+    p_add_plugin = subparsers.add_parser(
+        'plugin',
+        help="Add plugin to machine"
+    )
+
+    p_add_plugin.add_argument(
+        '--plugin-id', required=True,
+        help="Id of the plugin you want to add. You can list plugins for this machine to find available"
+             "plugins and the corresponding ids"
+    )
     #-----------------MACHINE ACTIONS TARGETS----------
     # for parser in [p_reboot, p_start, p_stop, p_destroy, p_probe]:
     #     subparsers = parser.add_subparsers(
@@ -532,7 +546,7 @@ def main():
     for parser in [p_rename_backend, p_delete_backend, p_display_backend, p_list_locations,
                    p_list_images, p_list_sizes, p_create_machine, p_start_machine, p_reboot_machine,
                    p_stop_machine, p_destroy_machine, p_probe_machine, p_enable_monitoring_machine,
-                   p_disable_monitoring_machine]:
+                   p_disable_monitoring_machine, p_list_plugins, p_add_plugin]:
         group = parser.add_mutually_exclusive_group(required=True)
         group.add_argument(
             '--backend',
@@ -549,7 +563,8 @@ def main():
 
     #------------MACHINE OPTIONS------------------------
     for parser in [p_start_machine, p_reboot_machine, p_stop_machine, p_destroy_machine,
-                   p_probe_machine, p_enable_monitoring_machine, p_disable_monitoring_machine]:
+                   p_probe_machine, p_enable_monitoring_machine, p_disable_monitoring_machine,
+                   p_list_plugins, p_add_plugin]:
         group = parser.add_mutually_exclusive_group(required=True)
         group.add_argument(
             '--machine',
@@ -583,6 +598,9 @@ def main():
         key_action(args)
     elif args.target in ['machine', 'machines']:
         machine_action(args)
+    elif args.target in ['plugin', 'plugins']:
+        plugin_action(args)
+
 
     #----------------MACHINE OPTIONS--------------------
 
