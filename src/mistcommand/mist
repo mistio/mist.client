@@ -133,6 +133,11 @@ def main():
         description="List available machine sizes for the given backend"
     )
 
+    p_list_keys = subparsers.add_parser(
+        'keys',
+        description="List added/available SSH Keys"
+    )
+
     # ----------------DISPLAY TARGETS------------------
     subparsers = p_display.add_subparsers(
         dest='target',
@@ -142,6 +147,11 @@ def main():
     p_display_backend = subparsers.add_parser(
         'backend',
         help="Display info for this backend"
+    )
+
+    p_display_key = subparsers.add_parser(
+        'key',
+        help="Display info for this key"
     )
 
     # ----------------ADD TARGETS----------------------
@@ -318,6 +328,27 @@ def main():
         help="The id of the ssh key that is associated with the machine"
     )
 
+
+    p_add_key = subparsers.add_parser(
+        'key',
+        help="Add a new SSH Key"
+    )
+
+    p_add_key.add_argument(
+        '--name', required=True,
+        help="Name of the new SSH Key"
+    )
+
+    group = p_add_key.add_mutually_exclusive_group(required=True)
+    group.add_argument(
+        '--key-path',
+        help="Path to private SSH Key file"
+    )
+    group.add_argument(
+        '--auto-generate', action='store_true',
+        help="If given, then mist.io will auto-generate an SSH Key"
+    )
+
     # ----------------RENAME TARGETS-------------------
     subparsers = p_rename.add_subparsers(
         dest='target',
@@ -330,8 +361,18 @@ def main():
     )
 
     p_rename_backend.add_argument(
-        '-n', '--new_name', required=True,
+        '-n', '--new-name', required=True,
         help="New name"
+    )
+
+    p_rename_key = subparsers.add_parser(
+        'key',
+        description="Rename SSH Key"
+    )
+
+    p_rename_key.add_argument(
+        '--new-name', required=True,
+        help="New name for the SSH Key"
     )
 
     # ----------------DELETE TARGETS-------------------
@@ -345,6 +386,11 @@ def main():
         help="Delete this backend"
     )
 
+    p_delete_key = subparsers.add_parser(
+        'key',
+        help="Delete this SSH Key"
+    )
+
     # ----------------USER TARGETS---------------------
     subparsers = p_user.add_subparsers(
         dest='target',
@@ -355,6 +401,13 @@ def main():
         'info',
         help='Get info about the user'
     )
+
+    #---------------KEYS OPTIONS------------------------
+    for parser in [p_delete_key, p_rename_key, p_display_key]:
+        parser.add_argument(
+            '--key', required=True,
+            help="Name of the SSH Key you want to delete"
+        )
 
     #---------------BACKEND OPTIONS---------------------
     for parser in [p_rename_backend, p_delete_backend, p_display_backend, p_list_locations,
@@ -388,6 +441,8 @@ def main():
         image_action(args)
     elif args.target == 'sizes':
         size_action(args)
+    elif args.target in ['keys', 'key']:
+        key_action(args)
 
 
     # if len(sys.argv) == 1:

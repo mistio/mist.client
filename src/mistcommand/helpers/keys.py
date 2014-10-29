@@ -33,51 +33,35 @@ def key_action(args):
 
     client = authenticate()
 
-    if args.action in ["list", "ls"] and args.target == "keys":
-        list_keys(client)
-    elif args.action in ["add", "create"] and args.target == "key":
+    if args.action == 'add':
         name = args.name
-        key = args.key
+        key_path = args.key_path
+        auto = args.auto_generate
 
-        if args.auto:
+        if auto:
             private = client.generate_key()
-
         else:
-            with open(key, "r") as f:
+            with open(key_path, "r") as f:
                 private = f.read().strip("\n")
 
         client.add_key(key_name=name, private=private)
         print "Added key %s" % name
-    elif args.action in ["delete", "remove", "rm", "del"] and args.target == "key":
-        key_name = args.name
-        if not key_name:
-            print "You have to provide key name"
-            sys.exit(1)
+    elif args.action == 'list':
+        list_keys(client)
+    elif args.action == 'delete':
+        key_name = args.key
         key = client.keys[key_name]
-        key.delete()
-        print "Deleted key %s" % key_name
-    elif args.action == "rename" and args.target == "key":
-        key_name = args.name
-        if not key_name:
-            print "You have to provide key name"
-            sys.exit(1)
 
+        key.delete()
+        print "Deleted %s" % key_name
+    elif args.action == 'rename':
+        key_name = args.key
         new_name = args.new_name
-        if not new_name:
-            print "You have to provide new name for the key"
-            sys.exit(1)
 
         key = client.keys[key_name]
         key.rename(new_name)
-        print "Renamed %s to %s" % (key_name, new_name)
-    elif args.action in ["show", "describe", "display"] and args.target == "key":
-        key_name = args.name
-        if not key_name:
-            print "You have to provide key name"
-            sys.exit(1)
-
+        print "Renamed key to %s" % new_name
+    elif args.action == 'display':
+        key_name = args.key
         key = client.keys[key_name]
         show_key(key)
-    else:
-        print "Action not supported"
-        sys.exit(1)
