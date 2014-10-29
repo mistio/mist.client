@@ -136,8 +136,36 @@ def main():
         help="Add a new backend"
     )
 
+    provider_choices = [
+        'bare_metal',
+        'ec2_ap_northeast',
+        'ec2_ap_southeast',
+        'ec2_ap_southeast_2',
+        'ec2_eu_west',
+        'ec2_sa_east',
+        'ec2_us_east',
+        'ec2_us_west',
+        'ec2_us_west_oregon',
+        'gce',
+        'nephoscale',
+        'digitalocean',
+        'linode',
+        'openstack',
+        'rackspace:dfw',
+        'rackspace:ord',
+        'rackspace:iad',
+        'rackspace:lon',
+        'rackspace:syd',
+        'rackspace:hkg',
+        'rackspace_first_gen:us',
+        'rackspace_first_gen:uk',
+        'softlayer',
+        'hpcloud:region-a.geo-1',
+        'hpcloud:region-b.geo-1',
+        'docker'
+    ]
     p_add_backend.add_argument(
-        '--provider', required=True,
+        '--provider', required=True, choices=provider_choices,
         help="The provider id for the new backend, e.g. ec2_ap_northeast. You can"
              " list supported-providers to see all available provider ids"
     )

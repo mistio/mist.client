@@ -64,6 +64,19 @@ def add_backend(client, args):
         add_nepho_backend(client, args)
     elif "digi" in provider:
         add_digital_backend(client,args)
+    elif "linode" in provider:
+        add_linode_backend(client, args)
+    elif "openstack" in provider:
+        add_openstack_backend(client, args)
+    elif "softlayer" in provider:
+        add_softlayer_backend(client, args)
+    elif "hp" in provider:
+        add_hp_backend(client, args)
+    elif "docker" in provider:
+        print "Not implemented yet"
+        sys.exit(0)
+    elif "bare" in provider:
+        add_bare_metal_backend(client, args)
 
 
 def add_ec2_backend(client, args):
@@ -104,6 +117,65 @@ def add_digital_backend(client, args):
     secret = args.digi_token
 
     client.add_backend(title=title, provider=provider, secret=secret, key=key)
+
+
+def add_linode_backend(client, args):
+    title = args.name
+    provider = args.provider
+
+    key = "dummy"
+    secret = args.linode_api_key
+
+    client.add_backend(title=title, provider=provider, secret=secret, key=key)
+
+
+def add_openstack_backend(client, args):
+    title = args.name
+    provider = args.provider
+
+    key = args.openstack_username
+    secret = args.openstack_password
+    apiurl = args.openstack_auth_url
+    tenant_name = args.openstack_tenant
+    region = args.openstack_region
+
+    client.add_backend(title=title, provider=provider, key=key, secret=secret, apiurl=apiurl,
+                       tenant_name=tenant_name, region=region)
+
+
+def add_softlayer_backend(client, args):
+    title = args.name
+    provider = args.provider
+
+    key = args.softlayer_username
+    secret = args.softlayer_api_key
+
+    client.add_backend(title=title, provider=provider, secret=secret, key=key)
+
+
+def add_hp_backend(client, args):
+    title = args.name
+    provider = args.provider
+
+    key = args.hp_username
+    secret = args.hp_password
+    tenant_name = args.hp_tenant
+
+    client.add_backend(title=title, provider=provider, secret=secret, key=key, tenant_name=tenant_name)
+
+
+def add_bare_metal_backend(client, args):
+    title = args.name
+    provider = args.provider
+
+    key = args.bare_hostname
+    secret = args.bare_user
+
+    machine_port = args.bare_port
+    machine_key = args.bare_ssh_key_id
+
+    client.add_backend(title=title, provider=provider, secret=secret, key=key, machine_key=machine_key,
+                       machine_port=machine_port, machine_user=secret)
 
 
 def backend_action(args):
