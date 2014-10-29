@@ -38,6 +38,22 @@ def list_machines(client, backend):
     print x
 
 
+def display_machine(machine):
+    x = PrettyTable(["Name", "ID", "State", "Public Ips", "Backend Title", "Tags"])
+
+    try:
+        public_ips = machine.info['public_ips']
+        ips = " -- ".join(public_ips)
+    except:
+        ips = ""
+
+    machine_tags = machine.info.get('tags', [])
+    tags = ",".join(machine_tags)
+
+    x.add_row([machine.name, machine.id, machine.info['state'], ips, machine.backend.title, tags])
+    print x
+
+
 def machine_take_action(machine, action):
     if action == "start":
         machine.start()
@@ -95,6 +111,13 @@ def machine_action(args):
             backend = None
 
         list_machines(client, backend)
+
+    elif args.action == 'display':
+        backend = choose_backend(client, args)
+        machine = choose_machine(backend, args)
+
+        display_machine(machine)
+
     elif args.action == 'create':
         backend = choose_backend(client, args)
         create_machine(client, backend, args)

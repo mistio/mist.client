@@ -29,7 +29,7 @@ def main():
 
     p_display = subparsers.add_parser(
         'display',
-        description="Display info about image, size, location, backend, key or machine"
+        description="Display info about key or machine"
     )
     p_add = subparsers.add_parser(
         'add',
@@ -174,6 +174,11 @@ def main():
     p_display_key = subparsers.add_parser(
         'key',
         help="Display info for this key"
+    )
+
+    p_display_machine = subparsers.add_parser(
+        'machine',
+        help="Display info for this machine"
     )
 
     # ----------------ADD TARGETS----------------------
@@ -546,7 +551,7 @@ def main():
     for parser in [p_rename_backend, p_delete_backend, p_display_backend, p_list_locations,
                    p_list_images, p_list_sizes, p_create_machine, p_start_machine, p_reboot_machine,
                    p_stop_machine, p_destroy_machine, p_probe_machine, p_enable_monitoring_machine,
-                   p_disable_monitoring_machine, p_list_plugins, p_add_plugin]:
+                   p_disable_monitoring_machine, p_list_plugins, p_add_plugin, p_display_machine]:
         group = parser.add_mutually_exclusive_group(required=True)
         group.add_argument(
             '--backend',
@@ -564,7 +569,7 @@ def main():
     #------------MACHINE OPTIONS------------------------
     for parser in [p_start_machine, p_reboot_machine, p_stop_machine, p_destroy_machine,
                    p_probe_machine, p_enable_monitoring_machine, p_disable_monitoring_machine,
-                   p_list_plugins, p_add_plugin]:
+                   p_list_plugins, p_add_plugin, p_display_machine]:
         group = parser.add_mutually_exclusive_group(required=True)
         group.add_argument(
             '--machine',
