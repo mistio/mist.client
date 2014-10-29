@@ -60,6 +60,10 @@ def add_backend(client, args):
         add_ec2_backend(client, args)
     elif "rackspace" in provider:
         add_rackspace_backend(client, args)
+    elif "nepho" in provider:
+        add_nepho_backend(client, args)
+    elif "digi" in provider:
+        add_digital_backend(client,args)
 
 
 def add_ec2_backend(client, args):
@@ -78,6 +82,26 @@ def add_rackspace_backend(client, args):
 
     key = args.rackspace_username
     secret = args.rackspace_api_key
+
+    client.add_backend(title=title, provider=provider, secret=secret, key=key)
+
+
+def add_nepho_backend(client, args):
+    title = args.name
+    provider = args.provider
+
+    key = args.nepho_username
+    secret = args.nepho_password
+
+    client.add_backend(title=title, provider=provider, secret=secret, key=key)
+
+
+def add_digital_backend(client, args):
+    title = args.name
+    provider = args.provider
+
+    key = "dummy"
+    secret = args.digi_token
 
     client.add_backend(title=title, provider=provider, secret=secret, key=key)
 
