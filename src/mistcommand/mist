@@ -369,6 +369,57 @@ def main():
         help="If given, then mist.io will auto-generate an SSH Key"
     )
 
+    #-----------------MACHINE ACTIONS TARGETS----------
+    # for parser in [p_reboot, p_start, p_stop, p_destroy, p_probe]:
+    #     subparsers = parser.add_subparsers(
+    #         dest='target',
+    #         help="Action for this machine"
+    #     )
+
+    subparsers = p_reboot.add_subparsers(
+        dest='target',
+        help='Reboot machine'
+    )
+    p_reboot_machine = subparsers.add_parser(
+        'machine',
+        help="Reboot machine"
+    )
+
+    subparsers = p_start.add_subparsers(
+        dest='target',
+        help='Start machine'
+    )
+    p_start_machine = subparsers.add_parser(
+        'machine',
+        help="Start machine"
+    )
+
+    subparsers = p_stop.add_subparsers(
+        dest='target',
+        help='Stop machine'
+    )
+    p_stop_machine = subparsers.add_parser(
+        'machine',
+        help="Stop machine"
+    )
+
+    subparsers = p_destroy.add_subparsers(
+        dest='target',
+        help='Destroy machine'
+    )
+    p_destroy_machine = subparsers.add_parser(
+        'machine',
+        help="Destroy machine"
+    )
+
+    subparsers = p_probe.add_subparsers(
+        dest='target',
+        help='Probe machine'
+    )
+    p_probe_machine = subparsers.add_parser(
+        'machine',
+        help="Probe machine"
+    )
     #-----------------CREATE TARGETS-------------------
     subparsers = p_create.add_subparsers(
         dest='target',
@@ -399,10 +450,6 @@ def main():
     p_create_machine.add_argument(
         '--location-id', required=True,
         help="Id of the backend location. You can list locations for the given backend to find their ids"
-    )
-    p_create_machine.add_argument(
-        '--enable-monitoring', action='store_true',
-        help="Enable monitoring after creation of machine"
     )
 
     # ----------------RENAME TARGETS-------------------
@@ -467,19 +514,37 @@ def main():
 
     #---------------BACKEND OPTIONS---------------------
     for parser in [p_rename_backend, p_delete_backend, p_display_backend, p_list_locations,
-                   p_list_images, p_list_sizes, p_create_machine]:
+                   p_list_images, p_list_sizes, p_create_machine, p_start_machine, p_reboot_machine,
+                   p_stop_machine, p_destroy_machine, p_probe_machine]:
         group = parser.add_mutually_exclusive_group(required=True)
         group.add_argument(
             '--backend',
             help="This can be either a backend's name or id"
         )
         group.add_argument(
-            '--backend_id',
+            '--backend-id',
             help="Specify a backend's id"
         )
         group.add_argument(
-            '--backend_name',
+            '--backend-name',
             help="Sepcify a backend's name"
+        )
+
+    #------------MACHINE OPTIONS------------------------
+    for parser in [p_start_machine, p_reboot_machine, p_stop_machine, p_destroy_machine,
+                   p_probe_machine]:
+        group = parser.add_mutually_exclusive_group(required=True)
+        group.add_argument(
+            '--machine',
+            help="This can be either a machine's name or id"
+        )
+        group.add_argument(
+            '--machine-id',
+            help="Specify a machine's id"
+        )
+        group.add_argument(
+            '--machine-name',
+            help="Sepcify a machine's name"
         )
 
     argcomplete.autocomplete(main_parser)

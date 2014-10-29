@@ -97,10 +97,8 @@ def create_machine(client, backend, args):
     image_id = args.image_id
     size_id = args.size_id
     location_id = args.location_id
-    monitoring = True if args.enable_monitoring else False
 
-    backend.create_machine(name=name, key=key, image_id=image_id, size_id=size_id,
-                           location_id=location_id, monitoring=monitoring)
+    backend.create_machine(name=name, key=key, image_id=image_id, size_id=size_id, location_id=location_id)
 
 
 def machine_action(args):
@@ -119,7 +117,11 @@ def machine_action(args):
         create_machine(client, backend, args)
         print "Created machine %s" % args.machine_name
 
+    elif args.action in ['start', 'stop', 'reboot', 'destroy', 'probe']:
+        backend = choose_backend(client, args)
+        machine = choose_machine(backend, args)
 
+        machine_take_action(machine, args.action)
     # backend_value = args.backend
     # if args.action in ["list", "ls"] and args.target == "machines":
     #     list_machines(client, backend_value)
