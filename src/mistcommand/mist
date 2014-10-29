@@ -76,6 +76,11 @@ def main():
         description="Probe a machine"
     )
 
+    p_tag = subparsers.add_parser(
+        'tag',
+        description="Tag machine"
+    )
+
     p_enable_monitoring = subparsers.add_parser(
         'enable-monitoring',
         description="Enable monitoring on a machine"
@@ -387,11 +392,6 @@ def main():
              "plugins and the corresponding ids"
     )
     #-----------------MACHINE ACTIONS TARGETS----------
-    # for parser in [p_reboot, p_start, p_stop, p_destroy, p_probe]:
-    #     subparsers = parser.add_subparsers(
-    #         dest='target',
-    #         help="Action for this machine"
-    #     )
 
     subparsers = p_reboot.add_subparsers(
         dest='target',
@@ -454,6 +454,20 @@ def main():
     p_disable_monitoring_machine = subparsers.add_parser(
         'machine',
         help="Enable monitoring on this machine"
+    )
+
+    subparsers = p_tag.add_subparsers(
+        dest='target',
+        help="Tag machine"
+    )
+    p_tag_machine = subparsers.add_parser(
+        'machine',
+        help="Tag this machine"
+    )
+
+    p_tag_machine.add_argument(
+        '--tag', required=True,
+        help="Add this tag to the machine"
     )
     #-----------------CREATE TARGETS-------------------
     subparsers = p_create.add_subparsers(
@@ -551,7 +565,8 @@ def main():
     for parser in [p_rename_backend, p_delete_backend, p_display_backend, p_list_locations,
                    p_list_images, p_list_sizes, p_create_machine, p_start_machine, p_reboot_machine,
                    p_stop_machine, p_destroy_machine, p_probe_machine, p_enable_monitoring_machine,
-                   p_disable_monitoring_machine, p_list_plugins, p_add_plugin, p_display_machine]:
+                   p_disable_monitoring_machine, p_list_plugins, p_add_plugin, p_display_machine,
+                   p_tag_machine]:
         group = parser.add_mutually_exclusive_group(required=True)
         group.add_argument(
             '--backend',
@@ -569,7 +584,7 @@ def main():
     #------------MACHINE OPTIONS------------------------
     for parser in [p_start_machine, p_reboot_machine, p_stop_machine, p_destroy_machine,
                    p_probe_machine, p_enable_monitoring_machine, p_disable_monitoring_machine,
-                   p_list_plugins, p_add_plugin, p_display_machine]:
+                   p_list_plugins, p_add_plugin, p_display_machine, p_tag_machine]:
         group = parser.add_mutually_exclusive_group(required=True)
         group.add_argument(
             '--machine',

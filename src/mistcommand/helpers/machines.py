@@ -140,32 +140,13 @@ def machine_action(args):
         machine.disable_monitoring()
         print "Disabled monitoring to machine %s" % machine.name
 
-    # elif args.action in ["add", "create"] and args.target == "plugin":
-    #     if not backend_value:
-    #         print "You have to provide either backend name or backend id"
-    #         sys.exit(1)
-    #     else:
-    #         backend = client.search_backend(backend_value)
-    #
-    #     machine_name = args.name
-    #     machine_id = args.id
-    #     if machine_name:
-    #         machine = backend.machine_from_name(machine_name)
-    #     elif machine_id:
-    #         machine = backend.machine_from_id(machine_id)
-    #     else:
-    #         print "You have to provide either machine name or machine id"
-    #         sys.exit(1)
-    #
-    #     if not args.plugin:
-    #         print "You have to provide plugin id or name"
-    #         sys.exit(1)
-    #     else:
-    #         plugin_id = args.plugin
-    #
-    #         if not args.custom_plugin:
-    #             machine.add_metric(plugin_id)
-    #             print "Added Plugin %s to monitored machine %s" % (plugin_id, machine.name)
-    #         else:
-    #             machine.add_python_plugin(name=plugin_id, python_file=args.custom_plugin)
-    #             print "Added %s file as custom plugin" % args.custom_plugin
+    elif args.action == 'tag':
+        backend = choose_backend(client, args)
+        machine = choose_machine(backend, args)
+
+        if machine.info['can_tag']:
+            machine.tag(tag=args.tag)
+            print "Add tag %s to machine %s" % (args.tag, machine.name)
+        else:
+            print "Cannot tag machine, maybe action is not supported by the provider"
+            sys.exit(0)

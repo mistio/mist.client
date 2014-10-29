@@ -526,6 +526,16 @@ class Machine(object):
                            data=data)
         req.post()
 
+    def tag(self, tag):
+        payload = {
+            'tag': tag
+        }
+        data = json.dumps(payload)
+        req = self.request(self.mist_client.uri+"/backends/"+self.backend.id+"/machines/"+self.id+"/metadata",
+                           data=data)
+        req.post()
+        self.backend.update_machines()
+
 
 class Key(object):
     """
