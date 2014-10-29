@@ -138,6 +138,26 @@ def main():
         description="List added/available SSH Keys"
     )
 
+    p_list_machines = subparsers.add_parser(
+        'machines',
+        description="List machines for all or a specific backend. "
+                    "If no backend is specified it will list all machines for all backends"
+    )
+
+    group = p_list_machines.add_mutually_exclusive_group()
+    group.add_argument(
+        '--backend',
+        help="This can be either a backend's name or id"
+    )
+    group.add_argument(
+        '--backend-id',
+        help="Specify a backend's id"
+    )
+    group.add_argument(
+        '--backend-name',
+        help="Sepcify a backend's name"
+    )
+
     # ----------------DISPLAY TARGETS------------------
     subparsers = p_display.add_subparsers(
         dest='target',
@@ -349,6 +369,42 @@ def main():
         help="If given, then mist.io will auto-generate an SSH Key"
     )
 
+    #-----------------CREATE TARGETS-------------------
+    subparsers = p_create.add_subparsers(
+        dest='target',
+        help="Create machine or network"
+    )
+
+    p_create_machine = subparsers.add_parser(
+        'machine',
+        help="Create a new machine"
+    )
+
+    p_create_machine.add_argument(
+        '--machine-name', required=True,
+        help="Name for the new machine"
+    )
+    p_create_machine.add_argument(
+        '--key-id',
+        help="Id of SSH Key to associate with the machine"
+    )
+    p_create_machine.add_argument(
+        '--image-id', required=True,
+        help="Id of OS Image. You can list images for the given backend to find their ids"
+    )
+    p_create_machine.add_argument(
+        '--size-id', required=True,
+        help="Id of machine size. You can list sizes for the given backend to find their ids"
+    )
+    p_create_machine.add_argument(
+        '--location-id', required=True,
+        help="Id of the backend location. You can list locations for the given backend to find their ids"
+    )
+    p_create_machine.add_argument(
+        '--enable-monitoring', action='store_true',
+        help="Enable monitoring after creation of machine"
+    )
+
     # ----------------RENAME TARGETS-------------------
     subparsers = p_rename.add_subparsers(
         dest='target',
@@ -411,7 +467,7 @@ def main():
 
     #---------------BACKEND OPTIONS---------------------
     for parser in [p_rename_backend, p_delete_backend, p_display_backend, p_list_locations,
-                   p_list_images, p_list_sizes]:
+                   p_list_images, p_list_sizes, p_create_machine]:
         group = parser.add_mutually_exclusive_group(required=True)
         group.add_argument(
             '--backend',
@@ -443,7 +499,10 @@ def main():
         size_action(args)
     elif args.target in ['keys', 'key']:
         key_action(args)
+    elif args.target in ['machine', 'machines']:
+        machine_action(args)
 
+    #----------------MACHINE OPTIONS--------------------
 
     # if len(sys.argv) == 1:
     #     print "Mist.io Service"

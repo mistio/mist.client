@@ -2,11 +2,12 @@ import sys
 
 from prettytable import PrettyTable
 from mistcommand.helpers.login import authenticate
+from mistcommand.helpers.backends import choose_backend
 
 
-def list_machines(client, backend_value):
+def list_machines(client, backend):
     x = PrettyTable(["Name", "ID", "State", "Public Ips", "Backend Title"])
-    if not backend_value:
+    if not backend:
         backends = client.backends
         for i in backends.keys():
             backend = backends[i]
@@ -20,7 +21,6 @@ def list_machines(client, backend_value):
                     ips = ""
                 x.add_row([machine.name, machine.id, machine.info['state'], ips, backend.title])
     else:
-        backend = client.search_backend(backend_value)
         machines = backend.machines
         for y in machines.keys():
             machine = machines[y]
@@ -76,112 +76,152 @@ def list_plugins(machine):
     print x
 
 
+def choose_machine(backend, args):
+    machine_id = args.machine_id
+    machine_name = args.machine_name
+    if machine_id:
+        machine = backend.machine_from_id(machine_id)
+    elif machine_name:
+        machine = backend.machine_from_name(machine_name)
+    else:
+        machine = backend.search_machine(args.machine)
+
+    return machine
+
+
+def create_machine(client, backend, args):
+    key_id = args.key_id
+    key = client.keys[key_id]
+
+    name = args.machine_name
+    image_id = args.image_id
+    size_id = args.size_id
+    location_id = args.location_id
+    monitoring = True if args.enable_monitoring else False
+
+    backend.create_machine(name=name, key=key, image_id=image_id, size_id=size_id,
+                           location_id=location_id, monitoring=monitoring)
+
+
 def machine_action(args):
 
     client = authenticate()
 
-    backend_value = args.backend
-    if args.action in ["list", "ls"] and args.target == "machines":
-        list_machines(client, backend_value)
-    elif args.action in ["start", "stop", "destroy", "reboot", "probe"] and args.target == "machine":
-        if not backend_value:
-            print "You have to provide either backend name or backend id"
-            sys.exit(1)
+    if args.action == 'list':
+        if args.backend or args.backend_id or args.backend_name:
+            backend = choose_backend(client, args)
         else:
-            backend = client.search_backend(backend_value)
+            backend = None
 
-        machine_name = args.name
-        machine_id = args.id
-        if machine_name:
-            machine = backend.machine_from_name(machine_name)
-        elif machine_id:
-            machine = backend.machine_from_id(machine_id)
-        else:
-            print "You have to provide either machine name or machine id"
-            sys.exit(1)
-        machine_take_action(machine, args.action)
-    elif args.action in ["create", "add"] and args.target == "machine":
-        if not backend_value:
-            print "You have to provide either backend name or backend id"
-            sys.exit(1)
-        else:
-            backend = client.search_backend(backend_value)
+        list_machines(client, backend)
+    elif args.action == 'create':
+        backend = choose_backend(client, args)
+        create_machine(client, backend, args)
+        print "Created machine %s" % args.machine_name
 
-        for arg in [args.name, args.image, args.size, args.key, args.location]:
-            if not arg:
-                print "You have to provide name, image id, size id, location id, size id and key id"
-                sys.exit(1)
 
-        name = args.name
-        key = client.keys[args.key]
-        image_id = args.image
-        size_id = args.size
-        location_id = args.location
-
-        backend.create_machine(name=name, key=key, image_id=image_id, location_id=location_id, size_id=size_id)
-        print "Created machine %s" % name
-    elif args.action in ["enable-monitoring", "disable-monitoring"] and args.target == "machine":
-        if not backend_value:
-            print "You have to provide either backend name or backend id"
-            sys.exit(1)
-        else:
-            backend = client.search_backend(backend_value)
-
-        machine_name = args.name
-        machine_id = args.id
-        if machine_name:
-            machine = backend.machine_from_name(machine_name)
-        elif machine_id:
-            machine = backend.machine_from_id(machine_id)
-        else:
-            print "You have to provide either machine name or machine id"
-            sys.exit(1)
-
-        toggle_monitoring(machine, args.action)
-    elif args.action in ["list", "ls"] and args.target == "plugins":
-        if not backend_value:
-            print "You have to provide either backend name or backend id"
-            sys.exit(1)
-        else:
-            backend = client.search_backend(backend_value)
-
-        machine_name = args.name
-        machine_id = args.id
-        if machine_name:
-            machine = backend.machine_from_name(machine_name)
-        elif machine_id:
-            machine = backend.machine_from_id(machine_id)
-        else:
-            print "You have to provide either machine name or machine id"
-            sys.exit(1)
-
-        list_plugins(machine)
-    elif args.action in ["add", "create"] and args.target == "plugin":
-        if not backend_value:
-            print "You have to provide either backend name or backend id"
-            sys.exit(1)
-        else:
-            backend = client.search_backend(backend_value)
-
-        machine_name = args.name
-        machine_id = args.id
-        if machine_name:
-            machine = backend.machine_from_name(machine_name)
-        elif machine_id:
-            machine = backend.machine_from_id(machine_id)
-        else:
-            print "You have to provide either machine name or machine id"
-            sys.exit(1)
-
-        if not args.plugin:
-            print "You have to provide plugin id or name"
-            sys.exit(1)
-        else:
-            plugin_id = args.plugin
-
-            if not args.custom_plugin:
-                machine.add_metric(plugin_id)
-                print "Added Plugin %s to monitored machine %s" % (plugin_id, machine.name)
-            else:
-                machine.add_python_plugin(name=plugin_id, python_file=args.custom_plugin)
-                print "Added %s file as custom plugin" % args.custom_plugin
+    # backend_value = args.backend
+    # if args.action in ["list", "ls"] and args.target == "machines":
+    #     list_machines(client, backend_value)
+    # elif args.action in ["start", "stop", "destroy", "reboot", "probe"] and args.target == "machine":
+    #     if not backend_value:
+    #         print "You have to provide either backend name or backend id"
+    #         sys.exit(1)
+    #     else:
+    #         backend = client.search_backend(backend_value)
+    #
+    #     machine_name = args.name
+    #     machine_id = args.id
+    #     if machine_name:
+    #         machine = backend.machine_from_name(machine_name)
+    #     elif machine_id:
+    #         machine = backend.machine_from_id(machine_id)
+    #     else:
+    #         print "You have to provide either machine name or machine id"
+    #         sys.exit(1)
+    #     machine_take_action(machine, args.action)
+    # elif args.action in ["create", "add"] and args.target == "machine":
+    #     if not backend_value:
+    #         print "You have to provide either backend name or backend id"
+    #         sys.exit(1)
+    #     else:
+    #         backend = client.search_backend(backend_value)
+    #
+    #     for arg in [args.name, args.image, args.size, args.key, args.location]:
+    #         if not arg:
+    #             print "You have to provide name, image id, size id, location id, size id and key id"
+    #             sys.exit(1)
+    #
+    #     name = args.name
+    #     key = client.keys[args.key]
+    #     image_id = args.image
+    #     size_id = args.size
+    #     location_id = args.location
+    #
+    #     backend.create_machine(name=name, key=key, image_id=image_id, location_id=location_id, size_id=size_id)
+    #     print "Created machine %s" % name
+    # elif args.action in ["enable-monitoring", "disable-monitoring"] and args.target == "machine":
+    #     if not backend_value:
+    #         print "You have to provide either backend name or backend id"
+    #         sys.exit(1)
+    #     else:
+    #         backend = client.search_backend(backend_value)
+    #
+    #     machine_name = args.name
+    #     machine_id = args.id
+    #     if machine_name:
+    #         machine = backend.machine_from_name(machine_name)
+    #     elif machine_id:
+    #         machine = backend.machine_from_id(machine_id)
+    #     else:
+    #         print "You have to provide either machine name or machine id"
+    #         sys.exit(1)
+    #
+    #     toggle_monitoring(machine, args.action)
+    # elif args.action in ["list", "ls"] and args.target == "plugins":
+    #     if not backend_value:
+    #         print "You have to provide either backend name or backend id"
+    #         sys.exit(1)
+    #     else:
+    #         backend = client.search_backend(backend_value)
+    #
+    #     machine_name = args.name
+    #     machine_id = args.id
+    #     if machine_name:
+    #         machine = backend.machine_from_name(machine_name)
+    #     elif machine_id:
+    #         machine = backend.machine_from_id(machine_id)
+    #     else:
+    #         print "You have to provide either machine name or machine id"
+    #         sys.exit(1)
+    #
+    #     list_plugins(machine)
+    # elif args.action in ["add", "create"] and args.target == "plugin":
+    #     if not backend_value:
+    #         print "You have to provide either backend name or backend id"
+    #         sys.exit(1)
+    #     else:
+    #         backend = client.search_backend(backend_value)
+    #
+    #     machine_name = args.name
+    #     machine_id = args.id
+    #     if machine_name:
+    #         machine = backend.machine_from_name(machine_name)
+    #     elif machine_id:
+    #         machine = backend.machine_from_id(machine_id)
+    #     else:
+    #         print "You have to provide either machine name or machine id"
+    #         sys.exit(1)
+    #
+    #     if not args.plugin:
+    #         print "You have to provide plugin id or name"
+    #         sys.exit(1)
+    #     else:
+    #         plugin_id = args.plugin
+    #
+    #         if not args.custom_plugin:
+    #             machine.add_metric(plugin_id)
+    #             print "Added Plugin %s to monitored machine %s" % (plugin_id, machine.name)
+    #         else:
+    #             machine.add_python_plugin(name=plugin_id, python_file=args.custom_plugin)
+    #             print "Added %s file as custom plugin" % args.custom_plugin
