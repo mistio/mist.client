@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+# PYTHON_ARGCOMPLETE_OK
+
 import sys
 import argparse
 import argcomplete
@@ -41,8 +43,18 @@ def main():
         description="Create machine"
     )
 
+    p_delete = subparsers.add_parser(
+        'delete',
+        description="Delete backend, key or network"
+    )
+
+    p_rename = subparsers.add_parser(
+        'rename',
+        description="Rename backend or key"
+    )
+
     p_start = subparsers.add_parser(
-        'add',
+        'start',
         description="Start a machine"
     )
 
@@ -86,8 +98,6 @@ def main():
         description="User actions"
     )
 
-    # ------------------TARGETS------------------------
-
     # ------------------LIST TARGETS-------------------
     subparsers = p_list.add_subparsers(
         dest='target',
@@ -104,7 +114,191 @@ def main():
         description="List all backends that are added to mist.io"
     )
 
-    #-----------------USER TARGETS---------------------
+    # ----------------DISPLAY TARGETS------------------
+    subparsers = p_display.add_subparsers(
+        dest='target',
+        help='List info for this target, e.g. display backend --backend_name MyBackend'
+    )
+
+    p_display_backend = subparsers.add_parser(
+        'backend',
+        help="Display info for this backend"
+    )
+
+    # ----------------ADD TARGETS----------------------
+    subparsers = p_add.add_subparsers(
+        dest='target',
+        help='Add a backend or key'
+    )
+
+    p_add_backend = subparsers.add_parser(
+        'backend',
+        help="Add a new backend"
+    )
+
+    p_add_backend.add_argument(
+        '--provider', required=True,
+        help="The provider id for the new backend, e.g. ec2_ap_northeast. You can"
+             " list supported-providers to see all available provider ids"
+    )
+
+    p_add_backend.add_argument(
+        '--name', required=True,
+        help="Name for the new backend"
+    )
+
+    ec2_group = p_add_backend.add_argument_group('EC2')
+    ec2_group.add_argument(
+        '--ec2-api-key',
+        help="The ec2 API key"
+    )
+    ec2_group.add_argument(
+        '--ec2-api-secret',
+        help="The ec2 API secret"
+    )
+
+    rackspace_group = p_add_backend.add_argument_group('Rackspace')
+    rackspace_group.add_argument(
+        '--rackspace-username',
+        help="Username for Rackspace"
+    )
+    rackspace_group.add_argument(
+        '--rackspace-api-key',
+        help="API Key for Rackspace"
+    )
+
+    nephoscale_group = p_add_backend.add_argument_group('NephoScale')
+    nephoscale_group.add_argument(
+        '--nepho-username',
+        help="Username for NephoScale"
+    )
+    nephoscale_group.add_argument(
+        '--nepho-password',
+        help="Password for nephoscale"
+    )
+
+    digital_group = p_add_backend.add_argument_group('DigitalOcean')
+    digital_group.add_argument(
+        '--digi-token',
+        help="Token for the DigitalOcean backend"
+    )
+
+    linode_group = p_add_backend.add_argument_group("Linode")
+    linode_group.add_argument(
+        '--linode-api-key',
+        help="API Key for the Linode backend"
+    )
+
+    openstack_group = p_add_backend.add_argument_group("Openstack")
+    openstack_group.add_argument(
+        '--openstack-username',
+        help="Username for the Openstack backend"
+    )
+    openstack_group.add_argument(
+        '--openstack-password',
+        help="Password for the Openstack backend"
+    )
+    openstack_group.add_argument(
+        '--openstack-auth-url',
+        help="Auth url, e.g. http://10.0.0.2:5000"
+    )
+    openstack_group.add_argument(
+        '--openstack-tenant',
+        help="Tenant name"
+    )
+    openstack_group.add_argument(
+        '--openstack-region',
+        help="OPTIONAL. Normally you do not have to explicitly set a region"
+    )
+
+    softlayer_group = p_add_backend.add_argument_group("SoftLayer")
+    softlayer_group.add_argument(
+        '--softlayer-username',
+        help="Username for the softlayer backend"
+    )
+    softlayer_group.add_argument(
+        '--softlayer-api-key',
+        help="API Key for the SoftLayer backend"
+    )
+
+    hp_group = p_add_backend.add_argument_group("HP")
+    hp_group.add_argument(
+        '--hp-username',
+        help="Username for the HP backend"
+    )
+    hp_group.add_argument(
+        '--hp-password',
+        help="Passord for the HP backend"
+    )
+    hp_group.add_argument(
+        '--hp-tenant',
+        help="Tenant name for the HP backend"
+    )
+
+    docker_group = p_add_backend.add_argument_group("Docker")
+    docker_group.add_argument(
+        '--docker-host',
+        help="Ip of the Docker host"
+    )
+    docker_group.add_argument(
+        '--docker-port', default="4243",
+        help="Port for the Docker API. By default 4243."
+    )
+    docker_group.add_argument(
+        '--docker-auth-user',
+        help="OPTIONAL. In case you have a basic auth set up."
+    )
+    docker_group.add_argument(
+        '--docker-auth-password',
+        help="OPTIONAL. In case you have a basic auth set up"
+    )
+
+    bare_group = p_add_backend.add_argument_group("Bare Metal Server")
+    bare_group.add_argument(
+        '--bare-hostname',
+        help="Hostname of the machine"
+    )
+    bare_group.add_argument(
+        '--bare-user', default="root",
+        help="By default root"
+    )
+    bare_group.add_argument(
+        '--bare-port', default="22",
+        help="Port of the ssh-server. By default 22"
+    )
+    bare_group.add_argument(
+        '--bare-ssh-key-id',
+        help="The id of the ssh key that is associated with the machine"
+    )
+
+    # ----------------RENAME TARGETS-------------------
+    subparsers = p_rename.add_subparsers(
+        dest='target',
+        help="Rename backend or key"
+    )
+
+    p_rename_backend = subparsers.add_parser(
+        'backend',
+        description="Rename backend"
+    )
+
+    p_rename_backend.add_argument(
+        '-n', '--new_name', required=True,
+        help="New name"
+    )
+
+    # ----------------DELETE TARGETS-------------------
+    subparsers = p_delete.add_subparsers(
+        dest='target',
+        description="Delele backend, key or network"
+    )
+
+    p_delete_backend = subparsers.add_parser(
+        'backend',
+        help="Delete this backend"
+    )
+
+    # ----------------USER TARGETS---------------------
     subparsers = p_user.add_subparsers(
         dest='target',
         help='List info and take actions regarding the user'
@@ -115,6 +309,22 @@ def main():
         help='Get info about the user'
     )
 
+    #---------------BACKEND OPTIONS---------------------
+    for parser in [p_rename_backend, p_delete_backend, p_display_backend]:
+        group = parser.add_mutually_exclusive_group(required=True)
+        group.add_argument(
+            '--backend',
+            help="This can be either a backend's name or id"
+        )
+        group.add_argument(
+            '--backend_id',
+            help="Specify a backend's id"
+        )
+        group.add_argument(
+            '--backend_name',
+            help="Sepcify a backend's name"
+        )
+
     argcomplete.autocomplete(main_parser)
     args = main_parser.parse_args()
 
@@ -122,6 +332,8 @@ def main():
         user_info()
     elif args.target == 'supported-providers':
         provider_action(args)
+    elif args.target in ['backends', 'backend']:
+        backend_action(args)
 
 
     # if len(sys.argv) == 1:

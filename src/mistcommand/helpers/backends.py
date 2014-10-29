@@ -41,55 +41,86 @@ def list_backends(client):
     print x
 
 
+def choose_backend(client, args):
+    backend_id = args.backend_id
+    backend_name = args.backend_name
+    if backend_id:
+        backend = client.backend_from_id(backend_id)
+    elif backend_name:
+        backend = client.backend_from_title(backend_name)
+    else:
+        backend = client.search_backend(args.backend)
+
+    return backend
+
+
 def backend_action(args):
 
     client = authenticate()
 
-    if args.action in ["list", "ls"] and args.target == "backends":
+    if args.action == 'list':
         list_backends(client)
-    elif args.action in ["add", "create"] and args.target == "backend":
-        title = args.name
-        provider = args.provider
-        key = args.key
-        secret = args.secret
-        client.add_backend(title=title, provider=provider, key=key, secret=secret)
-        print "Added backend %s" % title
-    elif args.action in ["delete", "remove", "rm", "del"] and args.target == "backend":
-        title = args.name
-        backend_id = args.id
-        if title:
-            backend = client.backend_from_title(title)
-        elif backend_id:
-            backend = client.backend_from_id(backend_id)
-        else:
-            print "You have to provide backend name or id"
-            sys.exit(1)
+    elif args.action == 'rename':
+        backend = choose_backend(client, args)
+        backend.rename(args.new_name)
+        print "Renamed backend to %s" % args.new_name
+    elif args.action == 'delete':
+        backend = choose_backend(client, args)
         backend.delete()
         print "Deleted backend %s" % backend.title
-    elif args.action == "rename" and args.target == "backend":
-        title = args.name
-        backend_id = args.id
-        if title:
-            backend = client.backend_from_title(title)
-        elif backend_id:
-            backend = client.backend_from_id(backend_id)
-        else:
-            print "You have to provide backend name or id"
-            sys.exit(1)
-        new_name = args.new_name
-        if not new_name:
-            print "You have to provide new name"
-            sys.exit(1)
-        backend.rename(new_name)
-        print "Renamed backend %s to %s" % (backend.title, new_name)
-    elif args.action in ["show", "describe", "display"] and args.target == "backend":
-        title = args.name
-        backend_id = args.id
-        if title:
-            backend = client.backend_from_title(title)
-        elif backend_id:
-            backend = client.backend_from_id(backend_id)
-        else:
-            print "You have to provide backend name or id"
-            sys.exit(1)
+    elif args.action == 'display':
+        backend = choose_backend(client, args)
         show_backend(backend)
+    elif args.action == 'add':
+        print args
+
+
+
+    # if args.action in ["list", "ls"] and args.target == "backends":
+    #     list_backends(client)
+    # elif args.action in ["add", "create"] and args.target == "backend":
+    #     title = args.name
+    #     provider = args.provider
+    #     key = args.key
+    #     secret = args.secret
+    #     client.add_backend(title=title, provider=provider, key=key, secret=secret)
+    #     print "Added backend %s" % title
+    # elif args.action in ["delete", "remove", "rm", "del"] and args.target == "backend":
+    #     title = args.name
+    #     backend_id = args.id
+    #     if title:
+    #         backend = client.backend_from_title(title)
+    #     elif backend_id:
+    #         backend = client.backend_from_id(backend_id)
+    #     else:
+    #         print "You have to provide backend name or id"
+    #         sys.exit(1)
+    #     backend.delete()
+    #     print "Deleted backend %s" % backend.title
+    # elif args.action == "rename" and args.target == "backend":
+    #     title = args.name
+    #     backend_id = args.id
+    #     if title:
+    #         backend = client.backend_from_title(title)
+    #     elif backend_id:
+    #         backend = client.backend_from_id(backend_id)
+    #     else:
+    #         print "You have to provide backend name or id"
+    #         sys.exit(1)
+    #     new_name = args.new_name
+    #     if not new_name:
+    #         print "You have to provide new name"
+    #         sys.exit(1)
+    #     backend.rename(new_name)
+    #     print "Renamed backend %s to %s" % (backend.title, new_name)
+    # elif args.action in ["show", "describe", "display"] and args.target == "backend":
+    #     title = args.name
+    #     backend_id = args.id
+    #     if title:
+    #         backend = client.backend_from_title(title)
+    #     elif backend_id:
+    #         backend = client.backend_from_id(backend_id)
+    #     else:
+    #         print "You have to provide backend name or id"
+    #         sys.exit(1)
+    #     show_backend(backend)
