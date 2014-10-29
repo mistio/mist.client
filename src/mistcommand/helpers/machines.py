@@ -6,7 +6,7 @@ from mistcommand.helpers.backends import choose_backend
 
 
 def list_machines(client, backend):
-    x = PrettyTable(["Name", "ID", "State", "Public Ips", "Backend Title"])
+    x = PrettyTable(["Name", "ID", "State", "Public Ips", "Backend Title", "Tags"])
     if not backend:
         backends = client.backends
         for i in backends.keys():
@@ -19,7 +19,9 @@ def list_machines(client, backend):
                     ips = " -- ".join(public_ips)
                 except:
                     ips = ""
-                x.add_row([machine.name, machine.id, machine.info['state'], ips, backend.title])
+                machine_tags = machine.info.get('tags', [])
+                tags = ",".join(machine_tags)
+                x.add_row([machine.name, machine.id, machine.info['state'], ips, backend.title, tags])
     else:
         machines = backend.machines
         for y in machines.keys():
@@ -29,7 +31,9 @@ def list_machines(client, backend):
                 ips = " -- ".join(public_ips)
             except:
                 ips = ""
-            x.add_row([machine.name, machine.id, machine.info['state'], ips, backend.title])
+            machine_tags = machine.info.get('tags', [])
+            tags = ",".join(machine_tags)
+            x.add_row([machine.name, machine.id, machine.info['state'], ips, backend.title, tags])
 
     print x
 
