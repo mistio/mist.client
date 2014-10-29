@@ -1,6 +1,7 @@
 #!/usr/bin/env python
-import argparse
 import sys
+import argparse
+import argcomplete
 
 from mistcommand.helpers.sync import sync
 from mistcommand.helpers.ansible import ansible
@@ -16,62 +17,169 @@ from mistcommand.helpers.locations import location_action
 
 def main():
 
-    if len(sys.argv) == 1:
-        print "Mist.io Service"
-        sys.exit(0)
+    main_parser = argparse.ArgumentParser(description="Mist.io command line tool")
+    subparsers = main_parser.add_subparsers(help='action to perform',
+                                            dest='action')
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument("action", help="Available actions", type=str,
-                        choices=["sync", "user", "list", "ls", "add", "delete", "remove", "rm", "del", "rename",
-                                 "create", "add", "show", "describe", "display", "ansible", "reboot", "start", "stop",
-                                 "destroy", "probe", "enable-monitoring", "get-stats", "enable-monitoring",
-                                 "disable-monitoring"], default="list")
-    parser.add_argument("target", help="Backends, Keys, Machines", type=str, default="backend",
-                        choices=["backend", "backends", "machine", "machines", "key", "keys", "info", "providers",
-                                 "supported_providers", "images", "locations", "sizes", "dbyaml", "plugins", "plugin"])
+    # --------------ACTiONS----------------------------
+    p_list = subparsers.add_parser(
+        'list',
+        description="List supported providers, images, sizes, locations, networks, backends, keys or machines",
+    )
 
-    parser.add_argument("vars", nargs="*")
-    parser.add_argument("--dbyaml", help="Used with mist sync. Path of dbyaml file", required=False, type=str)
-    parser.add_argument("-n", "--name", help="Name for whenever you need to provide one", required=False, type=str)
-    parser.add_argument("-p", "--provider", help="Provider to use", required=False, type=str)
-    parser.add_argument("-k", "--key", help="Username or apikey for backend", required=False, type=str)
-    parser.add_argument("-s", "--secret", help="Password or apisecret for backend", required=False, type=str)
-    parser.add_argument("-i", "--id", help="Id of backend, machine or key", required=False, type=str)
-    parser.add_argument("-a", "--auto", help="Auto for auto-generation", required=False, action="store_true")
-    parser.add_argument("--new_name", help="New name for renaming stuff", required=False, type=str)
-    parser.add_argument("-b", "--backend", help="Backend name or id to be used with machines", required=False,
-                        type=str)
-    parser.add_argument("--search", help="When searching specifically (e.g. images)", required=False, type=str)
-    parser.add_argument("--image", help="Image id to be used with machine creation", required=False, type=str)
-    parser.add_argument("--size", help="Size id for machine creation", required=False, type=str)
-    parser.add_argument("--location", help="Location id for machine creation", required=False, type=str)
-    parser.add_argument("--plugin", help="Plugin Id to be added", required=False, type=str)
-    parser.add_argument("--custom_plugin", help="Used if adding custom plugin", required=False, type=str)
+    p_display = subparsers.add_parser(
+        'display',
+        description="Display info about image, size, location, backend, key or machine"
+    )
+    p_add = subparsers.add_parser(
+        'add',
+        description="Add backend or key",
+    )
 
-    args = parser.parse_args()
-    if args.action == "sync":
-        sync(sys.argv[-1])
-    elif args.action == "ansible":
-        ansible(args.vars, args.name)
-    elif args.action == "user" and args.target == "info":
+    p_create = subparsers.add_parser(
+        'create',
+        description="Create machine"
+    )
+
+    p_start = subparsers.add_parser(
+        'add',
+        description="Start a machine"
+    )
+
+    p_stop = subparsers.add_parser(
+        'stop',
+        description="Stop a machine"
+    )
+
+    p_reboot = subparsers.add_parser(
+        'reboot',
+        description="Reboot a machine"
+    )
+
+    p_destroy = subparsers.add_parser(
+        'destroy',
+        description="Destroy a machine"
+    )
+
+    p_probe = subparsers.add_parser(
+        'probe',
+        description="Probe a machine"
+    )
+
+    p_enable_monitoring = subparsers.add_parser(
+        'enable-monitoring',
+        description="Enable monitoring on a machine"
+    )
+
+    p_disable_monitoring = subparsers.add_parser(
+        'disable-monitoring',
+        description="Disable monitoring on a machine"
+    )
+
+    p_get_stats = subparsers.add_parser(
+        'get-stats',
+        description="Get stats from a monitored machine"
+    )
+
+    p_user = subparsers.add_parser(
+        'user',
+        description="User actions"
+    )
+
+    # ------------------TARGETS------------------------
+
+    # ------------------LIST TARGETS-------------------
+    subparsers = p_list.add_subparsers(
+        dest='target',
+        help='List info for this target, e.g. list machines'
+    )
+
+    p_list_supported_providers = subparsers.add_parser(
+        'supported-providers',
+        description="List all supported providers"
+    )
+
+    p_list_backends = subparsers.add_parser(
+        'backends',
+        description="List all backends that are added to mist.io"
+    )
+
+    #-----------------USER TARGETS---------------------
+    subparsers = p_user.add_subparsers(
+        dest='target',
+        help='List info and take actions regarding the user'
+    )
+
+    p_user_info = subparsers.add_parser(
+        'info',
+        help='Get info about the user'
+    )
+
+    argcomplete.autocomplete(main_parser)
+    args = main_parser.parse_args()
+
+    if args.action == 'user' and args.target == 'info':
         user_info()
-    elif args.target in ["providers", "supported_providers"]:
+    elif args.target == 'supported-providers':
         provider_action(args)
-    elif args.target in ["backends", "backend"]:
-        backend_action(args)
-    elif args.target in ["keys", "key"]:
-        key_action(args)
-    elif args.target in ["machines", "machine", "plugins", "plugin"]:
-        machine_action(args)
-    elif args.target in ["images", "image"]:
-        image_action(args)
-    elif args.target in ["locations", "location"]:
-        location_action(args)
-    elif args.target in ["sizes", "size"]:
-        size_action(args)
-    else:
-        print "Functionality not yet implemented"
-        sys.exit(0)
+
+
+    # if len(sys.argv) == 1:
+    #     print "Mist.io Service"
+    #     sys.exit(0)
+    #
+    # parser = argparse.ArgumentParser()
+    # parser.add_argument("action", help="Available actions", type=str,
+    #                     choices=["sync", "user", "list", "ls", "add", "delete", "remove", "rm", "del", "rename",
+    #                              "create", "add", "show", "describe", "display", "ansible", "reboot", "start", "stop",
+    #                              "destroy", "probe", "enable-monitoring", "get-stats", "enable-monitoring",
+    #                              "disable-monitoring"], default="list")
+    # parser.add_argument("target", help="Backends, Keys, Machines", type=str, default="backend",
+    #                     choices=["backend", "backends", "machine", "machines", "key", "keys", "info", "providers",
+    #                              "supported_providers", "images", "locations", "sizes", "dbyaml", "plugins", "plugin"])
+    #
+    # parser.add_argument("vars", nargs="*")
+    # parser.add_argument("--dbyaml", help="Used with mist sync. Path of dbyaml file", required=False, type=str)
+    # parser.add_argument("-n", "--name", help="Name for whenever you need to provide one", required=False, type=str)
+    # parser.add_argument("-p", "--provider", help="Provider to use", required=False, type=str)
+    # parser.add_argument("-k", "--key", help="Username or apikey for backend", required=False, type=str)
+    # parser.add_argument("-s", "--secret", help="Password or apisecret for backend", required=False, type=str)
+    # parser.add_argument("-i", "--id", help="Id of backend, machine or key", required=False, type=str)
+    # parser.add_argument("-a", "--auto", help="Auto for auto-generation", required=False, action="store_true")
+    # parser.add_argument("--new_name", help="New name for renaming stuff", required=False, type=str)
+    # parser.add_argument("-b", "--backend", help="Backend name or id to be used with machines", required=False,
+    #                     type=str)
+    # parser.add_argument("--search", help="When searching specifically (e.g. images)", required=False, type=str)
+    # parser.add_argument("--image", help="Image id to be used with machine creation", required=False, type=str)
+    # parser.add_argument("--size", help="Size id for machine creation", required=False, type=str)
+    # parser.add_argument("--location", help="Location id for machine creation", required=False, type=str)
+    # parser.add_argument("--plugin", help="Plugin Id to be added", required=False, type=str)
+    # parser.add_argument("--custom_plugin", help="Used if adding custom plugin", required=False, type=str)
+    #
+    # args = parser.parse_args()
+    # if args.action == "sync":
+    #     sync(sys.argv[-1])
+    # elif args.action == "ansible":
+    #     ansible(args.vars, args.name)
+    # elif args.action == "user" and args.target == "info":
+    #     user_info()
+    # elif args.target in ["providers", "supported_providers"]:
+    #     provider_action(args)
+    # elif args.target in ["backends", "backend"]:
+    #     backend_action(args)
+    # elif args.target in ["keys", "key"]:
+    #     key_action(args)
+    # elif args.target in ["machines", "machine", "plugins", "plugin"]:
+    #     machine_action(args)
+    # elif args.target in ["images", "image"]:
+    #     image_action(args)
+    # elif args.target in ["locations", "location"]:
+    #     location_action(args)
+    # elif args.target in ["sizes", "size"]:
+    #     size_action(args)
+    # else:
+    #     print "Functionality not yet implemented"
+    #     sys.exit(0)
 
 if __name__ == "__main__":
     main()

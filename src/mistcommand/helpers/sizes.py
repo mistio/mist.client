@@ -1,7 +1,7 @@
 import sys
 
 from prettytable import PrettyTable
-from mist.cmd.helpers.login import authenticate
+from mistcommand.helpers.login import authenticate
 
 
 def list_sizes(backend):

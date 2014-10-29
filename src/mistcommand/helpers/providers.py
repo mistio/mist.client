@@ -1,7 +1,7 @@
 import sys
 
 from prettytable import PrettyTable
-from mist.cmd.helpers.login import authenticate
+from mistcommand.helpers.login import authenticate
 
 
 def list_providers(client):
@@ -18,8 +18,5 @@ def provider_action(args):
 
     client = authenticate()
 
-    if args.action in ["list", "ls"] and args.target in ["providers", "supported_providers"]:
+    if args.action == "list":
         list_providers(client)
-    else:
-        print "Action not supported"
-        sys.exit(1)
