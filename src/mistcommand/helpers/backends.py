@@ -54,6 +54,34 @@ def choose_backend(client, args):
     return backend
 
 
+def add_backend(client, args):
+    provider = args.provider
+    if "ec2" in provider:
+        add_ec2_backend(client, args)
+    elif "rackspace" in provider:
+        add_rackspace_backend(client, args)
+
+
+def add_ec2_backend(client, args):
+    title = args.name
+    provider = args.provider
+
+    key = args.ec2_api_key
+    secret = args.ec2_api_secret
+
+    client.add_backend(title=title, provider=provider, key=key, secret=secret)
+
+
+def add_rackspace_backend(client, args):
+    title = args.name
+    provider = args.provider
+
+    key = args.rackspace_username
+    secret = args.rackspace_api_key
+
+    client.add_backend(title=title, provider=provider, secret=secret, key=key)
+
+
 def backend_action(args):
 
     client = authenticate()
@@ -72,7 +100,8 @@ def backend_action(args):
         backend = choose_backend(client, args)
         show_backend(backend)
     elif args.action == 'add':
-        print args
+        add_backend(client, args)
+        print "New backend added"
 
 
 
