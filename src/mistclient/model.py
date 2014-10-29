@@ -357,8 +357,12 @@ class Machine(object):
         :param ssh_user: Optional. Give if you explicitly want a specific user
         :returns: A list of data received by the probing (e.g. uptime etc)
         """
+        ips = [ip for ip in self.info['public_ips'] if ':' not in ip]
+
+        if not ips:
+            raise Exception("No public IPv4 address available to connect to")
         payload = {
-            'host': self.info['public_ips'][0],
+            'host': ips[0],
             'key': key_id,
             'ssh_user': ssh_user
         }
@@ -380,7 +384,7 @@ class Machine(object):
         req.put()
         self.mist_client.update_keys()
 
-    def _toggle_monitoring(self, action):
+    def _toggle_monitoring(self, action, no_ssh=False):
         """
         Enable or disable monitoring on a machine
 
@@ -388,7 +392,8 @@ class Machine(object):
         """
         payload = {
             'action': action,
-            'machine_name': self.name,
+            'name': self.name,
+            'no_ssh': no_ssh,
             'public_ips': self.info['public_ips'],
             'dns_name': self.info['extra'].get('dns_name', 'n/a')
         }
@@ -399,17 +404,17 @@ class Machine(object):
                            data=data)
         req.post()
 
-    def enable_monitoring(self):
+    def enable_monitoring(self, no_ssh=False):
         """
         Enable monitoring
         """
-        self._toggle_monitoring(action="enable")
+        return self._toggle_monitoring(action="enable", no_ssh=no_ssh)
 
-    def disable_monitoring(self):
+    def disable_monitoring(self, no_ssh=False):
         """
         Disable monitoring
         """
-        self._toggle_monitoring(action="disable")
+        return self._toggle_monitoring(action="disable", no_ssh=no_ssh)
 
     def get_stats(self, start=int(time()), stop=int(time())+10, step=10):
         """
