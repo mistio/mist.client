@@ -418,6 +418,24 @@ def main():
         'machine',
         help="Probe machine"
     )
+
+    subparsers = p_enable_monitoring.add_subparsers(
+        dest='target',
+        help="Enable monitoring on machine"
+    )
+    p_enable_monitoring_machine = subparsers.add_parser(
+        'machine',
+        help="Enable monitoring on this machine"
+    )
+
+    subparsers = p_disable_monitoring.add_subparsers(
+        dest='target',
+        help="Enable monitoring on machine"
+    )
+    p_disable_monitoring_machine = subparsers.add_parser(
+        'machine',
+        help="Enable monitoring on this machine"
+    )
     #-----------------CREATE TARGETS-------------------
     subparsers = p_create.add_subparsers(
         dest='target',
@@ -513,7 +531,8 @@ def main():
     #---------------BACKEND OPTIONS---------------------
     for parser in [p_rename_backend, p_delete_backend, p_display_backend, p_list_locations,
                    p_list_images, p_list_sizes, p_create_machine, p_start_machine, p_reboot_machine,
-                   p_stop_machine, p_destroy_machine, p_probe_machine]:
+                   p_stop_machine, p_destroy_machine, p_probe_machine, p_enable_monitoring_machine,
+                   p_disable_monitoring_machine]:
         group = parser.add_mutually_exclusive_group(required=True)
         group.add_argument(
             '--backend',
@@ -530,7 +549,7 @@ def main():
 
     #------------MACHINE OPTIONS------------------------
     for parser in [p_start_machine, p_reboot_machine, p_stop_machine, p_destroy_machine,
-                   p_probe_machine]:
+                   p_probe_machine, p_enable_monitoring_machine, p_disable_monitoring_machine]:
         group = parser.add_mutually_exclusive_group(required=True)
         group.add_argument(
             '--machine',

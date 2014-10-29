@@ -122,6 +122,14 @@ def machine_action(args):
         machine = choose_machine(backend, args)
 
         machine_take_action(machine, args.action)
+    elif args.action == 'enable-monitoring':
+        backend = choose_backend(client, args)
+        machine = choose_machine(backend, args)
+        machine.enable_monitoring()
+    elif args.action == 'disable-monitoring':
+        backend = choose_backend(client, args)
+        machine = choose_machine(backend, args)
+        machine.disable_monitoring()
     # backend_value = args.backend
     # if args.action in ["list", "ls"] and args.target == "machines":
     #     list_machines(client, backend_value)
