@@ -64,6 +64,23 @@ def init_ansible_tmp_dir(assoc_machines, assoc_keys, tag):
     return tmp_dir, tmp_ansible_host_file
 
 
+def parse_output(result, assoc_machines):
+    for machine in assoc_machines:
+        print "\nFinished in machine: %s" % machine.name
+        machine_output = result['contacted'][machine.name]
+        failed = machine_output.get("failed", False)
+
+        if failed:
+            print "FAILED"
+            msg = machine_output.get('msg', None)
+            if msg:
+                print "Error output: \n%s" % msg
+        else:
+            stdout = machine_output.get('stdout', None)
+            if stdout:
+                print "Output: \n%s" % stdout
+
+
 def ansible_action(args, Runner, Inventory):
     client = authenticate()
     command = args.command
@@ -90,5 +107,5 @@ def ansible_action(args, Runner, Inventory):
     runner = Runner(module_name='command', module_args=command,  inventory=inventory, host_list=[tag])
     result = runner.run()
 
-    print result
+    parse_output(result, assoc_machines)
     shutil.rmtree(tmp_dir)
