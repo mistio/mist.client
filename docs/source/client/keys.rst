@@ -54,4 +54,4 @@ Finally, to delete the key::
 
     key.delete()
 
-See ``mist.client.model.Key`` class for detailed information.
+See ``mistclient.model.Key`` class for detailed information.

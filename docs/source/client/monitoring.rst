@@ -44,5 +44,5 @@ for the plugin::
 
     machine.add_python_plugin(name="Random", python_file="/home/user/random.py")
 
-Some more advanced options can be used, determining the value_type, the unit etc. You can see ``mist.client.model.Machine.add_python_plugin``
+Some more advanced options can be used, determining the value_type, the unit etc. You can see ``mistclient.model.Machine.add_python_plugin``
 method for more info.

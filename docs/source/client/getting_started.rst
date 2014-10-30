@@ -1,9 +1,9 @@
 Getting Started
 ***************
 
-Now that you have the ``mist.client`` package you can import it to use it::
+Now that you have the ``mistclient`` package you can import it to use it::
 
-    from mist.client import MistClient
+    from mistclient import MistClient
     client = MistClient(email="yourmail@mist.io", password="yourpassword")
 
 By default ``MistClient`` will try to connect to the mist.io service, with default url set to https://mist.io. However,

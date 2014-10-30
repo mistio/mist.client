@@ -150,7 +150,7 @@ name for the machine::
 
     backend.create_machine(name="production.server", key=key, image_id=image_id, location_id=location_id, size_id=size_id)
 
-In some backends some extra information is needed. You can see ``mist.client.model.Backend.create_machine`` method for more details.
+In some backends some extra information is needed. You can see ``mistclient.model.Backend.create_machine`` method for more details.
 
 Machine actions
 ===============

@@ -5,9 +5,9 @@ Install using pip
 =================
 This is the easiest way to obtain the mist.client package::
 
-    pip install mist.client
+    pip install mist
 
-You now have the ``mist.client`` module and the ``mist`` command line tool installed.
+You now have the ``mistclient`` module and the ``mist`` command line tool installed.
 
 Clone from Github
 =================

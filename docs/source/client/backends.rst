@@ -93,7 +93,7 @@ Your new backend object has a lot of attributes and methods::
     backend.images
     ...
 
-See ``mist.client.model.Backend`` class for detailed information.
+See ``mistclient.model.Backend`` class for detailed information.
 
 You have the option to rename a backend::
 
