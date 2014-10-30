@@ -5,6 +5,9 @@ import sys
 import argparse
 import argcomplete
 
+from ansible.runner import Runner
+from ansible.inventory import Inventory
+
 from mistcommand.helpers.login import user_info
 from mistcommand.helpers.backends import backend_action
 from mistcommand.helpers.providers import provider_action
@@ -619,7 +622,7 @@ def main():
     args = main_parser.parse_args()
 
     if args.action == 'run':
-        ansible_action(args)
+        ansible_action(args, Runner, Inventory)
     elif args.action == 'user' and args.target == 'info':
         user_info()
     elif args.target == 'supported-providers':
