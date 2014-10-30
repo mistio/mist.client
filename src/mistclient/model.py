@@ -174,52 +174,7 @@ class Backend(object):
         else:
             self._machines = {}
 
-    def machine_from_id(self, machine_id):
-        self.machines
-        if machine_id in self._machines.keys():
-            return self._machines[machine_id]
-        else:
-            return None
-
-    def machine_from_name(self, machine_name):
-        self.machines
-        for key in self._machines.keys():
-            machine = self._machines[key]
-            if machine_name == machine.name:
-                return machine
-
-        return None
-
-    def machine_from_ip(self, machine_ip):
-        self.machines
-        for key in self._machines.keys():
-            machine = self._machines[key]
-            public_ips = machine.info.get('public_ips', None)
-            if public_ips:
-                if machine_ip == public_ips[0]:
-                    return machine
-
-        return None
-
-    def search_machine(self, machine_key):
-        """
-        Choose a machine by providing a machine's id, name or ip
-        """
-        self.machines
-        machine = self.machine_from_id(machine_key)
-        if machine:
-            return machine
-
-        machine = self.machine_from_name(machine_key)
-        if machine:
-            return machine
-
-        machine = self.machine_from_ip(machine_key)
-        if machine:
-            return machine
-
-    @property
-    def machines(self):
+    def machines(self, id=None, name=None, search=None):
         """
         Property-like function to call the _list_machines function in order to populate self._machines dict
 
@@ -229,7 +184,18 @@ class Backend(object):
             self._machines = {}
             self._list_machines()
 
-        return self._machines
+        if id:
+            return [self._machines[machine_id] for machine_id in self._machines.keys()
+                    if id == self._machines[machine_id].id]
+        elif name:
+            return [self._machines[machine_id] for machine_id in self._machines.keys()
+                    if name == self._machines[machine_id].name]
+        elif search:
+            return [self._machines[machine_id] for machine_id in self._machines.keys()
+                    if search in self._machines[machine_id].name
+                    or search in self._machines[machine_id].id]
+        else:
+            return [self._machines[machine_id] for machine_id in self._machines.keys()]
 
     def update_machines(self):
         """

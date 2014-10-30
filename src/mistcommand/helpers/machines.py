@@ -162,5 +162,5 @@ def machine_action(args):
             machine.tag(tag=args.tag)
             print "Add tag %s to machine %s" % (args.tag, machine.name)
         else:
-            print "Cannot tag machine, maybe action is not supported by the provider"
+            print "Cannot tag machine on provider %s" % backend.title
             sys.exit(0)
