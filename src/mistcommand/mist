@@ -112,7 +112,7 @@ def main():
     )
 
     p_run.add_argument(
-        '--command',
+        '--command', required=True,
         help="Run this command"
     )
 
