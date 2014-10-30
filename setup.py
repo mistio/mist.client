@@ -10,6 +10,7 @@ requires = [
     'argcomplete',
     'pyyaml',
     'prettytable',
+    'ansible'
 ]
 
 

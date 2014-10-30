@@ -14,6 +14,8 @@ from mistcommand.helpers.images import image_action
 from mistcommand.helpers.sizes import size_action
 from mistcommand.helpers.locations import location_action
 from mistcommand.helpers.plugins import plugin_action
+from mistcommand.helpers.mistansible import ansible_action
+
 
 def main():
 
@@ -101,6 +103,20 @@ def main():
         description="User actions"
     )
 
+    p_run = subparsers.add_parser(
+        'run',
+        description="Run a command in multiple machines"
+    )
+
+    p_run.add_argument(
+        '--command',
+        help="Run this command"
+    )
+
+    p_run.add_argument(
+        '--tag', required=True,
+        help="Run the command in machines that have this tag"
+    )
     # ------------------LIST TARGETS-------------------
     subparsers = p_list.add_subparsers(
         dest='target',
@@ -602,7 +618,9 @@ def main():
     argcomplete.autocomplete(main_parser)
     args = main_parser.parse_args()
 
-    if args.action == 'user' and args.target == 'info':
+    if args.action == 'run':
+        ansible_action(args)
+    elif args.action == 'user' and args.target == 'info':
         user_info()
     elif args.target == 'supported-providers':
         provider_action(args)

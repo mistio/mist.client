@@ -5,6 +5,20 @@ from mistcommand.helpers.login import authenticate
 from mistcommand.helpers.backends import choose_backend
 
 
+def choose_machines_by_tag(client, tag):
+    chosen_machines = []
+    backends = client.backends
+
+    for backend_id in backends.keys():
+        machines = backends[backend_id].machines
+        for machine_id in machines.keys():
+            machine_tags = machines[machine_id].info.get('tags', [])
+            if tag in machine_tags:
+                chosen_machines.append(machines[machine_id])
+
+    return chosen_machines
+
+
 def list_machines(client, backend):
     x = PrettyTable(["Name", "ID", "State", "Public Ips", "Backend Title", "Tags"])
     if not backend:
