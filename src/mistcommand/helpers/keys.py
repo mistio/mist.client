@@ -17,13 +17,13 @@ def show_key(key):
 
 
 def list_keys(client):
-    if not client.keys:
+    keys = client.keys()
+    if not keys:
         print "No keys found"
         sys.exit(0)
 
     x = PrettyTable(["Name", "Is Default"])
-    for i in client.keys:
-        key = client.keys[i]
+    for key in keys:
         x.add_row([key.id, key.is_default])
 
     print x
@@ -49,19 +49,32 @@ def key_action(args):
     elif args.action == 'list':
         list_keys(client)
     elif args.action == 'delete':
-        key_name = args.key
-        key = client.keys[key_name]
-
-        key.delete()
-        print "Deleted %s" % key_name
+        keys = client.keys(id=args.key)
+        key = keys[0] if keys else None
+        if key:
+            key.delete()
+            print "Deleted %s" % key.id
+        else:
+            print "Cound not find key: %s" % args.key
+            sys.exit(0)
     elif args.action == 'rename':
         key_name = args.key
         new_name = args.new_name
 
-        key = client.keys[key_name]
-        key.rename(new_name)
-        print "Renamed key to %s" % new_name
+        keys = client.keys(id=key_name)
+        key = keys[0] if keys else None
+
+        if key:
+            key.rename(new_name)
+            print "Renamed key to %s" % new_name
+        else:
+            print "Could not find key: %s" % key_name
     elif args.action == 'display':
         key_name = args.key
-        key = client.keys[key_name]
-        show_key(key)
+        keys = client.keys(id=key_name)
+        key = keys[0] if keys else None
+        if key:
+            show_key(key)
+        else:
+            print "Could not find key: %s" % key_name
+
