@@ -96,10 +96,10 @@ def main():
         description="Disable monitoring on a machine"
     )
 
-    p_get_stats = subparsers.add_parser(
-        'get-stats',
-        description="Get stats from a monitored machine"
-    )
+    # p_get_stats = subparsers.add_parser(
+    #     'get-stats',
+    #     description="Get stats from a monitored machine"
+    # )
 
     p_user = subparsers.add_parser(
         'user',

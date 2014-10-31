@@ -7,14 +7,12 @@ from mistcommand.helpers.backends import choose_backend
 
 def choose_machines_by_tag(client, tag):
     chosen_machines = []
-    backends = client.backends
+    machines = client.machines()
 
-    for backend_id in backends.keys():
-        machines = backends[backend_id].machines
-        for machine_id in machines.keys():
-            machine_tags = machines[machine_id].info.get('tags', [])
-            if tag in machine_tags:
-                chosen_machines.append(machines[machine_id])
+    for machine in machines:
+        machine_tags = machine.info.get('tags', [])
+        if tag in machine_tags:
+            chosen_machines.append(machine)
 
     return chosen_machines
 

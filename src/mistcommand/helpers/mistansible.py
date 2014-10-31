@@ -8,24 +8,24 @@ from mistcommand.helpers.machines import choose_machines_by_tag
 
 
 def update_key_association(client, machines):
-    keys = client.keys
+    keys = client.keys()
     machine_ids = [machine.id for machine in machines]
     assoc_keys = []
 
-    for key_id in keys.keys():
-        assoc_machines = keys[key_id].info['machines']
+    for key in keys:
+        assoc_machines = key.info['machines']
         for assoc_machine in assoc_machines:
             id = assoc_machine[1]
             if id in machine_ids:
                 for machine in machines:
                     if machine.id == id:
-                        print "Found key associoation for machine: %s" % machine.name
+                        print "Found key association for machine: %s" % machine.name
                         machine.info['assoc'] = {
-                            'key_id': key_id,
+                            'key_id': key.id,
                             'user': assoc_machine[3],
                             'port': assoc_machine[-1]
                         }
-                        assoc_keys.append(keys[key_id])
+                        assoc_keys.append(key)
 
     return machines, assoc_keys
 
