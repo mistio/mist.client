@@ -22,24 +22,20 @@ def choose_machines_by_tag(client, tag):
 def list_machines(client, backend):
     x = PrettyTable(["Name", "ID", "State", "Public Ips", "Backend Title", "Tags"])
     if not backend:
-        backends = client.backends
-        for i in backends.keys():
-            backend = backends[i]
-            machines = backend.machines
-            for y in machines.keys():
-                machine = machines[y]
-                try:
-                    public_ips = machine.info['public_ips']
-                    ips = " -- ".join(public_ips)
-                except:
-                    ips = ""
-                machine_tags = machine.info.get('tags', [])
-                tags = ",".join(machine_tags)
-                x.add_row([machine.name, machine.id, machine.info['state'], ips, backend.title, tags])
+        machines = client.machines()
+        for machine in machines:
+            try:
+                public_ips = machine.info['public_ips']
+                ips = " -- ".join(public_ips)
+            except:
+                ips = ""
+            machine_tags = machine.info.get('tags', [])
+            tags = ",".join(machine_tags)
+            x.add_row([machine.name, machine.id, machine.info['state'], ips, machine.backend.title, tags])
+
     else:
-        machines = backend.machines
-        for y in machines.keys():
-            machine = machines[y]
+        machines = backend.machines()
+        for machine in machines:
             try:
                 public_ips = machine.info['public_ips']
                 ips = " -- ".join(public_ips)
@@ -89,15 +85,18 @@ def machine_take_action(machine, action):
             print "Not probed"
 
 
-def choose_machine(backend, args):
+def choose_machine(client, args):
     machine_id = args.machine_id
     machine_name = args.machine_name
     if machine_id:
-        machine = backend.machine_from_id(machine_id)
+        machines = client.machines(id=machine_id)
+        machine = machines[0] if machines else None
     elif machine_name:
-        machine = backend.machine_from_name(machine_name)
+        machines = client.machines(name=machine_name)
+        machine = machines[0] if machines else None
     else:
-        machine = backend.search_machine(args.machine)
+        machines = client.machines(search=args.machine)
+        machine = machines[0] if machines else None
 
     return machine
 
@@ -127,8 +126,7 @@ def machine_action(args):
         list_machines(client, backend)
 
     elif args.action == 'display':
-        backend = choose_backend(client, args)
-        machine = choose_machine(backend, args)
+        machine = choose_machine(client, args)
 
         display_machine(machine)
 
@@ -138,29 +136,25 @@ def machine_action(args):
         print "Created machine %s" % args.machine_name
 
     elif args.action in ['start', 'stop', 'reboot', 'destroy', 'probe']:
-        backend = choose_backend(client, args)
-        machine = choose_machine(backend, args)
+        machine = choose_machine(client, args)
 
         machine_take_action(machine, args.action)
     elif args.action == 'enable-monitoring':
-        backend = choose_backend(client, args)
-        machine = choose_machine(backend, args)
+        machine = choose_machine(client, args)
         machine.enable_monitoring()
         print "Enabled monitoring to machine %s" % machine.name
 
     elif args.action == 'disable-monitoring':
-        backend = choose_backend(client, args)
-        machine = choose_machine(backend, args)
+        machine = choose_machine(client, args)
         machine.disable_monitoring()
         print "Disabled monitoring to machine %s" % machine.name
 
     elif args.action == 'tag':
-        backend = choose_backend(client, args)
-        machine = choose_machine(backend, args)
+        machine = choose_machine(client, args)
 
         if machine.info['can_tag']:
             machine.tag(tag=args.tag)
             print "Add tag %s to machine %s" % (args.tag, machine.name)
         else:
-            print "Cannot tag machine on provider %s" % backend.title
+            print "Cannot tag machine on provider %s" % machine.backend.title
             sys.exit(0)
