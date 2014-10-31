@@ -12,31 +12,28 @@ def show_backend(backend):
 
     print "Machines:"
     x = PrettyTable(["Name", "ID", "State", "Public Ips"])
-    for key in backend.machines.keys():
-        machine = backend.machines[key]
+    machines = backend.machines()
+
+    for machine in machines:
         try:
             public_ips = machine.info['public_ips']
             ips = " -- ".join(public_ips)
         except:
             ips = ""
         x.add_row([machine.name, machine.id, machine.info['state'], ips])
+
     print x
 
 
 def list_backends(client):
-    if not client.backends:
+    backends = client.backends()
+    if not client.backends():
         print "No backends found"
         sys.exit(0)
 
     x = PrettyTable(["Name", "ID", "Provider", "State"])
-    for id in client.backends.keys():
-        backend_info = []
-        backend = client.backends[id]
-        backend_info.append(backend.title)
-        backend_info.append(backend.id)
-        backend_info.append(backend.provider)
-        backend_info.append(backend.info['state'])
-        x.add_row(backend_info)
+    for backend in backends:
+        x.add_row([backend.title, backend.title, backend.provider, backend.info['state']])
 
     print x
 
@@ -45,11 +42,14 @@ def choose_backend(client, args):
     backend_id = args.backend_id
     backend_name = args.backend_name
     if backend_id:
-        backend = client.backend_from_id(backend_id)
+        backends = client.backends(id=backend_id) or None
+        backend = backends[0] if backends else None
     elif backend_name:
-        backend = client.backend_from_title(backend_name)
+        backends = client.backends(name=backend_name)
+        backend = backends[0] if backends else None
     else:
-        backend = client.search_backend(args.backend)
+        backends = client.backends(search=args.backend)
+        backend = backends[0] if backends else None
 
     return backend
 
@@ -190,11 +190,17 @@ def backend_action(args):
         print "Renamed backend to %s" % args.new_name
     elif args.action == 'delete':
         backend = choose_backend(client, args)
-        backend.delete()
-        print "Deleted backend %s" % backend.title
+        if backend:
+            backend.delete()
+            print "Deleted backend %s" % backend.title
+        else:
+            print "Could not find backend"
     elif args.action == 'display':
         backend = choose_backend(client, args)
-        show_backend(backend)
+        if backend:
+            show_backend(backend)
+        else:
+            print "Could not find backend"
     elif args.action == 'add':
         add_backend(client, args)
         print "New backend added"
