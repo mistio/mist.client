@@ -102,8 +102,12 @@ def choose_machine(client, args):
 
 
 def create_machine(client, backend, args):
-    key_id = args.key_id
-    key = client.keys[key_id]
+    keys = client.keys(id=args.key_id)
+    key = keys[0] if keys else None
+
+    if not key:
+        print "Could not find key: %s" % args.key_id
+        sys.exit(1)
 
     name = args.machine_name
     image_id = args.image_id

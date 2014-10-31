@@ -582,7 +582,7 @@ def main():
 
     #---------------BACKEND OPTIONS---------------------
     for parser in [p_rename_backend, p_delete_backend, p_display_backend, p_list_locations,
-                   p_list_images, p_list_sizes, p_create_machine, p_list_plugins, p_add_plugin]:
+                   p_list_images, p_list_sizes, p_create_machine]:
         group = parser.add_mutually_exclusive_group(required=True)
         group.add_argument(
             '--backend',

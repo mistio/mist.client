@@ -22,13 +22,10 @@ def plugin_action(args):
     client = authenticate()
 
     if args.action == 'list':
-        backend = choose_backend(client, args)
-        machine = choose_machine(backend, args)
-
+        machine = choose_machine(client, args)
         list_plugins(machine)
     elif args.action == 'add':
-        backend = choose_backend(client, args)
-        machine = choose_machine(backend, args)
+        machine = choose_machine(client, args)
 
         machine.add_metric(args.plugin_id)
         print "Added Plugin %s to monitored machine %s" % (args.plugin_id, machine.name)
