@@ -75,8 +75,8 @@ def key_action(args):
             print "Renamed key to %s" % new_name
         else:
             print "Could not find key: %s" % key_name
-    elif args.action == 'display':
-        key_name = args.key
+    elif args.action == 'describe-key':
+        key_name = args.key_name if args.key_name else args.key_id
         keys = client.keys(id=key_name)
         key = keys[0] if keys else None
         if key:

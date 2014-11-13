@@ -65,23 +65,23 @@ def main():
         description="Delete a key"
     )
 
-    # group = p_delete_key.add_mutually_exclusive_group(required=True)
-    # group.add_argument(
-    #     "--key-id",
-    #     help="Id of the key you want to delete"
-    # )
-    # group.add_argument(
-    #     "key_name", nargs="?",
-    #     help="Name of the key you want to delete"
-    # )
-
-    # Rename key
     p_rename_key = subparsers.add_parser(
         'rename-key',
         description="Rename key"
     )
 
-    for parser in [p_delete_key, p_rename_key]:
+
+    p_rename_key.add_argument(
+        '--new-name', required=True,
+        help="New name for the key"
+    )
+
+    p_describe_key = subparsers.add_parser(
+        'describe-key',
+        description="Show analytic information about a specifies key"
+    )
+
+    for parser in [p_delete_key, p_rename_key, p_describe_key]:
         group = parser.add_mutually_exclusive_group(required=True)
         group.add_argument(
             '--key-id',
@@ -91,11 +91,6 @@ def main():
             'key_name', nargs="?",
             help="Name of the key you want to delete"
         )
-
-    p_rename_key.add_argument(
-        '--new-name', required=True,
-        help="New name for the key"
-    )
 
     p_list = subparsers.add_parser(
         'list',
@@ -263,11 +258,6 @@ def main():
     p_display_backend = subparsers.add_parser(
         'backend',
         help="Display info for this backend"
-    )
-
-    p_display_key = subparsers.add_parser(
-        'key',
-        help="Display info for this key"
     )
 
     p_display_machine = subparsers.add_parser(
