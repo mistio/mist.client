@@ -57,6 +57,22 @@ def main():
         help="If given, then mist.io will auto-generate an SSH Key"
     )
 
+    p_delete_key = subparsers.add_parser(
+        'delete-key',
+        description="Delete a key"
+    )
+
+    group = p_delete_key.add_mutually_exclusive_group(required=True)
+    group.add_argument(
+        "--key-id",
+        help="Id of the key you want to delete"
+    )
+    group.add_argument(
+        "key_name", nargs="?",
+        help="Name of the key you want to delete"
+    )
+
+
     p_list = subparsers.add_parser(
         'list',
         description="List added keys",
@@ -566,10 +582,6 @@ def main():
         help="Delete this backend"
     )
 
-    p_delete_key = subparsers.add_parser(
-        'key',
-        help="Delete this SSH Key"
-    )
 
     # ----------------USER TARGETS---------------------
     subparsers = p_user.add_subparsers(

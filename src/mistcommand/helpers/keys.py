@@ -53,8 +53,12 @@ def key_action(args):
     elif args.action == 'list-keys':
         pretty = args.pretty
         list_keys(client, pretty)
-    elif args.action == 'delete':
-        keys = client.keys(id=args.key)
+    elif args.action == 'delete-key':
+        if args.key_name:
+            key_id = args.key_name
+        else:
+            key_id = args.key_id
+        keys = client.keys(id=key_id)
         key = keys[0] if keys else None
         if key:
             key.delete()
