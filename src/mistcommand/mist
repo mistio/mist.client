@@ -27,7 +27,7 @@ def main():
                                             dest='action')
 
     # ---------------BACKEND ACTIONS------------------
-    #List backends
+    # List backends
     p_list_backends = subparsers.add_parser(
         'list-backends',
         description="List all of your added backends"
@@ -38,7 +38,7 @@ def main():
         help="Print in a table format"
     )
 
-    #Rename backend
+    # Rename backend
     p_rename_backend = subparsers.add_parser(
         'rename-backend',
         description="Rename a specified backend"
@@ -49,7 +49,13 @@ def main():
         help="New name for the key"
     )
 
-    for parser in [p_rename_backend]:
+    # Delete backend
+    p_delete_backend = subparsers.add_parser(
+        'delete-backend',
+        description="Delete the specified backend"
+    )
+
+    for parser in [p_rename_backend, p_delete_backend]:
         group = parser.add_mutually_exclusive_group(required=True)
         group.add_argument(
             '--backend-id',
@@ -666,7 +672,7 @@ def main():
         ansible_action(args, Runner, Inventory)
     elif args.action in ['list-keys', 'add-key', 'describe-key', 'rename-key', 'delete-key']:
         key_action(args)
-    elif args.action in ['list-backends', 'rename-backend']:
+    elif args.action in ['list-backends', 'rename-backend', 'delete-backend']:
         backend_action(args)
     elif args.action == 'user' and args.target == 'info':
         user_info()

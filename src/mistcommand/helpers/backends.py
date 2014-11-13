@@ -194,7 +194,7 @@ def backend_action(args):
         backend = choose_backend(client, args)
         backend.rename(args.new_name)
         print "Renamed backend to %s" % args.new_name
-    elif args.action == 'delete':
+    elif args.action == 'delete-backend':
         backend = choose_backend(client, args)
         if backend:
             backend.delete()
