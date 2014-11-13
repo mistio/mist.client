@@ -64,11 +64,11 @@ def main():
     for parser in [p_rename_backend, p_delete_backend, p_describe_backend]:
         group = parser.add_mutually_exclusive_group(required=True)
         group.add_argument(
-            '--backend-id',
+            '--id',
             help="Id of the specified backend"
         )
         group.add_argument(
-            '--backend-name',
+            '--name',
             help="Name of the specified backend"
         )
         group.add_argument(

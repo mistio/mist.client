@@ -44,8 +44,8 @@ def list_backends(client, pretty):
 
 
 def choose_backend(client, args):
-    backend_id = args.backend_id
-    backend_name = args.backend_name
+    backend_id = args.id
+    backend_name = args.name
     if backend_id:
         backends = client.backends(id=backend_id) or None
         backend = backends[0] if backends else None
