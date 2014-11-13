@@ -201,7 +201,7 @@ def backend_action(args):
             print "Deleted backend %s" % backend.title
         else:
             print "Could not find backend"
-    elif args.action == 'display':
+    elif args.action == 'describe-backend':
         backend = choose_backend(client, args)
         if backend:
             show_backend(backend)

@@ -55,7 +55,13 @@ def main():
         description="Delete the specified backend"
     )
 
-    for parser in [p_rename_backend, p_delete_backend]:
+    # Describe backend
+    p_describe_backend = subparsers.add_parser(
+        'describe-backend',
+        description="Show information about a specified backend"
+    )
+
+    for parser in [p_rename_backend, p_delete_backend, p_describe_backend]:
         group = parser.add_mutually_exclusive_group(required=True)
         group.add_argument(
             '--backend-id',
@@ -124,7 +130,7 @@ def main():
     # Describe key
     p_describe_key = subparsers.add_parser(
         'describe-key',
-        description="Show analytic information about a specifies key"
+        description="Show information about a specified key"
     )
 
     for parser in [p_delete_key, p_rename_key, p_describe_key]:
@@ -295,11 +301,6 @@ def main():
     subparsers = p_display.add_subparsers(
         dest='target',
         help='List info for this target, e.g. display backend --backend_name MyBackend'
-    )
-
-    p_display_backend = subparsers.add_parser(
-        'backend',
-        help="Display info for this backend"
     )
 
     p_display_machine = subparsers.add_parser(
@@ -631,7 +632,7 @@ def main():
     )
 
     #---------------BACKEND OPTIONS---------------------
-    for parser in [p_delete_backend, p_display_backend, p_list_locations,
+    for parser in [p_delete_backend, p_list_locations,
                    p_list_images, p_list_sizes, p_create_machine]:
         group = parser.add_mutually_exclusive_group(required=True)
         group.add_argument(
@@ -672,7 +673,7 @@ def main():
         ansible_action(args, Runner, Inventory)
     elif args.action in ['list-keys', 'add-key', 'describe-key', 'rename-key', 'delete-key']:
         key_action(args)
-    elif args.action in ['list-backends', 'rename-backend', 'delete-backend']:
+    elif args.action in ['list-backends', 'rename-backend', 'delete-backend', 'describe-backend']:
         backend_action(args)
     elif args.action == 'user' and args.target == 'info':
         user_info()
