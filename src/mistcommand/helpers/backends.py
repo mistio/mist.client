@@ -190,7 +190,7 @@ def backend_action(args):
     if args.action == 'list-backends':
         pretty = args.pretty
         list_backends(client, pretty)
-    elif args.action == 'rename':
+    elif args.action == 'rename-backend':
         backend = choose_backend(client, args)
         backend.rename(args.new_name)
         print "Renamed backend to %s" % args.new_name

@@ -27,6 +27,7 @@ def main():
                                             dest='action')
 
     # ---------------BACKEND ACTIONS------------------
+    #List backends
     p_list_backends = subparsers.add_parser(
         'list-backends',
         description="List all of your added backends"
@@ -36,7 +37,33 @@ def main():
         '--pretty', action='store_true', default=False,
         help="Print in a table format"
     )
-    # --------------KEYS ACTIONS----------------------
+
+    #Rename backend
+    p_rename_backend = subparsers.add_parser(
+        'rename-backend',
+        description="Rename a specified backend"
+    )
+
+    p_rename_backend.add_argument(
+        '--new-name', required=True,
+        help="New name for the key"
+    )
+
+    for parser in [p_rename_backend]:
+        group = parser.add_mutually_exclusive_group(required=True)
+        group.add_argument(
+            '--backend-id',
+            help="Id of the specified backend"
+        )
+        group.add_argument(
+            '--backend-name',
+            help="Name of the specified backend"
+        )
+        group.add_argument(
+            'backend', nargs="?",
+            help="Name or id of the backend you want to specify"
+        )
+    # --------------_KEY ACTIONS----------------------
 
     # List keys
     p_list_keys = subparsers.add_parser(
@@ -574,16 +601,6 @@ def main():
         help="Rename backend or key"
     )
 
-    p_rename_backend = subparsers.add_parser(
-        'backend',
-        description="Rename backend"
-    )
-
-    p_rename_backend.add_argument(
-        '-n', '--new-name', required=True,
-        help="New name"
-    )
-
     # ----------------DELETE TARGETS-------------------
     subparsers = p_delete.add_subparsers(
         dest='target',
@@ -608,7 +625,7 @@ def main():
     )
 
     #---------------BACKEND OPTIONS---------------------
-    for parser in [p_rename_backend, p_delete_backend, p_display_backend, p_list_locations,
+    for parser in [p_delete_backend, p_display_backend, p_list_locations,
                    p_list_images, p_list_sizes, p_create_machine]:
         group = parser.add_mutually_exclusive_group(required=True)
         group.add_argument(
@@ -649,7 +666,7 @@ def main():
         ansible_action(args, Runner, Inventory)
     elif args.action in ['list-keys', 'add-key', 'describe-key', 'rename-key', 'delete-key']:
         key_action(args)
-    elif args.action in ['list-backends']:
+    elif args.action in ['list-backends', 'rename-backend']:
         backend_action(args)
     elif args.action == 'user' and args.target == 'info':
         user_info()
