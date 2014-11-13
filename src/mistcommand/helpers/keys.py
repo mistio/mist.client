@@ -16,24 +16,28 @@ def show_key(key):
     print key.public
 
 
-def list_keys(client):
+def list_keys(client, pretty):
     keys = client.keys()
     if not keys:
         print "No keys found"
         sys.exit(0)
 
-    x = PrettyTable(["Name", "Is Default"])
-    for key in keys:
-        x.add_row([key.id, key.is_default])
+    if pretty:
+        x = PrettyTable(["Name", "Is Default"])
+        for key in keys:
+            x.add_row([key.id, key.is_default])
 
-    print x
+        print x
+    else:
+        for key in keys:
+            print "%s" % key.id
 
 
 def key_action(args):
 
     client = authenticate()
 
-    if args.action == 'add':
+    if args.action == 'add-key':
         name = args.name
         key_path = args.key_path
         auto = args.auto_generate
@@ -46,8 +50,9 @@ def key_action(args):
 
         client.add_key(key_name=name, private=private)
         print "Added key %s" % name
-    elif args.action == 'list':
-        list_keys(client)
+    elif args.action == 'list-keys':
+        pretty = args.pretty
+        list_keys(client, pretty)
     elif args.action == 'delete':
         keys = client.keys(id=args.key)
         key = keys[0] if keys else None

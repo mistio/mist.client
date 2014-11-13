@@ -26,10 +26,40 @@ def main():
     subparsers = main_parser.add_subparsers(help='action to perform',
                                             dest='action')
 
-    # --------------ACTiONS----------------------------
+    # --------------KEYS ACTiONS----------------------
+    p_list_keys = subparsers.add_parser(
+        'list-keys',
+        description="List added keys",
+    )
+
+    p_list_keys.add_argument(
+        '--pretty', action='store_true', default=False,
+        help="Print in a table format"
+    )
+
+    p_add_key = subparsers.add_parser(
+        'add-key',
+        help="Add a new SSH Key"
+    )
+
+    p_add_key.add_argument(
+        '--name', required=True,
+        help="Name of the new SSH Key"
+    )
+
+    group = p_add_key.add_mutually_exclusive_group(required=True)
+    group.add_argument(
+        '--key-path',
+        help="Path to private SSH Key file"
+    )
+    group.add_argument(
+        '--auto-generate', action='store_true',
+        help="If given, then mist.io will auto-generate an SSH Key"
+    )
+
     p_list = subparsers.add_parser(
         'list',
-        description="List supported providers, images, sizes, locations, networks, backends, keys, machines, plugins",
+        description="List added keys",
     )
 
     p_display = subparsers.add_parser(
@@ -379,27 +409,6 @@ def main():
         help="The id of the ssh key that is associated with the machine"
     )
 
-
-    p_add_key = subparsers.add_parser(
-        'key',
-        help="Add a new SSH Key"
-    )
-
-    p_add_key.add_argument(
-        '--name', required=True,
-        help="Name of the new SSH Key"
-    )
-
-    group = p_add_key.add_mutually_exclusive_group(required=True)
-    group.add_argument(
-        '--key-path',
-        help="Path to private SSH Key file"
-    )
-    group.add_argument(
-        '--auto-generate', action='store_true',
-        help="If given, then mist.io will auto-generate an SSH Key"
-    )
-
     p_add_plugin = subparsers.add_parser(
         'plugin',
         help="Add plugin to machine"
@@ -573,13 +582,6 @@ def main():
         help='Get info about the user'
     )
 
-    #---------------KEYS OPTIONS------------------------
-    for parser in [p_delete_key, p_rename_key, p_display_key]:
-        parser.add_argument(
-            '--key', required=True,
-            help="Name of the SSH Key you want to delete"
-        )
-
     #---------------BACKEND OPTIONS---------------------
     for parser in [p_rename_backend, p_delete_backend, p_display_backend, p_list_locations,
                    p_list_images, p_list_sizes, p_create_machine]:
@@ -620,6 +622,8 @@ def main():
 
     if args.action == 'run':
         ansible_action(args, Runner, Inventory)
+    elif args.action in ['list-keys', 'add-key', 'describe-key', 'rename-key', 'delete-key']:
+        key_action(args)
     elif args.action == 'user' and args.target == 'info':
         user_info()
     elif args.target == 'supported-providers':
