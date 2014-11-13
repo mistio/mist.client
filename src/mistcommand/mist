@@ -26,7 +26,18 @@ def main():
     subparsers = main_parser.add_subparsers(help='action to perform',
                                             dest='action')
 
+    # ---------------BACKEND ACTIONS------------------
+    p_list_backends = subparsers.add_parser(
+        'list-backends',
+        description="List all of your added backends"
+    )
+
+    p_list_backends.add_argument(
+        '--pretty', action='store_true', default=False,
+        help="Print in a table format"
+    )
     # --------------KEYS ACTIONS----------------------
+
     # List keys
     p_list_keys = subparsers.add_parser(
         'list-keys',
@@ -65,6 +76,7 @@ def main():
         description="Delete a key"
     )
 
+    # Rename key
     p_rename_key = subparsers.add_parser(
         'rename-key',
         description="Rename key"
@@ -76,6 +88,7 @@ def main():
         help="New name for the key"
     )
 
+    # Describe key
     p_describe_key = subparsers.add_parser(
         'describe-key',
         description="Show analytic information about a specifies key"
@@ -91,6 +104,7 @@ def main():
             'key_name', nargs="?",
             help="Name of the key you want to delete"
         )
+
 
     p_list = subparsers.add_parser(
         'list',
@@ -194,11 +208,6 @@ def main():
     p_list_supported_providers = subparsers.add_parser(
         'supported-providers',
         description="List all supported providers"
-    )
-
-    p_list_backends = subparsers.add_parser(
-        'backends',
-        description="List all backends that are added to mist.io"
     )
 
     p_list_locations = subparsers.add_parser(
@@ -640,12 +649,12 @@ def main():
         ansible_action(args, Runner, Inventory)
     elif args.action in ['list-keys', 'add-key', 'describe-key', 'rename-key', 'delete-key']:
         key_action(args)
+    elif args.action in ['list-backends']:
+        backend_action(args)
     elif args.action == 'user' and args.target == 'info':
         user_info()
     elif args.target == 'supported-providers':
         provider_action(args)
-    elif args.target in ['backends', 'backend']:
-        backend_action(args)
     elif args.target == 'locations':
         location_action(args)
     elif args.target == 'images':

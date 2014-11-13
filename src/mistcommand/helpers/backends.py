@@ -25,17 +25,22 @@ def show_backend(backend):
     print x
 
 
-def list_backends(client):
+def list_backends(client, pretty):
     backends = client.backends()
     if not client.backends():
         print "No backends found"
         sys.exit(0)
 
-    x = PrettyTable(["Name", "ID", "Provider", "State"])
-    for backend in backends:
-        x.add_row([backend.title, backend.title, backend.provider, backend.info['state']])
+    if pretty:
+        x = PrettyTable(["Name", "ID", "Provider", "State"])
+        for backend in backends:
+            x.add_row([backend.title, backend.id, backend.provider, backend.info['state']])
 
-    print x
+        print x
+    else:
+        for backend in backends:
+            # print backend.title, backend.id, backend.provider, backend.info['state']
+            print "%-40s %-40s %-30s %-20s" % (backend.title, backend.id, backend.provider, backend.info['state'])
 
 
 def choose_backend(client, args):
@@ -182,8 +187,9 @@ def backend_action(args):
 
     client = authenticate()
 
-    if args.action == 'list':
-        list_backends(client)
+    if args.action == 'list-backends':
+        pretty = args.pretty
+        list_backends(client, pretty)
     elif args.action == 'rename':
         backend = choose_backend(client, args)
         backend.rename(args.new_name)
