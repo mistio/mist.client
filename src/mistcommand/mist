@@ -75,6 +75,175 @@ def main():
             'backend', nargs="?",
             help="Name or id of the backend you want to specify"
         )
+
+    # Add backend
+    p_add_backend = subparsers.add_parser(
+        'add-backend',
+        help="Add a new backend"
+    )
+
+    provider_choices = [
+        'bare_metal',
+        'ec2_ap_northeast',
+        'ec2_ap_southeast',
+        'ec2_ap_southeast_2',
+        'ec2_eu_west',
+        'ec2_sa_east',
+        'ec2_us_east',
+        'ec2_us_west',
+        'ec2_us_west_oregon',
+        'gce',
+        'nephoscale',
+        'digitalocean',
+        'linode',
+        'openstack',
+        'rackspace:dfw',
+        'rackspace:ord',
+        'rackspace:iad',
+        'rackspace:lon',
+        'rackspace:syd',
+        'rackspace:hkg',
+        'rackspace_first_gen:us',
+        'rackspace_first_gen:uk',
+        'softlayer',
+        'hpcloud:region-a.geo-1',
+        'hpcloud:region-b.geo-1',
+        'docker'
+    ]
+    p_add_backend.add_argument(
+        '--provider', required=True, choices=provider_choices,
+        help="The provider id for the new backend, e.g. ec2_ap_northeast. You can"
+             " list supported-providers to see all available provider ids"
+    )
+
+    p_add_backend.add_argument(
+        '--name', required=True,
+        help="Name for the new backend"
+    )
+
+    ec2_group = p_add_backend.add_argument_group('EC2')
+    ec2_group.add_argument(
+        '--ec2-api-key',
+        help="The ec2 API key"
+    )
+    ec2_group.add_argument(
+        '--ec2-api-secret',
+        help="The ec2 API secret"
+    )
+
+    rackspace_group = p_add_backend.add_argument_group('Rackspace')
+    rackspace_group.add_argument(
+        '--rackspace-username',
+        help="Username for Rackspace"
+    )
+    rackspace_group.add_argument(
+        '--rackspace-api-key',
+        help="API Key for Rackspace"
+    )
+
+    nephoscale_group = p_add_backend.add_argument_group('NephoScale')
+    nephoscale_group.add_argument(
+        '--nepho-username',
+        help="Username for NephoScale"
+    )
+    nephoscale_group.add_argument(
+        '--nepho-password',
+        help="Password for nephoscale"
+    )
+
+    digital_group = p_add_backend.add_argument_group('DigitalOcean')
+    digital_group.add_argument(
+        '--digi-token',
+        help="Token for the DigitalOcean backend"
+    )
+
+    linode_group = p_add_backend.add_argument_group("Linode")
+    linode_group.add_argument(
+        '--linode-api-key',
+        help="API Key for the Linode backend"
+    )
+
+    openstack_group = p_add_backend.add_argument_group("Openstack")
+    openstack_group.add_argument(
+        '--openstack-username',
+        help="Username for the Openstack backend"
+    )
+    openstack_group.add_argument(
+        '--openstack-password',
+        help="Password for the Openstack backend"
+    )
+    openstack_group.add_argument(
+        '--openstack-auth-url',
+        help="Auth url, e.g. http://10.0.0.2:5000"
+    )
+    openstack_group.add_argument(
+        '--openstack-tenant',
+        help="Tenant name"
+    )
+    openstack_group.add_argument(
+        '--openstack-region',
+        help="OPTIONAL. Normally you do not have to explicitly set a region"
+    )
+
+    softlayer_group = p_add_backend.add_argument_group("SoftLayer")
+    softlayer_group.add_argument(
+        '--softlayer-username',
+        help="Username for the softlayer backend"
+    )
+    softlayer_group.add_argument(
+        '--softlayer-api-key',
+        help="API Key for the SoftLayer backend"
+    )
+
+    hp_group = p_add_backend.add_argument_group("HP")
+    hp_group.add_argument(
+        '--hp-username',
+        help="Username for the HP backend"
+    )
+    hp_group.add_argument(
+        '--hp-password',
+        help="Passord for the HP backend"
+    )
+    hp_group.add_argument(
+        '--hp-tenant',
+        help="Tenant name for the HP backend"
+    )
+
+    docker_group = p_add_backend.add_argument_group("Docker")
+    docker_group.add_argument(
+        '--docker-host',
+        help="Ip of the Docker host"
+    )
+    docker_group.add_argument(
+        '--docker-port', default="4243",
+        help="Port for the Docker API. By default 4243."
+    )
+    docker_group.add_argument(
+        '--docker-auth-user',
+        help="OPTIONAL. In case you have a basic auth set up."
+    )
+    docker_group.add_argument(
+        '--docker-auth-password',
+        help="OPTIONAL. In case you have a basic auth set up"
+    )
+
+    bare_group = p_add_backend.add_argument_group("Bare Metal Server")
+    bare_group.add_argument(
+        '--bare-hostname',
+        help="Hostname of the machine"
+    )
+    bare_group.add_argument(
+        '--bare-user', default="root",
+        help="By default root"
+    )
+    bare_group.add_argument(
+        '--bare-port', default="22",
+        help="Port of the ssh-server. By default 22"
+    )
+    bare_group.add_argument(
+        '--bare-ssh-key-id',
+        help="The id of the ssh key that is associated with the machine"
+    )
     # --------------_KEY ACTIONS----------------------
 
     # List keys
@@ -314,173 +483,173 @@ def main():
         help='Add a backend or key'
     )
 
-    p_add_backend = subparsers.add_parser(
-        'backend',
-        help="Add a new backend"
-    )
-
-    provider_choices = [
-        'bare_metal',
-        'ec2_ap_northeast',
-        'ec2_ap_southeast',
-        'ec2_ap_southeast_2',
-        'ec2_eu_west',
-        'ec2_sa_east',
-        'ec2_us_east',
-        'ec2_us_west',
-        'ec2_us_west_oregon',
-        'gce',
-        'nephoscale',
-        'digitalocean',
-        'linode',
-        'openstack',
-        'rackspace:dfw',
-        'rackspace:ord',
-        'rackspace:iad',
-        'rackspace:lon',
-        'rackspace:syd',
-        'rackspace:hkg',
-        'rackspace_first_gen:us',
-        'rackspace_first_gen:uk',
-        'softlayer',
-        'hpcloud:region-a.geo-1',
-        'hpcloud:region-b.geo-1',
-        'docker'
-    ]
-    p_add_backend.add_argument(
-        '--provider', required=True, choices=provider_choices,
-        help="The provider id for the new backend, e.g. ec2_ap_northeast. You can"
-             " list supported-providers to see all available provider ids"
-    )
-
-    p_add_backend.add_argument(
-        '--name', required=True,
-        help="Name for the new backend"
-    )
-
-    ec2_group = p_add_backend.add_argument_group('EC2')
-    ec2_group.add_argument(
-        '--ec2-api-key',
-        help="The ec2 API key"
-    )
-    ec2_group.add_argument(
-        '--ec2-api-secret',
-        help="The ec2 API secret"
-    )
-
-    rackspace_group = p_add_backend.add_argument_group('Rackspace')
-    rackspace_group.add_argument(
-        '--rackspace-username',
-        help="Username for Rackspace"
-    )
-    rackspace_group.add_argument(
-        '--rackspace-api-key',
-        help="API Key for Rackspace"
-    )
-
-    nephoscale_group = p_add_backend.add_argument_group('NephoScale')
-    nephoscale_group.add_argument(
-        '--nepho-username',
-        help="Username for NephoScale"
-    )
-    nephoscale_group.add_argument(
-        '--nepho-password',
-        help="Password for nephoscale"
-    )
-
-    digital_group = p_add_backend.add_argument_group('DigitalOcean')
-    digital_group.add_argument(
-        '--digi-token',
-        help="Token for the DigitalOcean backend"
-    )
-
-    linode_group = p_add_backend.add_argument_group("Linode")
-    linode_group.add_argument(
-        '--linode-api-key',
-        help="API Key for the Linode backend"
-    )
-
-    openstack_group = p_add_backend.add_argument_group("Openstack")
-    openstack_group.add_argument(
-        '--openstack-username',
-        help="Username for the Openstack backend"
-    )
-    openstack_group.add_argument(
-        '--openstack-password',
-        help="Password for the Openstack backend"
-    )
-    openstack_group.add_argument(
-        '--openstack-auth-url',
-        help="Auth url, e.g. http://10.0.0.2:5000"
-    )
-    openstack_group.add_argument(
-        '--openstack-tenant',
-        help="Tenant name"
-    )
-    openstack_group.add_argument(
-        '--openstack-region',
-        help="OPTIONAL. Normally you do not have to explicitly set a region"
-    )
-
-    softlayer_group = p_add_backend.add_argument_group("SoftLayer")
-    softlayer_group.add_argument(
-        '--softlayer-username',
-        help="Username for the softlayer backend"
-    )
-    softlayer_group.add_argument(
-        '--softlayer-api-key',
-        help="API Key for the SoftLayer backend"
-    )
-
-    hp_group = p_add_backend.add_argument_group("HP")
-    hp_group.add_argument(
-        '--hp-username',
-        help="Username for the HP backend"
-    )
-    hp_group.add_argument(
-        '--hp-password',
-        help="Passord for the HP backend"
-    )
-    hp_group.add_argument(
-        '--hp-tenant',
-        help="Tenant name for the HP backend"
-    )
-
-    docker_group = p_add_backend.add_argument_group("Docker")
-    docker_group.add_argument(
-        '--docker-host',
-        help="Ip of the Docker host"
-    )
-    docker_group.add_argument(
-        '--docker-port', default="4243",
-        help="Port for the Docker API. By default 4243."
-    )
-    docker_group.add_argument(
-        '--docker-auth-user',
-        help="OPTIONAL. In case you have a basic auth set up."
-    )
-    docker_group.add_argument(
-        '--docker-auth-password',
-        help="OPTIONAL. In case you have a basic auth set up"
-    )
-
-    bare_group = p_add_backend.add_argument_group("Bare Metal Server")
-    bare_group.add_argument(
-        '--bare-hostname',
-        help="Hostname of the machine"
-    )
-    bare_group.add_argument(
-        '--bare-user', default="root",
-        help="By default root"
-    )
-    bare_group.add_argument(
-        '--bare-port', default="22",
-        help="Port of the ssh-server. By default 22"
-    )
-    bare_group.add_argument(
-        '--bare-ssh-key-id',
-        help="The id of the ssh key that is associated with the machine"
-    )
+    # p_add_backend = subparsers.add_parser(
+    #     'backend',
+    #     help="Add a new backend"
+    # )
+    #
+    # provider_choices = [
+    #     'bare_metal',
+    #     'ec2_ap_northeast',
+    #     'ec2_ap_southeast',
+    #     'ec2_ap_southeast_2',
+    #     'ec2_eu_west',
+    #     'ec2_sa_east',
+    #     'ec2_us_east',
+    #     'ec2_us_west',
+    #     'ec2_us_west_oregon',
+    #     'gce',
+    #     'nephoscale',
+    #     'digitalocean',
+    #     'linode',
+    #     'openstack',
+    #     'rackspace:dfw',
+    #     'rackspace:ord',
+    #     'rackspace:iad',
+    #     'rackspace:lon',
+    #     'rackspace:syd',
+    #     'rackspace:hkg',
+    #     'rackspace_first_gen:us',
+    #     'rackspace_first_gen:uk',
+    #     'softlayer',
+    #     'hpcloud:region-a.geo-1',
+    #     'hpcloud:region-b.geo-1',
+    #     'docker'
+    # ]
+    # p_add_backend.add_argument(
+    #     '--provider', required=True, choices=provider_choices,
+    #     help="The provider id for the new backend, e.g. ec2_ap_northeast. You can"
+    #          " list supported-providers to see all available provider ids"
+    # )
+    #
+    # p_add_backend.add_argument(
+    #     '--name', required=True,
+    #     help="Name for the new backend"
+    # )
+    #
+    # ec2_group = p_add_backend.add_argument_group('EC2')
+    # ec2_group.add_argument(
+    #     '--ec2-api-key',
+    #     help="The ec2 API key"
+    # )
+    # ec2_group.add_argument(
+    #     '--ec2-api-secret',
+    #     help="The ec2 API secret"
+    # )
+    #
+    # rackspace_group = p_add_backend.add_argument_group('Rackspace')
+    # rackspace_group.add_argument(
+    #     '--rackspace-username',
+    #     help="Username for Rackspace"
+    # )
+    # rackspace_group.add_argument(
+    #     '--rackspace-api-key',
+    #     help="API Key for Rackspace"
+    # )
+    #
+    # nephoscale_group = p_add_backend.add_argument_group('NephoScale')
+    # nephoscale_group.add_argument(
+    #     '--nepho-username',
+    #     help="Username for NephoScale"
+    # )
+    # nephoscale_group.add_argument(
+    #     '--nepho-password',
+    #     help="Password for nephoscale"
+    # )
+    #
+    # digital_group = p_add_backend.add_argument_group('DigitalOcean')
+    # digital_group.add_argument(
+    #     '--digi-token',
+    #     help="Token for the DigitalOcean backend"
+    # )
+    #
+    # linode_group = p_add_backend.add_argument_group("Linode")
+    # linode_group.add_argument(
+    #     '--linode-api-key',
+    #     help="API Key for the Linode backend"
+    # )
+    #
+    # openstack_group = p_add_backend.add_argument_group("Openstack")
+    # openstack_group.add_argument(
+    #     '--openstack-username',
+    #     help="Username for the Openstack backend"
+    # )
+    # openstack_group.add_argument(
+    #     '--openstack-password',
+    #     help="Password for the Openstack backend"
+    # )
+    # openstack_group.add_argument(
+    #     '--openstack-auth-url',
+    #     help="Auth url, e.g. http://10.0.0.2:5000"
+    # )
+    # openstack_group.add_argument(
+    #     '--openstack-tenant',
+    #     help="Tenant name"
+    # )
+    # openstack_group.add_argument(
+    #     '--openstack-region',
+    #     help="OPTIONAL. Normally you do not have to explicitly set a region"
+    # )
+    #
+    # softlayer_group = p_add_backend.add_argument_group("SoftLayer")
+    # softlayer_group.add_argument(
+    #     '--softlayer-username',
+    #     help="Username for the softlayer backend"
+    # )
+    # softlayer_group.add_argument(
+    #     '--softlayer-api-key',
+    #     help="API Key for the SoftLayer backend"
+    # )
+    #
+    # hp_group = p_add_backend.add_argument_group("HP")
+    # hp_group.add_argument(
+    #     '--hp-username',
+    #     help="Username for the HP backend"
+    # )
+    # hp_group.add_argument(
+    #     '--hp-password',
+    #     help="Passord for the HP backend"
+    # )
+    # hp_group.add_argument(
+    #     '--hp-tenant',
+    #     help="Tenant name for the HP backend"
+    # )
+    #
+    # docker_group = p_add_backend.add_argument_group("Docker")
+    # docker_group.add_argument(
+    #     '--docker-host',
+    #     help="Ip of the Docker host"
+    # )
+    # docker_group.add_argument(
+    #     '--docker-port', default="4243",
+    #     help="Port for the Docker API. By default 4243."
+    # )
+    # docker_group.add_argument(
+    #     '--docker-auth-user',
+    #     help="OPTIONAL. In case you have a basic auth set up."
+    # )
+    # docker_group.add_argument(
+    #     '--docker-auth-password',
+    #     help="OPTIONAL. In case you have a basic auth set up"
+    # )
+    #
+    # bare_group = p_add_backend.add_argument_group("Bare Metal Server")
+    # bare_group.add_argument(
+    #     '--bare-hostname',
+    #     help="Hostname of the machine"
+    # )
+    # bare_group.add_argument(
+    #     '--bare-user', default="root",
+    #     help="By default root"
+    # )
+    # bare_group.add_argument(
+    #     '--bare-port', default="22",
+    #     help="Port of the ssh-server. By default 22"
+    # )
+    # bare_group.add_argument(
+    #     '--bare-ssh-key-id',
+    #     help="The id of the ssh key that is associated with the machine"
+    # )
 
     p_add_plugin = subparsers.add_parser(
         'plugin',
@@ -673,7 +842,8 @@ def main():
         ansible_action(args, Runner, Inventory)
     elif args.action in ['list-keys', 'add-key', 'describe-key', 'rename-key', 'delete-key']:
         key_action(args)
-    elif args.action in ['list-backends', 'rename-backend', 'delete-backend', 'describe-backend']:
+    elif args.action in ['list-backends', 'rename-backend', 'delete-backend', 'describe-backend',
+                         'add-backend']:
         backend_action(args)
     elif args.action == 'user' and args.target == 'info':
         user_info()

@@ -207,6 +207,6 @@ def backend_action(args):
             show_backend(backend)
         else:
             print "Could not find backend"
-    elif args.action == 'add':
+    elif args.action == 'add-backend':
         add_backend(client, args)
         print "New backend added"
