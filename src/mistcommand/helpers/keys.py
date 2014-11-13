@@ -54,10 +54,7 @@ def key_action(args):
         pretty = args.pretty
         list_keys(client, pretty)
     elif args.action == 'delete-key':
-        if args.key_name:
-            key_id = args.key_name
-        else:
-            key_id = args.key_id
+        key_id = args.key_name if args.key_name else args.key_id
         keys = client.keys(id=key_id)
         key = keys[0] if keys else None
         if key:
@@ -66,8 +63,8 @@ def key_action(args):
         else:
             print "Cound not find key: %s" % args.key
             sys.exit(0)
-    elif args.action == 'rename':
-        key_name = args.key
+    elif args.action == 'rename-key':
+        key_name = args.key_name if args.key_name else args.key_id
         new_name = args.new_name
 
         keys = client.keys(id=key_name)

@@ -26,7 +26,8 @@ def main():
     subparsers = main_parser.add_subparsers(help='action to perform',
                                             dest='action')
 
-    # --------------KEYS ACTiONS----------------------
+    # --------------KEYS ACTIONS----------------------
+    # List keys
     p_list_keys = subparsers.add_parser(
         'list-keys',
         description="List added keys",
@@ -37,6 +38,7 @@ def main():
         help="Print in a table format"
     )
 
+    # Add key
     p_add_key = subparsers.add_parser(
         'add-key',
         help="Add a new SSH Key"
@@ -57,21 +59,43 @@ def main():
         help="If given, then mist.io will auto-generate an SSH Key"
     )
 
+    # Delete key
     p_delete_key = subparsers.add_parser(
         'delete-key',
         description="Delete a key"
     )
 
-    group = p_delete_key.add_mutually_exclusive_group(required=True)
-    group.add_argument(
-        "--key-id",
-        help="Id of the key you want to delete"
-    )
-    group.add_argument(
-        "key_name", nargs="?",
-        help="Name of the key you want to delete"
+    # group = p_delete_key.add_mutually_exclusive_group(required=True)
+    # group.add_argument(
+    #     "--key-id",
+    #     help="Id of the key you want to delete"
+    # )
+    # group.add_argument(
+    #     "key_name", nargs="?",
+    #     help="Name of the key you want to delete"
+    # )
+
+    # Rename key
+    p_rename_key = subparsers.add_parser(
+        'rename-key',
+        description="Rename key"
     )
 
+    for parser in [p_delete_key, p_rename_key]:
+        group = parser.add_mutually_exclusive_group(required=True)
+        group.add_argument(
+            '--key-id',
+            help="Id of the key you want to delete"
+        )
+        group.add_argument(
+            'key_name', nargs="?",
+            help="Name of the key you want to delete"
+        )
+
+    p_rename_key.add_argument(
+        '--new-name', required=True,
+        help="New name for the key"
+    )
 
     p_list = subparsers.add_parser(
         'list',
@@ -559,16 +583,6 @@ def main():
     p_rename_backend.add_argument(
         '-n', '--new-name', required=True,
         help="New name"
-    )
-
-    p_rename_key = subparsers.add_parser(
-        'key',
-        description="Rename SSH Key"
-    )
-
-    p_rename_key.add_argument(
-        '--new-name', required=True,
-        help="New name for the SSH Key"
     )
 
     # ----------------DELETE TARGETS-------------------
