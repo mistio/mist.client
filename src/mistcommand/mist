@@ -408,15 +408,20 @@ def main():
         help="Show information about a specified machine"
     )
 
-    for parser in [p_describe_machine]:
+    p_probe = subparsers.add_parser(
+        'probe',
+        description="Probe a specified machine"
+    )
+
+    for parser in [p_describe_machine, p_probe]:
         group = parser.add_mutually_exclusive_group(required=True)
         group.add_argument(
             '--id',
-            help="Id of the specified backend"
+            help="Id of the specified machine"
         )
         group.add_argument(
             '--name',
-            help="Name of the specified backend"
+            help="Name of the specified machine"
         )
         group.add_argument(
             'machine', nargs="?",
@@ -475,10 +480,6 @@ def main():
         description="Destroy a machine"
     )
 
-    p_probe = subparsers.add_parser(
-        'probe',
-        description="Probe a machine"
-    )
 
     p_tag = subparsers.add_parser(
         'tag',
@@ -603,15 +604,6 @@ def main():
         help="Destroy machine"
     )
 
-    subparsers = p_probe.add_subparsers(
-        dest='target',
-        help='Probe machine'
-    )
-    p_probe_machine = subparsers.add_parser(
-        'machine',
-        help="Probe machine"
-    )
-
     subparsers = p_enable_monitoring.add_subparsers(
         dest='target',
         help="Enable monitoring on machine"
@@ -722,22 +714,22 @@ def main():
     #     )
 
     #------------MACHINE OPTIONS------------------------
-    for parser in [p_start_machine, p_reboot_machine, p_stop_machine, p_destroy_machine,
-                   p_probe_machine, p_enable_monitoring_machine, p_disable_monitoring_machine,
-                   p_list_plugins, p_add_plugin, p_display_machine, p_tag_machine]:
-        group = parser.add_mutually_exclusive_group(required=True)
-        group.add_argument(
-            '--machine',
-            help="This can be either a machine's name or id"
-        )
-        group.add_argument(
-            '--machine-id',
-            help="Specify a machine's id"
-        )
-        group.add_argument(
-            '--machine-name',
-            help="Sepcify a machine's name"
-        )
+    # for parser in [p_start_machine, p_reboot_machine, p_stop_machine, p_destroy_machine,
+    #                p_enable_monitoring_machine, p_disable_monitoring_machine,
+    #                p_list_plugins, p_add_plugin, p_display_machine, p_tag_machine]:
+    #     group = parser.add_mutually_exclusive_group(required=True)
+    #     group.add_argument(
+    #         '--machine',
+    #         help="This can be either a machine's name or id"
+    #     )
+    #     group.add_argument(
+    #         '--machine-id',
+    #         help="Specify a machine's id"
+    #     )
+    #     group.add_argument(
+    #         '--machine-name',
+    #         help="Sepcify a machine's name"
+    #     )
 
     argcomplete.autocomplete(main_parser)
     args = main_parser.parse_args()
@@ -757,7 +749,7 @@ def main():
         size_action(args)
     elif args.action == 'list-locations':
         location_action(args)
-    elif args.action in ['list-machines', 'describe-machine']:
+    elif args.action in ['list-machines', 'describe-machine', 'probe']:
         machine_action(args)
     elif args.action == 'user' and args.target == 'info':
         user_info()

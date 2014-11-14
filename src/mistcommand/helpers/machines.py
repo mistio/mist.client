@@ -88,7 +88,7 @@ def machine_take_action(machine, action):
     elif action == "probe":
         info = machine.probe()
         if "uptime" in info.keys():
-            print "Uptime: %s" % info['uptime']
+            print "Machine %s is probed" % machine.name
         else:
             print "Not probed"
 
