@@ -2,10 +2,10 @@ import sys
 
 from prettytable import PrettyTable
 from mistcommand.helpers.login import authenticate
-from mistcommand.helpers.backends import choose_backend
+from mistcommand.helpers.backends import return_backend
 
 
-def list_images(backend, search_term):
+def list_images(backend, search_term, pretty):
     if not search_term:
         images = []
         for image in backend.images:
@@ -16,18 +16,23 @@ def list_images(backend, search_term):
     else:
         images = backend.search_image(search_term)
 
-    x = PrettyTable(["Name", "ID"])
-    for image in images:
-        x.add_row([image['name'], image['id']])
+    if pretty:
+        x = PrettyTable(["Name", "ID"])
+        for image in images:
+            x.add_row([image['name'], image['id']])
 
-    print x
+        print x
+    else:
+        for image in images:
+            print "%-40s %-40s" % (image['name'], image['id'])
 
 
 def image_action(args):
 
-    if args.action == 'list':
+    if args.action == 'list-images':
         client = authenticate()
-        backend = choose_backend(client, args)
+        backend = return_backend(client, args)
         search_term = args.search
+        pretty = args.pretty
 
-        list_images(backend, search_term)
+        list_images(backend, search_term, pretty)

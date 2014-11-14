@@ -59,6 +59,22 @@ def choose_backend(client, args):
     return backend
 
 
+def return_backend(client, args):
+    backend_id = args.backend_id
+    backend_name = args.backend_name
+    if backend_id:
+        backends = client.backends(id=backend_id) or None
+        backend = backends[0] if backends else None
+    elif backend_name:
+        backends = client.backends(name=backend_name)
+        backend = backends[0] if backends else None
+    else:
+        backends = client.backends(search=args.backend)
+        backend = backends[0] if backends else None
+
+    return backend
+
+
 def add_backend(client, args):
     provider = args.provider
     if "ec2" in provider:

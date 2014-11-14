@@ -27,7 +27,7 @@ def main():
                                             dest='action')
 
     # -------------SUPPORTED PROVIDERS----------------
-    # Providers
+    # List supported providers
     p_list_providers = subparsers.add_parser(
         'list-providers',
         description="List all supported providers"
@@ -256,7 +256,7 @@ def main():
         '--bare-ssh-key-id',
         help="The id of the ssh key that is associated with the machine"
     )
-    # --------------_KEY ACTIONS----------------------
+    # ---------------KEY ACTIONS----------------------
 
     # List keys
     p_list_keys = subparsers.add_parser(
@@ -324,6 +324,54 @@ def main():
             'key_name', nargs="?",
             help="Name of the key you want to delete"
         )
+
+    # ----------------IMAGES/SIZES/LOCATIONS------------------
+    # List images
+
+    p_list_images = subparsers.add_parser(
+        'list-images',
+        description="List images for a specified backend"
+    )
+
+    p_list_images.add_argument(
+        '--pretty', action='store_true', default=False,
+        help="Print in a table format"
+    )
+
+    p_list_images.add_argument(
+        '--search', required=False,
+        help="Search for OS Images that contain this."
+    )
+
+    p_list_sizes = subparsers.add_parser(
+        'list-sizes',
+        description="List images for a specified backend"
+    )
+
+    p_list_sizes.add_argument(
+        '--pretty', action='store_true', default=False,
+        help="Print in a table format"
+    )
+
+    for parser in [p_list_images, p_list_sizes]:
+        group = parser.add_mutually_exclusive_group(required=True)
+        group.add_argument(
+            '--backend',
+            help="This can be either a backend's name or id"
+        )
+        group.add_argument(
+            '--backend-id',
+            help="Specify a backend's id"
+        )
+        group.add_argument(
+            '--backend-name',
+            help="Sepcify a backend's name"
+        )
+
+
+
+
+
 
 
     p_list = subparsers.add_parser(
@@ -437,11 +485,6 @@ def main():
     p_list_images.add_argument(
         '--search', required=False,
         help="Search for OS Images that contain this."
-    )
-
-    p_list_sizes = subparsers.add_parser(
-        'sizes',
-        description="List available machine sizes for the given backend"
     )
 
     p_list_machines = subparsers.add_parser(
@@ -635,21 +678,21 @@ def main():
     )
 
     #---------------BACKEND OPTIONS---------------------
-    for parser in [p_delete_backend, p_list_locations,
-                   p_list_images, p_list_sizes, p_create_machine]:
-        group = parser.add_mutually_exclusive_group(required=True)
-        group.add_argument(
-            '--backend',
-            help="This can be either a backend's name or id"
-        )
-        group.add_argument(
-            '--backend-id',
-            help="Specify a backend's id"
-        )
-        group.add_argument(
-            '--backend-name',
-            help="Sepcify a backend's name"
-        )
+    # for parser in [p_list_locations,
+    #                 p_list_sizes, p_create_machine]:
+    #     group = parser.add_mutually_exclusive_group(required=True)
+    #     group.add_argument(
+    #         '--backend',
+    #         help="This can be either a backend's name or id"
+    #     )
+    #     group.add_argument(
+    #         '--backend-id',
+    #         help="Specify a backend's id"
+    #     )
+    #     group.add_argument(
+    #         '--backend-name',
+    #         help="Sepcify a backend's name"
+    #     )
 
     #------------MACHINE OPTIONS------------------------
     for parser in [p_start_machine, p_reboot_machine, p_stop_machine, p_destroy_machine,
@@ -681,14 +724,16 @@ def main():
     elif args.action in ['list-backends', 'rename-backend', 'delete-backend', 'describe-backend',
                          'add-backend']:
         backend_action(args)
+    elif args.action == 'list-images':
+        image_action(args)
+    elif args.action == 'list-sizes':
+        size_action(args)
     elif args.action == 'user' and args.target == 'info':
         user_info()
     elif args.target == 'locations':
         location_action(args)
     elif args.target == 'images':
         image_action(args)
-    elif args.target == 'sizes':
-        size_action(args)
     elif args.target in ['keys', 'key']:
         key_action(args)
     elif args.target in ['machine', 'machines']:
