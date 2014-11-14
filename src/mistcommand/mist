@@ -354,7 +354,7 @@ def main():
     )
 
     p_list_locations = subparsers.add_parser(
-        'list-sizes',
+        'list-locations',
         description="List images for a specified backend"
     )
 
@@ -733,10 +733,10 @@ def main():
         image_action(args)
     elif args.action == 'list-sizes':
         size_action(args)
+    elif args.action == 'list-locations':
+        location_action(args)
     elif args.action == 'user' and args.target == 'info':
         user_info()
-    elif args.target == 'locations':
-        location_action(args)
     elif args.target == 'images':
         image_action(args)
     elif args.target in ['keys', 'key']:
