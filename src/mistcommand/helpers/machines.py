@@ -167,8 +167,8 @@ def machine_action(args):
         machine = choose_machine(client, args)
 
         if machine.info['can_tag']:
-            machine.tag(tag=args.tag)
-            print "Add tag %s to machine %s" % (args.tag, machine.name)
+            machine.tag(tag=args.new_tag)
+            print "Add tag %s to machine %s" % (args.new_tag, machine.name)
         else:
             print "Cannot tag machine on provider %s" % machine.backend.title
             sys.exit(0)

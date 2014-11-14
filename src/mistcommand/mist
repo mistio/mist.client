@@ -27,7 +27,6 @@ def main():
                                             dest='action')
 
     # -------------SUPPORTED PROVIDERS----------------
-    # List supported providers
     p_list_providers = subparsers.add_parser(
         'list-providers',
         description="List all supported providers"
@@ -39,7 +38,6 @@ def main():
     )
 
     # ---------------BACKEND ACTIONS------------------
-    # List backends
     p_list_backends = subparsers.add_parser(
         'list-backends',
         description="List all of your added backends"
@@ -50,7 +48,6 @@ def main():
         help="Print in a table format"
     )
 
-    # Rename backend
     p_rename_backend = subparsers.add_parser(
         'rename-backend',
         description="Rename a specified backend"
@@ -61,13 +58,11 @@ def main():
         help="New name for the key"
     )
 
-    # Delete backend
     p_delete_backend = subparsers.add_parser(
         'delete-backend',
         description="Delete the specified backend"
     )
 
-    # Describe backend
     p_describe_backend = subparsers.add_parser(
         'describe-backend',
         description="Show information about a specified backend"
@@ -88,7 +83,6 @@ def main():
             help="Name or id of the backend you want to specify"
         )
 
-    # Add backend
     p_add_backend = subparsers.add_parser(
         'add-backend',
         help="Add a new backend"
@@ -256,9 +250,8 @@ def main():
         '--bare-ssh-key-id',
         help="The id of the ssh key that is associated with the machine"
     )
-    # ---------------KEY ACTIONS----------------------
 
-    # List keys
+    # ---------------KEY ACTIONS----------------------
     p_list_keys = subparsers.add_parser(
         'list-keys',
         description="List added keys",
@@ -269,7 +262,6 @@ def main():
         help="Print in a table format"
     )
 
-    # Add key
     p_add_key = subparsers.add_parser(
         'add-key',
         help="Add a new SSH Key"
@@ -290,13 +282,11 @@ def main():
         help="If given, then mist.io will auto-generate an SSH Key"
     )
 
-    # Delete key
     p_delete_key = subparsers.add_parser(
         'delete-key',
         description="Delete a key"
     )
 
-    # Rename key
     p_rename_key = subparsers.add_parser(
         'rename-key',
         description="Rename key"
@@ -308,7 +298,6 @@ def main():
         help="New name for the key"
     )
 
-    # Describe key
     p_describe_key = subparsers.add_parser(
         'describe-key',
         description="Show information about a specified key"
@@ -326,8 +315,6 @@ def main():
         )
 
     # ----------------IMAGES/SIZES/LOCATIONS------------------
-    # List images
-
     p_list_images = subparsers.add_parser(
         'list-images',
         description="List images for a specified backend"
@@ -433,7 +420,17 @@ def main():
         description="Destroy a machine"
     )
 
-    for parser in [p_describe_machine, p_probe, p_start, p_stop, p_reboot, p_destroy]:
+    p_tag = subparsers.add_parser(
+        'tag',
+        description="Tag a machine"
+    )
+
+    p_tag.add_argument(
+        '--new-tag', required=True,
+        help="Add this tag to the machine"
+    )
+
+    for parser in [p_describe_machine, p_probe, p_start, p_stop, p_reboot, p_destroy, p_tag]:
         group = parser.add_mutually_exclusive_group(required=True)
         group.add_argument(
             '--id',
@@ -459,21 +456,6 @@ def main():
     p_create = subparsers.add_parser(
         'create',
         description="Create machine"
-    )
-
-    p_delete = subparsers.add_parser(
-        'delete',
-        description="Delete backend, key or network"
-    )
-
-    p_rename = subparsers.add_parser(
-        'rename',
-        description="Rename backend or key"
-    )
-
-    p_tag = subparsers.add_parser(
-        'tag',
-        description="Tag machine"
     )
 
     p_enable_monitoring = subparsers.add_parser(
@@ -561,19 +543,6 @@ def main():
         help="Enable monitoring on this machine"
     )
 
-    subparsers = p_tag.add_subparsers(
-        dest='target',
-        help="Tag machine"
-    )
-    p_tag_machine = subparsers.add_parser(
-        'machine',
-        help="Tag this machine"
-    )
-
-    p_tag_machine.add_argument(
-        '--tag', required=True,
-        help="Add this tag to the machine"
-    )
     #-----------------CREATE TARGETS-------------------
     subparsers = p_create.add_subparsers(
         dest='target',
@@ -606,23 +575,6 @@ def main():
         help="Id of the backend location. You can list locations for the given backend to find their ids"
     )
 
-    # ----------------RENAME TARGETS-------------------
-    subparsers = p_rename.add_subparsers(
-        dest='target',
-        help="Rename backend or key"
-    )
-
-    # ----------------DELETE TARGETS-------------------
-    subparsers = p_delete.add_subparsers(
-        dest='target',
-        description="Delele backend, key or network"
-    )
-
-    p_delete_backend = subparsers.add_parser(
-        'backend',
-        help="Delete this backend"
-    )
-
 
     # ----------------USER TARGETS---------------------
     subparsers = p_user.add_subparsers(
@@ -634,41 +586,6 @@ def main():
         'info',
         help='Get info about the user'
     )
-
-    #---------------BACKEND OPTIONS---------------------
-    # for parser in [p_list_locations,
-    #                 p_list_sizes, p_create_machine]:
-    #     group = parser.add_mutually_exclusive_group(required=True)
-    #     group.add_argument(
-    #         '--backend',
-    #         help="This can be either a backend's name or id"
-    #     )
-    #     group.add_argument(
-    #         '--backend-id',
-    #         help="Specify a backend's id"
-    #     )
-    #     group.add_argument(
-    #         '--backend-name',
-    #         help="Sepcify a backend's name"
-    #     )
-
-    #------------MACHINE OPTIONS------------------------
-    # for parser in [p_start_machine, p_reboot_machine, p_stop_machine, p_destroy_machine,
-    #                p_enable_monitoring_machine, p_disable_monitoring_machine,
-    #                p_list_plugins, p_add_plugin, p_display_machine, p_tag_machine]:
-    #     group = parser.add_mutually_exclusive_group(required=True)
-    #     group.add_argument(
-    #         '--machine',
-    #         help="This can be either a machine's name or id"
-    #     )
-    #     group.add_argument(
-    #         '--machine-id',
-    #         help="Specify a machine's id"
-    #     )
-    #     group.add_argument(
-    #         '--machine-name',
-    #         help="Sepcify a machine's name"
-    #     )
 
     argcomplete.autocomplete(main_parser)
     args = main_parser.parse_args()
@@ -689,7 +606,7 @@ def main():
     elif args.action == 'list-locations':
         location_action(args)
     elif args.action in ['list-machines', 'describe-machine', 'probe', 'start', 'stop', 'reboot',
-                         'destroy']:
+                         'destroy', 'tag']:
         machine_action(args)
     elif args.action == 'user' and args.target == 'info':
         user_info()
