@@ -353,7 +353,17 @@ def main():
         help="Print in a table format"
     )
 
-    for parser in [p_list_images, p_list_sizes]:
+    p_list_locations = subparsers.add_parser(
+        'list-sizes',
+        description="List images for a specified backend"
+    )
+
+    p_list_locations.add_argument(
+        '--pretty', action='store_true', default=False,
+        help="Print in a table format"
+    )
+
+    for parser in [p_list_images, p_list_sizes, p_list_locations]:
         group = parser.add_mutually_exclusive_group(required=True)
         group.add_argument(
             '--backend',
@@ -471,11 +481,6 @@ def main():
     subparsers = p_list.add_subparsers(
         dest='target',
         help='List info for this target, e.g. list machines'
-    )
-
-    p_list_locations = subparsers.add_parser(
-        'locations',
-        description="List locations for the given backend"
     )
 
     p_list_images = subparsers.add_parser(
