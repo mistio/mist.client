@@ -17,7 +17,7 @@ from mistcommand.helpers.images import image_action
 from mistcommand.helpers.sizes import size_action
 from mistcommand.helpers.locations import location_action
 from mistcommand.helpers.networks import network_action
-from mistcommand.helpers.plugins import plugin_action
+from mistcommand.helpers.metrics import metric_action
 from mistcommand.helpers.mistansible import ansible_action
 
 
@@ -523,15 +523,74 @@ def main():
         help="Currently supported only for Openstack. Required if multiple openstack networks are available"
     )
 
+
+    # -------------------METRICS ACTIONS-------------------
+    p_list_metrics = subparsers.add_parser(
+        'list-metrics',
+        description="List available metrics for this monitored machine"
+    )
+
+    p_list_metrics.add_argument(
+        '--pretty', action='store_true', default=False,
+        help="Print in a table format"
+    )
+
+    p_add_metric = subparsers.add_parser(
+        'add-metric',
+        help="Add a new metric to the machine"
+    )
+
+    p_add_metric.add_argument(
+        '--metric-id',
+        help="The id of the metric you want to add"
+    )
+
+    p_add_custom_metric = subparsers.add_parser(
+        'add-custom-metric',
+        description="Add custom python metric"
+    )
+
+    p_add_custom_metric.add_argument(
+        '--metric-name', required=True,
+        help="Name of the new custom metric"
+    )
+
+    p_add_custom_metric.add_argument(
+        '--file-path', required=True,
+        help="Path of the python metric"
+    )
+
+    p_add_custom_metric.add_argument(
+        '--value-type', default='gauge', choices=['gauge', 'derive'],
+        help="Value type can be gauge or derive"
+    )
+
+    p_add_custom_metric.add_argument(
+        '--unit', default=None,
+        help="Unit of the new custom metric"
+    )
+
+    for parser in [p_list_metrics, p_add_metric, p_add_custom_metric]:
+        group = parser.add_mutually_exclusive_group(required=True)
+        group.add_argument(
+            '--machine-id',
+            help="Id of the specified machine"
+        )
+        group.add_argument(
+            '--machine-name',
+            help="Name of the specified machine"
+        )
+        group.add_argument(
+            '--machine', nargs="?",
+            help="Name or id of the machine you want to specify"
+        )
+
+
+
     # p_get_stats = subparsers.add_parser(
     #     'get-stats',
     #     description="Get stats from a monitored machine"
     # )
-
-    p_user = subparsers.add_parser(
-        'user',
-        description="User actions"
-    )
 
     p_run = subparsers.add_parser(
         'run',
@@ -547,33 +606,10 @@ def main():
         '--tag', required=True,
         help="Run the command in machines that have this tag"
     )
-    # ------------------LIST TARGETS-------------------
-    p_list_plugins = subparsers.add_parser(
-        'plugins',
-        help="List available plugins for a machine"
-    )
 
-    # ----------------ADD TARGETS----------------------
-
-    p_add_plugin = subparsers.add_parser(
-        'plugin',
-        help="Add plugin to machine"
-    )
-
-    p_add_plugin.add_argument(
-        '--plugin-id', required=True,
-        help="Id of the plugin you want to add. You can list plugins for this machine to find available"
-             "plugins and the corresponding ids"
-    )
-
-    # ----------------USER TARGETS---------------------
-    subparsers = p_user.add_subparsers(
-        dest='target',
-        help='List info and take actions regarding the user'
-    )
-
+    # ----------------USER ACTIONS---------------------
     p_user_info = subparsers.add_parser(
-        'info',
+        'user-info',
         help='Get info about the user'
     )
 
@@ -600,10 +636,9 @@ def main():
     elif args.action in ['list-machines', 'describe-machine', 'probe', 'start', 'stop', 'reboot',
                          'destroy', 'tag', 'create-machine', 'enable-monitoring', 'disable-monitoring']:
         machine_action(args)
-    elif args.action == 'user' and args.target == 'info':
+    elif args.action in ['list-metrics', 'add-metric', 'add-custom-metric']:
+        metric_action(args)
+    elif args.action == 'user-info':
         user_info()
-    elif args.target in ['plugin', 'plugins']:
-        plugin_action(args)
-
 if __name__ == "__main__":
     main()

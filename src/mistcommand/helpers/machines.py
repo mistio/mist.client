@@ -109,6 +109,22 @@ def choose_machine(client, args):
     return machine
 
 
+def return_machine(client, args):
+    machine_id = args.machine_id
+    machine_name = args.machine_name
+    if machine_id:
+        machines = client.machines(id=machine_id)
+        machine = machines[0] if machines else None
+    elif machine_name:
+        machines = client.machines(name=machine_name)
+        machine = machines[0] if machines else None
+    else:
+        machines = client.machines(search=args.machine)
+        machine = machines[0] if machines else None
+
+    return machine
+
+
 def create_machine(client, backend, args):
     keys = client.keys(id=args.key_id)
     key = keys[0] if keys else None
