@@ -413,7 +413,27 @@ def main():
         description="Probe a specified machine"
     )
 
-    for parser in [p_describe_machine, p_probe]:
+    p_start = subparsers.add_parser(
+        'start',
+        description='Start a stopped machine'
+    )
+
+    p_stop = subparsers.add_parser(
+        'stop',
+        description="Stop a running machine"
+    )
+
+    p_reboot = subparsers.add_parser(
+        'reboot',
+        description="Reboot a machine"
+    )
+
+    p_destroy = subparsers.add_parser(
+        'destroy',
+        description="Destroy a machine"
+    )
+
+    for parser in [p_describe_machine, p_probe, p_start, p_stop, p_reboot, p_destroy]:
         group = parser.add_mutually_exclusive_group(required=True)
         group.add_argument(
             '--id',
@@ -436,15 +456,6 @@ def main():
         description="List added keys",
     )
 
-    p_display = subparsers.add_parser(
-        'display',
-        description="Display info about key or machine"
-    )
-    p_add = subparsers.add_parser(
-        'add',
-        description="Add backend, key or plugin to machine",
-    )
-
     p_create = subparsers.add_parser(
         'create',
         description="Create machine"
@@ -459,27 +470,6 @@ def main():
         'rename',
         description="Rename backend or key"
     )
-
-    p_start = subparsers.add_parser(
-        'start',
-        description="Start a machine"
-    )
-
-    p_stop = subparsers.add_parser(
-        'stop',
-        description="Stop a machine"
-    )
-
-    p_reboot = subparsers.add_parser(
-        'reboot',
-        description="Reboot a machine"
-    )
-
-    p_destroy = subparsers.add_parser(
-        'destroy',
-        description="Destroy a machine"
-    )
-
 
     p_tag = subparsers.add_parser(
         'tag',
@@ -539,22 +529,8 @@ def main():
         'plugins',
         help="List available plugins for a machine"
     )
-    # ----------------DISPLAY TARGETS------------------
-    subparsers = p_display.add_subparsers(
-        dest='target',
-        help='List info for this target, e.g. display backend --backend_name MyBackend'
-    )
-
-    p_display_machine = subparsers.add_parser(
-        'machine',
-        help="Display info for this machine"
-    )
 
     # ----------------ADD TARGETS----------------------
-    subparsers = p_add.add_subparsers(
-        dest='target',
-        help='Add a backend or key'
-    )
 
     p_add_plugin = subparsers.add_parser(
         'plugin',
@@ -567,43 +543,6 @@ def main():
              "plugins and the corresponding ids"
     )
     #-----------------MACHINE ACTIONS TARGETS----------
-
-    subparsers = p_reboot.add_subparsers(
-        dest='target',
-        help='Reboot machine'
-    )
-    p_reboot_machine = subparsers.add_parser(
-        'machine',
-        help="Reboot machine"
-    )
-
-    subparsers = p_start.add_subparsers(
-        dest='target',
-        help='Start machine'
-    )
-    p_start_machine = subparsers.add_parser(
-        'machine',
-        help="Start machine"
-    )
-
-    subparsers = p_stop.add_subparsers(
-        dest='target',
-        help='Stop machine'
-    )
-    p_stop_machine = subparsers.add_parser(
-        'machine',
-        help="Stop machine"
-    )
-
-    subparsers = p_destroy.add_subparsers(
-        dest='target',
-        help='Destroy machine'
-    )
-    p_destroy_machine = subparsers.add_parser(
-        'machine',
-        help="Destroy machine"
-    )
-
     subparsers = p_enable_monitoring.add_subparsers(
         dest='target',
         help="Enable monitoring on machine"
@@ -749,7 +688,8 @@ def main():
         size_action(args)
     elif args.action == 'list-locations':
         location_action(args)
-    elif args.action in ['list-machines', 'describe-machine', 'probe']:
+    elif args.action in ['list-machines', 'describe-machine', 'probe', 'start', 'stop', 'reboot',
+                         'destroy']:
         machine_action(args)
     elif args.action == 'user' and args.target == 'info':
         user_info()
