@@ -96,8 +96,21 @@ def add_backend(client, args):
     elif "docker" in provider:
         print "Not implemented yet"
         sys.exit(0)
+    elif "azure" in provider:
+        add_azure_backend(client, args)
     elif "bare" in provider:
         add_bare_metal_backend(client, args)
+
+
+def add_azure_backend(client, args):
+    title = args.name
+    provider = args.provider
+
+    key = args.azure_sub_id
+    with open(args.azure_cert_path) as f:
+        secret = f.read()
+
+    client.add_backend(title=title, provider=provider, key=key, secret=secret)
 
 
 def add_ec2_backend(client, args):

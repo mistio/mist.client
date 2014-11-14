@@ -115,7 +115,8 @@ def main():
         'softlayer',
         'hpcloud:region-a.geo-1',
         'hpcloud:region-b.geo-1',
-        'docker'
+        'docker',
+        'azure'
     ]
     p_add_backend.add_argument(
         '--provider', required=True, choices=provider_choices,
@@ -250,6 +251,16 @@ def main():
     bare_group.add_argument(
         '--bare-ssh-key-id',
         help="The id of the ssh key that is associated with the machine"
+    )
+
+    azure_group = p_add_backend.add_argument_group("Azure")
+    azure_group.add_argument(
+        '--azure-sub-id',
+        help="Subscription ID of azure account "
+    )
+    azure_group.add_argument(
+        '--azure-cert-path',
+        help="Path of azure cert file"
     )
 
     # ---------------KEY ACTIONS----------------------
