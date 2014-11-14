@@ -452,7 +452,18 @@ def main():
         help="Add this tag to the machine"
     )
 
-    for parser in [p_describe_machine, p_probe, p_start, p_stop, p_reboot, p_destroy, p_tag]:
+    p_enable_monitoring = subparsers.add_parser(
+        'enable-monitoring',
+        description="Enable monitoring on a machine"
+    )
+
+    p_disable_monitoring = subparsers.add_parser(
+        'disable-monitoring',
+        description="Disable monitoring on a machine"
+    )
+
+    for parser in [p_describe_machine, p_probe, p_start, p_stop, p_reboot, p_destroy, p_tag,
+                   p_enable_monitoring, p_disable_monitoring]:
         group = parser.add_mutually_exclusive_group(required=True)
         group.add_argument(
             '--id',
@@ -512,16 +523,6 @@ def main():
         help="Currently supported only for Openstack. Required if multiple openstack networks are available"
     )
 
-    p_enable_monitoring = subparsers.add_parser(
-        'enable-monitoring',
-        description="Enable monitoring on a machine"
-    )
-
-    p_disable_monitoring = subparsers.add_parser(
-        'disable-monitoring',
-        description="Disable monitoring on a machine"
-    )
-
     # p_get_stats = subparsers.add_parser(
     #     'get-stats',
     #     description="Get stats from a monitored machine"
@@ -564,24 +565,6 @@ def main():
         help="Id of the plugin you want to add. You can list plugins for this machine to find available"
              "plugins and the corresponding ids"
     )
-    #-----------------MACHINE ACTIONS TARGETS----------
-    subparsers = p_enable_monitoring.add_subparsers(
-        dest='target',
-        help="Enable monitoring on machine"
-    )
-    p_enable_monitoring_machine = subparsers.add_parser(
-        'machine',
-        help="Enable monitoring on this machine"
-    )
-
-    subparsers = p_disable_monitoring.add_subparsers(
-        dest='target',
-        help="Enable monitoring on machine"
-    )
-    p_disable_monitoring_machine = subparsers.add_parser(
-        'machine',
-        help="Enable monitoring on this machine"
-    )
 
     # ----------------USER TARGETS---------------------
     subparsers = p_user.add_subparsers(
@@ -615,7 +598,7 @@ def main():
     elif args.action == 'list-networks':
         network_action(args)
     elif args.action in ['list-machines', 'describe-machine', 'probe', 'start', 'stop', 'reboot',
-                         'destroy', 'tag', 'create-machine']:
+                         'destroy', 'tag', 'create-machine', 'enable-monitoring', 'disable-monitoring']:
         machine_action(args)
     elif args.action == 'user' and args.target == 'info':
         user_info()
