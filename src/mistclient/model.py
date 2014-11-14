@@ -128,9 +128,12 @@ class Backend(object):
 
         :returns: A list of available networks associated to a provider.
         """
-        req = self.request(self.mist_client.uri+'/backends/'+self.id+'/networks')
-        networks = req.get().json()
-        return networks
+        if self.provider in ['openstack', 'nephoscale']:
+            req = self.request(self.mist_client.uri+'/backends/'+self.id+'/networks')
+            networks = req.get().json()
+            return networks
+        else:
+            print "Network actions not supported yet for %s provider" % self.provider
 
     @property
     def images(self):
