@@ -496,6 +496,11 @@ def main():
         help="Id of the backend location. You can list locations for the given backend to find their ids"
     )
 
+    p_create_machine.add_argument(
+        '--network-id', required=False,
+        help="Currently supported only for Openstack. Required if multiple openstack networks are available"
+    )
+
     p_enable_monitoring = subparsers.add_parser(
         'enable-monitoring',
         description="Enable monitoring on a machine"

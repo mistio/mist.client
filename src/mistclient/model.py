@@ -215,7 +215,7 @@ class Backend(object):
 
     def create_machine(self, name, key, image_id, location_id, size_id, 
                        image_extra="", disk="", script="", monitoring=False, 
-                       ips=[]):
+                       ips=[], networks=[]):
         """
         Create a new machine on the given backend
 
@@ -238,7 +238,8 @@ class Backend(object):
             'disk': disk,
             'script': script,
             'monitoring': monitoring,
-            'ips': ips
+            'ips': ips,
+            'networks': networks
         }
         data = json.dumps(payload)
         req = self.request(self.mist_client.uri+'/backends/'+self.id+'/machines', data=data)

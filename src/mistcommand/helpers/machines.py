@@ -121,8 +121,12 @@ def create_machine(client, backend, args):
     image_id = args.image_id
     size_id = args.size_id
     location_id = args.location_id
+    networks = []
+    if args.network_id:
+        networks.append(args.network_id)
 
-    backend.create_machine(name=name, key=key, image_id=image_id, size_id=size_id, location_id=location_id)
+    backend.create_machine(name=name, key=key, image_id=image_id, size_id=size_id, location_id=location_id,
+                           networks=networks)
 
 
 def machine_action(args):
