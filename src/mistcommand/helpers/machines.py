@@ -144,7 +144,7 @@ def machine_action(args):
 
         display_machine(machine)
 
-    elif args.action == 'create':
+    elif args.action == 'create-machine':
         backend = return_backend(client, args)
         create_machine(client, backend, args)
         print "Created machine %s" % args.machine_name

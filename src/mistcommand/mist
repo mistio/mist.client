@@ -445,17 +445,44 @@ def main():
             help="Name or id of the machine you want to specify"
         )
 
-
-
-
-    p_list = subparsers.add_parser(
-        'list',
-        description="List added keys",
+    p_create_machine = subparsers.add_parser(
+        'create-machine',
+        help="Create a new machine"
     )
 
-    p_create = subparsers.add_parser(
-        'create',
-        description="Create machine"
+    group = p_create_machine.add_mutually_exclusive_group(required=True)
+    group.add_argument(
+        '--backend',
+        help="This can be either a backend's name or id"
+    )
+    group.add_argument(
+        '--backend-id',
+        help="Specify a backend's id"
+    )
+    group.add_argument(
+        '--backend-name',
+        help="Sepcify a backend's name"
+    )
+
+    p_create_machine.add_argument(
+        '--machine-name', required=True,
+        help="Name for the new machine"
+    )
+    p_create_machine.add_argument(
+        '--key-id',
+        help="Id of SSH Key to associate with the machine"
+    )
+    p_create_machine.add_argument(
+        '--image-id', required=True,
+        help="Id of OS Image. You can list images for the given backend to find their ids"
+    )
+    p_create_machine.add_argument(
+        '--size-id', required=True,
+        help="Id of machine size. You can list sizes for the given backend to find their ids"
+    )
+    p_create_machine.add_argument(
+        '--location-id', required=True,
+        help="Id of the backend location. You can list locations for the given backend to find their ids"
     )
 
     p_enable_monitoring = subparsers.add_parser(
@@ -493,20 +520,6 @@ def main():
         help="Run the command in machines that have this tag"
     )
     # ------------------LIST TARGETS-------------------
-    subparsers = p_list.add_subparsers(
-        dest='target',
-        help='List info for this target, e.g. list machines'
-    )
-
-    p_list_images = subparsers.add_parser(
-        'images',
-        description="List available OS Images for the given backend"
-    )
-    p_list_images.add_argument(
-        '--search', required=False,
-        help="Search for OS Images that contain this."
-    )
-
     p_list_plugins = subparsers.add_parser(
         'plugins',
         help="List available plugins for a machine"
@@ -543,39 +556,6 @@ def main():
         help="Enable monitoring on this machine"
     )
 
-    #-----------------CREATE TARGETS-------------------
-    subparsers = p_create.add_subparsers(
-        dest='target',
-        help="Create machine or network"
-    )
-
-    p_create_machine = subparsers.add_parser(
-        'machine',
-        help="Create a new machine"
-    )
-
-    p_create_machine.add_argument(
-        '--machine-name', required=True,
-        help="Name for the new machine"
-    )
-    p_create_machine.add_argument(
-        '--key-id',
-        help="Id of SSH Key to associate with the machine"
-    )
-    p_create_machine.add_argument(
-        '--image-id', required=True,
-        help="Id of OS Image. You can list images for the given backend to find their ids"
-    )
-    p_create_machine.add_argument(
-        '--size-id', required=True,
-        help="Id of machine size. You can list sizes for the given backend to find their ids"
-    )
-    p_create_machine.add_argument(
-        '--location-id', required=True,
-        help="Id of the backend location. You can list locations for the given backend to find their ids"
-    )
-
-
     # ----------------USER TARGETS---------------------
     subparsers = p_user.add_subparsers(
         dest='target',
@@ -606,7 +586,7 @@ def main():
     elif args.action == 'list-locations':
         location_action(args)
     elif args.action in ['list-machines', 'describe-machine', 'probe', 'start', 'stop', 'reboot',
-                         'destroy', 'tag']:
+                         'destroy', 'tag', 'create-machine']:
         machine_action(args)
     elif args.action == 'user' and args.target == 'info':
         user_info()
