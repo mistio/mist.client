@@ -16,6 +16,7 @@ from mistcommand.helpers.machines import machine_action
 from mistcommand.helpers.images import image_action
 from mistcommand.helpers.sizes import size_action
 from mistcommand.helpers.locations import location_action
+from mistcommand.helpers.networks import network_action
 from mistcommand.helpers.plugins import plugin_action
 from mistcommand.helpers.mistansible import ansible_action
 
@@ -314,7 +315,7 @@ def main():
             help="Name of the key you want to delete"
         )
 
-    # ----------------IMAGES/SIZES/LOCATIONS------------------
+    # ----------------IMAGES/SIZES/LOCATIONS/NETWORKS------------------
     p_list_images = subparsers.add_parser(
         'list-images',
         description="List images for a specified backend"
@@ -350,7 +351,17 @@ def main():
         help="Print in a table format"
     )
 
-    for parser in [p_list_images, p_list_sizes, p_list_locations]:
+    p_list_networks = subparsers.add_parser(
+        'list-networks',
+        help="List availablen networks for specified provider (currently only OPENSTACK support)"
+    )
+
+    p_list_networks.add_argument(
+        '--pretty', action='store_true', default=False,
+        help="Print in a table format"
+    )
+
+    for parser in [p_list_images, p_list_sizes, p_list_locations, p_list_networks]:
         group = parser.add_mutually_exclusive_group(required=True)
         group.add_argument(
             '--backend',
@@ -585,6 +596,8 @@ def main():
         size_action(args)
     elif args.action == 'list-locations':
         location_action(args)
+    elif args.action == 'list-networks':
+        network_action(args)
     elif args.action in ['list-machines', 'describe-machine', 'probe', 'start', 'stop', 'reboot',
                          'destroy', 'tag', 'create-machine']:
         machine_action(args)
