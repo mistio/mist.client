@@ -2,7 +2,7 @@ import sys
 
 from prettytable import PrettyTable
 from mistcommand.helpers.login import authenticate
-from mistcommand.helpers.backends import choose_backend
+from mistcommand.helpers.backends import return_backend
 
 
 def choose_machines_by_tag(client, tag):
@@ -17,7 +17,7 @@ def choose_machines_by_tag(client, tag):
     return chosen_machines
 
 
-def list_machines(client, backend):
+def list_machines(client, backend, pretty):
     x = PrettyTable(["Name", "ID", "State", "Public Ips", "Backend Title", "Tags"])
     if not backend:
         machines = client.machines()
@@ -29,7 +29,12 @@ def list_machines(client, backend):
                 ips = ""
             machine_tags = machine.info.get('tags', [])
             tags = ",".join(machine_tags)
-            x.add_row([machine.name, machine.id, machine.info['state'], ips, machine.backend.title, tags])
+
+            if pretty:
+                x.add_row([machine.name, machine.id, machine.info['state'], ips, machine.backend.title, tags])
+            else:
+                print "%-25s %-60s %-10s %-20s %-30s %-20s" % (machine.name, machine.id, machine.info['state'], ips,
+                                                               machine.backend.title, tags)
 
     else:
         machines = backend.machines()
@@ -41,9 +46,14 @@ def list_machines(client, backend):
                 ips = ""
             machine_tags = machine.info.get('tags', [])
             tags = ",".join(machine_tags)
-            x.add_row([machine.name, machine.id, machine.info['state'], ips, backend.title, tags])
+            if pretty:
+                x.add_row([machine.name, machine.id, machine.info['state'], ips, backend.title, tags])
+            else:
+                print "%-25s %-60s %-10s %-20s %-30s %-20s" % (machine.name, machine.id, machine.info['state'], ips,
+                                                               machine.backend.title, tags)
 
-    print x
+    if pretty:
+        print x
 
 
 def display_machine(machine):
@@ -119,13 +129,15 @@ def machine_action(args):
 
     client = authenticate()
 
-    if args.action == 'list':
+    if args.action == 'list-machines':
         if args.backend or args.backend_id or args.backend_name:
-            backend = choose_backend(client, args)
+            backend = return_backend(client, args)
         else:
             backend = None
 
-        list_machines(client, backend)
+        pretty = args.pretty
+
+        list_machines(client, backend, pretty)
 
     elif args.action == 'display':
         machine = choose_machine(client, args)
@@ -133,7 +145,7 @@ def machine_action(args):
         display_machine(machine)
 
     elif args.action == 'create':
-        backend = choose_backend(client, args)
+        backend = return_backend(client, args)
         create_machine(client, backend, args)
         print "Created machine %s" % args.machine_name
 

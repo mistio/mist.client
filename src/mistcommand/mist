@@ -378,7 +378,30 @@ def main():
             help="Sepcify a backend's name"
         )
 
+    # --------------MACHINE ACTIONS-------------------------
+    p_list_machines = subparsers.add_parser(
+        'list-machines',
+        description="List all machines or on a specific backend"
+    )
 
+    group = p_list_machines.add_mutually_exclusive_group()
+    group.add_argument(
+        '--backend',
+        help="This can be either a backend's name or id"
+    )
+    group.add_argument(
+        '--backend-id',
+        help="Specify a backend's id"
+    )
+    group.add_argument(
+        '--backend-name',
+        help="Sepcify a backend's name"
+    )
+
+    p_list_machines.add_argument(
+        '--pretty', action='store_true', default=False,
+        help="Print in a table format"
+    )
 
 
 
@@ -490,26 +513,6 @@ def main():
     p_list_images.add_argument(
         '--search', required=False,
         help="Search for OS Images that contain this."
-    )
-
-    p_list_machines = subparsers.add_parser(
-        'machines',
-        description="List machines for all or a specific backend. "
-                    "If no backend is specified it will list all machines for all backends"
-    )
-
-    group = p_list_machines.add_mutually_exclusive_group()
-    group.add_argument(
-        '--backend',
-        help="This can be either a backend's name or id"
-    )
-    group.add_argument(
-        '--backend-id',
-        help="Specify a backend's id"
-    )
-    group.add_argument(
-        '--backend-name',
-        help="Sepcify a backend's name"
     )
 
     p_list_plugins = subparsers.add_parser(
@@ -735,14 +738,10 @@ def main():
         size_action(args)
     elif args.action == 'list-locations':
         location_action(args)
+    elif args.action in ['list-machines']:
+        machine_action(args)
     elif args.action == 'user' and args.target == 'info':
         user_info()
-    elif args.target == 'images':
-        image_action(args)
-    elif args.target in ['keys', 'key']:
-        key_action(args)
-    elif args.target in ['machine', 'machines']:
-        machine_action(args)
     elif args.target in ['plugin', 'plugins']:
         plugin_action(args)
 
