@@ -403,6 +403,25 @@ def main():
         help="Print in a table format"
     )
 
+    p_describe_machine = subparsers.add_parser(
+        'describe-machine',
+        help="Show information about a specified machine"
+    )
+
+    for parser in [p_describe_machine]:
+        group = parser.add_mutually_exclusive_group(required=True)
+        group.add_argument(
+            '--id',
+            help="Id of the specified backend"
+        )
+        group.add_argument(
+            '--name',
+            help="Name of the specified backend"
+        )
+        group.add_argument(
+            'machine', nargs="?",
+            help="Name or id of the machine you want to specify"
+        )
 
 
 
@@ -738,7 +757,7 @@ def main():
         size_action(args)
     elif args.action == 'list-locations':
         location_action(args)
-    elif args.action in ['list-machines']:
+    elif args.action in ['list-machines', 'describe-machine']:
         machine_action(args)
     elif args.action == 'user' and args.target == 'info':
         user_info()

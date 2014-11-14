@@ -94,8 +94,8 @@ def machine_take_action(machine, action):
 
 
 def choose_machine(client, args):
-    machine_id = args.machine_id
-    machine_name = args.machine_name
+    machine_id = args.id
+    machine_name = args.name
     if machine_id:
         machines = client.machines(id=machine_id)
         machine = machines[0] if machines else None
@@ -139,7 +139,7 @@ def machine_action(args):
 
         list_machines(client, backend, pretty)
 
-    elif args.action == 'display':
+    elif args.action == 'describe-machine':
         machine = choose_machine(client, args)
 
         display_machine(machine)
