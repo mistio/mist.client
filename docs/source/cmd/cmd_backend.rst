@@ -147,7 +147,7 @@ Output::
     openstackdfe.mist.io                     XMdRN2u3NVASMm14BuHo4HJnS15              bare_metal                     online
 
 
-.. Note:: You can use the ``--pretty`` flag. ``mist list-backends --pretty will return:
+.. Note:: You can use the ``--pretty`` flag. ``mist list-backends --pretty`` will return:
 
 ::
 
