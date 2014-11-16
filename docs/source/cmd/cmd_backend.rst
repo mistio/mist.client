@@ -137,47 +137,63 @@ You can now see a list of all your added backends::
 
 Output::
 
-    +---------------+------------------------------+------------------+--------+
-    |      Name     |              ID              |     Provider     | State  |
-    +---------------+------------------------------+------------------+--------+
-    |   NephoScale  | W16qxKErSArH9DSNJyxXU81n35w  |    nephoscale    | online |
-    |  DigitalOcean | 3aJhBzUtAMnCUmpEHKJsqLdm1Z9p |   digitalocean   | online |
-    | Rackspace ORD | 2zMXgapqqaw9bSNUzSmuygFLy6Kp |    rackspace     | online |
-    |      EC2      | D1g9abwqGUmQuZKGGBMfCgw8AUQ  | ec2_ap_northeast | online |
-    |     Docker    | B3rbEA6bteaqMWJ4obVbgbqrXWf  |      docker      | online |
-    |  Rackspace AU | 36vp27TVyUCarDNNcta1Knsqcr8Z |    rackspace     | online |
-    +---------------+------------------------------+------------------+--------+
+    openstackaf0.mist.io                     2Mn2ZnCoXhK3ywqzGn1fzWVmSSe6             bare_metal                     online
+    Icehouse                                 4ukW6Juooqa8bTu2YgM4mE8RAsk7             openstack                      online
+    EC2 AP Sydney                            25ykPERh5D17DyoeKsCgw35DLmvw             ec2_ap_southeast_2             online
+    Openstack Juno                           2u5yKqXmDiZ7BHCk1u17FFcmFS2m             openstack                      online
+    HP Helion Cloud                          3WwgPBXETjdeMEbM5fUCACSvedGT             hpcloud                        online
+    Google Compute Engine                    g6T3HYae2ZMcHfHyFGKVtMG6PZU              gce                            online
+    Docker                                   B3rbEA6bteaqMWJ4obVbgbqrXWf              docker                         online
+    openstackdfe.mist.io                     XMdRN2u3NVASMm14BuHo4HJnS15              bare_metal                     online
+
+
+.. Note:: You can use the ``--pretty`` flag. ``mist list-backends --pretty will return:
+
+::
+
+    +-----------------------+------------------------------+--------------------+--------+
+    |          Name         |              ID              |      Provider      | State  |
+    +-----------------------+------------------------------+--------------------+--------+
+    |  openstackaf0.mist.io | 2Mn2ZnCoXhK3ywqzGn1fzWVmSSe6 |     bare_metal     | online |
+    |        Icehouse       | 4ukW6Juooqa8bTu2YgM4mE8RAsk7 |     openstack      | online |
+    |     EC2 AP Sydney     | 25ykPERh5D17DyoeKsCgw35DLmvw | ec2_ap_southeast_2 | online |
+    |     Openstack Juno    | 2u5yKqXmDiZ7BHCk1u17FFcmFS2m |     openstack      | online |
+    |    HP Helion Cloud    | 3WwgPBXETjdeMEbM5fUCACSvedGT |      hpcloud       | online |
+    | Google Compute Engine | g6T3HYae2ZMcHfHyFGKVtMG6PZU  |        gce         | online |
+    |         Docker        | B3rbEA6bteaqMWJ4obVbgbqrXWf  |       docker       | online |
+    |  openstackdfe.mist.io | XMdRN2u3NVASMm14BuHo4HJnS15  |     bare_metal     | online |
+    +-----------------------+------------------------------+--------------------+--------+
+
 
 You can also display information about a specific backend, either by providing the backend's name or ID. The following
 commands are equivalent::
 
-    mist show backend --name EC2
-    mist show backend --id D1g9abwqGUmQuZKGGBMfCgw8AUQ
+    mist describe-backend Icehouse
+    mist describe-backend 4ukW6Juooqa8bTu2YgM4mE8RAsk7
+    mist describe-backend --id 4ukW6Juooqa8bTu2YgM4mE8RAsk7
+    mist describe-backend --name Icehouse
 
 Output::
 
-    +--------------+------------------------------+-----------+--------+
-    |    Title     |              ID              |  Provider | State  |
-    +--------------+------------------------------+-----------+--------+
-    | Rackspace AU | 36vp27TVyUCarDNNcta1Knsqcr8Z | rackspace | online |
-    +--------------+------------------------------+-----------+--------+
+    +----------+------------------------------+-----------+--------+
+    |  Title   |              ID              |  Provider | State  |
+    +----------+------------------------------+-----------+--------+
+    | Icehouse | 4ukW6Juooqa8bTu2YgM4mE8RAsk7 | openstack | online |
+    +----------+------------------------------+-----------+--------+
 
     Machines:
-    +------------------------+--------------------------------------+---------+------------------------------------------------------+
-    |          Name          |                  ID                  |  State  |                      Public Ips                      |
-    +------------------------+--------------------------------------+---------+------------------------------------------------------+
-    | dbServer               | 9da278-48cf-4673-97-5b101db72769     | running | 119.19.32.217 -- 2400:1700:7000:100:fecc:c49c:28:892 |
-    +------------------------+--------------------------------------+---------+------------------------------------------------------+
+    +---------+--------------------------------------+---------+-------------+
+    |   Name  |                  ID                  |  State  |  Public Ips |
+    +---------+--------------------------------------+---------+-------------+
+    | atlanta | c9411bbe-2bb2-4a88-996c-d831272b426e | running | 109.59.77.32|
+    +---------+--------------------------------------+---------+-------------+
+
 
 You have the option to rename a backend::
 
-    mist rename backend --name EC2 --new_name RenamedBackend
+    mist rename-backend Icehouse --new-name Openstack_Icehouse
 
 Finally you can delete a backend. The following two commands are equivalent::
 
-    mist delete backend --name DigitalOcean
-    mist delete backend --id D1g9abwqGUmQuZKGGBMfCgw8AUQ
+    mist delete-backend Docker
 
-You can see a full use case `here`_
-
-.. _here: http://asciinema.org/a/11875
