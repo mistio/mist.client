@@ -10,14 +10,47 @@ Supported Providers
 ===================
 Before you add a new backend, you'll find it useful to see a list of all the providers that mist.io supports::
 
-    mist list providers
+    mist list-providers
 
 Output::
+
+    Bare Metal Server              bare_metal
+    Azure                          azure
+    EC2 AP NORTHEAST               ec2_ap_northeast
+    EC2 AP SOUTHEAST               ec2_ap_southeast
+    EC2 AP Sydney                  ec2_ap_southeast_2
+    EC2 EU Ireland                 ec2_eu_west
+    EC2 SA EAST                    ec2_sa_east
+    EC2 US EAST                    ec2_us_east
+    EC2 US WEST                    ec2_us_west
+    EC2 US WEST OREGON             ec2_us_west_oregon
+    Google Compute Engine          gce
+    NephoScale                     nephoscale
+    DigitalOcean                   digitalocean
+    Linode                         linode
+    OpenStack                      openstack
+    Rackspace DFW                  rackspace:dfw
+    Rackspace ORD                  rackspace:ord
+    Rackspace IAD                  rackspace:iad
+    Rackspace LON                  rackspace:lon
+    Rackspace AU                   rackspace:syd
+    Rackspace HKG                  rackspace:hkg
+    Rackspace US (OLD)             rackspace_first_gen:us
+    Rackspace UK (OLD)             rackspace_first_gen:uk
+    SoftLayer                      softlayer
+    HP Helion Cloud - US West      hpcloud:region-a.geo-1
+    HP Helion Cloud - US East      hpcloud:region-b.geo-1
+    Docker                         docker
+
+.. Note:: With every *list* action, you can have the output in a more *pretty* format by providing the ``--pretty`` flag.
+
+For example, ``mist list-providers --pretty`` will return this output::
 
     +---------------------------+------------------------+
     |           Title           |      Provider ID       |
     +---------------------------+------------------------+
     |     Bare Metal Server     |       bare_metal       |
+    |           Azure           |         azure          |
     |      EC2 AP NORTHEAST     |    ec2_ap_northeast    |
     |      EC2 AP SOUTHEAST     |    ec2_ap_southeast    |
     |       EC2 AP Sydney       |   ec2_ap_southeast_2   |
