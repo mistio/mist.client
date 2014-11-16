@@ -82,14 +82,58 @@ From here on you'll need your desired provider's id in order to use it when addi
 
 Backend Actions
 ===============
-To add a new backend you'll need at least the provider's id, a name for the backend, an apikey/username and
-apisecret/password. For example, in order to add a Rackspace backend::
 
-    mist add backend --name RackBackend --provider rackspace:ord --key rackspace_username --secret rackspace_secret_key
+Add an EC2 backend::
+
+    mist add-backend --provider ec2_ap_northeast --ec2-api-key AKIAHKIB7OIJCX7YLIO3JA --ec2-api-secret knbkGJKHG9gjhUuhgfjtiu987
+
+Add a Rackspace backend::
+
+    mist add-backend --provider rackspace:iad --rackspace-username my_username --rackspace-api-key 098er098eqwec98dqdqd098
+
+Add a Nephoscale backend::
+
+    mist list backends --provider nephoscale --nepho-username nepho_username --nepho-password nepho_passwd
+
+Add a DigitalOcean backend::
+
+    mist add-backend --provider digitalocean --digi-token kjhdkfh897dfodlkfjlkhdf90sdfusldkfjkljsdf098lkjlkj
+
+Add a Linode backend::
+
+    mist add-backend --provider linode --linode-api-key dkljflkjlkgddgijgd00987ghudGgcf9Glkjh
+
+Add an OpenStack backend::
+
+    mist add-backend --provider openstack --openstack-username demo --openstack-password mypass --openstack-auth-url http://10.0.0.1:5000 --openstack-tenant demo
+
+Add a Softlayer backend::
+
+    mist add-backend --provider softlayer --softlayer-username soft_username --softlayer-api-key kjhfdkjahf098OIjhkFChiugiGIIUuoh
+
+Add a HP Cloud backend::
+
+    mist add-backend --provider hpcloud:region-a.geo-1 --hp-username hp_username --hp-password my_pass --hp-tenant my_tenant
+
+Add a Azure backend::
+
+    To add a Azure backend you have to download to a file the Azure certificate.
+
+    mist add-backend --provider azure --azure-sub-id lkjoiy8-kjdjkhd-987-hd9d --azure-cert-path /home/user/azure.cert
+
+Add a Docker backend::
+
+    mist add-backend --provider docker --docker-host 10.0.0.1 --docker-port 4243
+
+Add a Bare Metal Server (or any server)::
+
+    mist add-backend --provider bare_metal --bare-hostname 198.230.89.3 --bare-user root --bare-port 22 --bare-ssh-key-id my_ssh_key
+
 
 You can now see a list of all your added backends::
 
-    mist list backends
+    mist list-backends
+
 
 Output::
 
