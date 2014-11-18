@@ -127,5 +127,5 @@ You can also tag machine::
 
     mist tag db-server-1 --new-tag dbservers
 
-Tagging will be useful later when you want tpo group your machine across different clouds and run multiple commands
+Tagging will be useful later when you want to group your machines across different clouds and run multiple commands
 and configuration scripts.

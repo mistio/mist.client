@@ -49,7 +49,7 @@ mist - command line interface
    cmd/cmd_key
    cmd/cmd_machine
    cmd/cmd_monitor
-   cmd/run
+   cmd/cmd_run
 
 mist.ansible - Ansible modules for mist.io service
 ==================================================
