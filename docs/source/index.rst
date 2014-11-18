@@ -17,6 +17,14 @@ source installation of `mist.io`_.
 
 .. _mist.io: https://github.com/mistio/mist.io
 
+Quickstart
+===========
+
+.. toctree::
+   :maxdepth: 1
+
+   quickstart/python
+
 mistclient - Python interface
 ==============================
 
