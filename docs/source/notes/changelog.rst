@@ -1,8 +1,15 @@
 Changelog
 *********
 
-Release 0.1.1 (in development)
-==============================
+Release 0.3.0 (released Nov 18,2014)
+====================================
+
+Featured added:
+* Repackage ``mist.client`` to ``mist``
+* Refactor  ``mistclient.machines`` and ``mistclient.backends``
+* ``client.machines``, ``client.backends``, ``client.keys`` are now lists instead of dicts
+* Refactor the  ``mist`` command line tool
+* Add ``mist run`` capability
 
 Release 0.1.0 (released Sep 3, 2014)
 ====================================
