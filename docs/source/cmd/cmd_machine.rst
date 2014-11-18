@@ -10,7 +10,7 @@ Images
 To see all the available images for a backend. *The* ``--backend`` *option can be either the backend's id or name. Both will do.*
 ::
 
-    mist list images --backend Juno
+    mist list-images --backend Juno
 
 
 Output::
@@ -34,8 +34,8 @@ The list of images can be huge, especially on providers such as EC2. My default 
 used images. You can however use the ``--search`` option. If you provide ``--search all`` mist.io will provide all
 available images. If you want to narrow your search you can search for a specific image::
 
-    mist list images --backend DigitalOcean --search all
-    mist list images --backend DigitalOcean --search gentoo
+    mist list-images --backend DigitalOcean --search all
+    mist list-images --backend DigitalOcean --search gentoo
 
 From the returned list you 'll need your desired image's ID to be used with machine creation.
 
