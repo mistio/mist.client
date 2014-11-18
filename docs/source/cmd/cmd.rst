@@ -1,7 +1,7 @@
 Getting Started with mist command
 *********************************
 
-The ``mist`` command line tool gets installed alongside mist.client package.
+The ``mist`` command line tool gets installed alongside mist package.
 
 ``mist`` will prompt for your mist email and password. At the end it will ask you to create a config file ``~/.mist``.
 By having the config file you'll be able to use mist command without providing your credentials every time. The config
@@ -16,9 +16,20 @@ file will look like this::
 
 .. Note:: *In case you have a private installation of mist.io you can change the mist_uri to point to your custom url*
 
+.. Note:: The ``mist`` command line tool supports bash completion.
+
+To enable auto-completion, you have to do the following::
+
+    sudo activate-global-python-argcomplete
+
+And then add the following line in your ``~/.bashrc``::
+
+    eval "$(register-python-argcomplete  /usr/bin/mist)"
+
+
 To see your accounts' specific information::
 
-    mist user info
+    mist user-info
 
 Output::
 
@@ -39,46 +50,13 @@ Output::
 
 General Usage
 =============
-The command line tool is used as ``mist <action> <target> [--extra-params...]``
+The command line tool is used as ``mist <action> [--extra-params...]``
 
-A few examples of actions and targets:
-
-List backends, machines, keys:
-
-* mist list
+For example:
 ::
 
-    mist list providers
-
-
-Display specific information:
-
-* mist show
-::
-
-    mist show backend --name EC2NorthEast
-
-
-Add new backends, keys:
-
-* mist add
-::
-
-    mist add backend --name EC2 --provider ec2_ap_northeast --key IUOOLK9098OLIU --secret sahkjlhadoiu098098lLKlkjlkj
-
-
-Create a new machine:
-
-* mist create
-::
-
-    mist create machine --name dbServer
-
-Delete/remove:
-
-* mist delete
-::
-
-    mist delete backend --id 3aJoiuYB9mpEHKJsqLdm1Z9p
-
-
+    mist list-providers
+    mist list-machines
+    mist add-backend --name EC2 --provider ec2_ap_northeast --ec2-api-key IUOOLK9098OLIU --ec2-api-secret sahkjlhadoiu098098lLKlkjlkj
+    mist delete-backend Rackspace
+    mist create-machine --name dbServer

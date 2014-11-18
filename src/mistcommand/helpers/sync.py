@@ -5,8 +5,8 @@ import getpass
 from yaml import load
 from yaml.scanner import ScannerError
 
-from mist.client import MistClient
-from mist.client.helpers import machine_from_id, backend_from_id
+from mistclient import MistClient
+from mistclient.helpers import machine_from_id, backend_from_id
 
 
 def load_dbyaml(path):

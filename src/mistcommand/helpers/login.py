@@ -3,7 +3,7 @@ import sys
 import getpass
 import time
 import ConfigParser
-from mist.client import MistClient
+from mistclient import MistClient
 from prettytable import PrettyTable
 
 

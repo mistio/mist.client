@@ -10,27 +10,27 @@ used as collectd plugins, allowing you to monitor...well, almost everything.
 
 Enable monitoring
 =================
-In order to enable monitoring on a machine::
+In order to enable monitoring on a machine with name ``dbServer``::
 
-    mist enable-monitoring machine --backend EC2 --name dbServer
+    mist enable-monitoring dbServer
 
 Now, your dbServer machine has collectd installed and you can visit mist.io to see live graphs (note that the first time
 you enable collectd it may take some time for the package to install).
 
 To disable monitoring on a machine::
 
-    mist disable-monitoring machine --backend EC2 --name dbServer
+    mist disable-monitoring dbServer
 
 
 Add Metrics
 ===========
 Collectd supports a huge list of custom metrics/plugins. To see all available plugins/metrics for a monitored machine::
 
-    mist list plugins --backend EC2 --name dbServer
+    mist list-metrics --machine dbServer
 
-If you wish to add one of those plugins you have to use the plugin's id. For example, to add the plugin ``users``::
+If you wish to add one of those metrics you have to use the metric's id. For example, to add the metric ``users``::
 
-    mist add plugin --backend EC2 --name dbServer --plugin users
+    mist add-metric --machine dbServer --metric-id users
 
 Mist.io supports custom, python plugins. For example, if you have a ``~/plugin.py``::
 
@@ -42,6 +42,5 @@ Mist.io supports custom, python plugins. For example, if you have a ``~/plugin.p
 
 You can add it by providing the ``--custom_plugin`` parameter and providing a plugin name with the ``--plugin`` parameter::
 
-    mist add plugin --backend EC2 --name dbServer --plugin MyPlugin --custom_plugin ~/plugin.py
-
+    mist add-custom-metric --machine dbServer --metric-name my_custom_metric --file-path ~/plugin.py --unit my_unit
 

@@ -63,28 +63,29 @@ Backend actions
 ===============
 You can see all of your added backends::
 
-    client.backends
+    client.backends()
 
-This will return a dict like this::
+This will return a list of all your added backends::
 
-    {u'2zMXgapqqaw9bSNUzSmuygFLy6Kp': Backend => Rackspace ORD, rackspace, 2zMXgapqqaw9bSNUzSmuygFLy6Kp,
-     u'36vp27TVyUCarDNNcta1Knsqcr8Z': Backend => Rackspace AU, rackspace, 36vp27TVyUCarDNNcta1Knsqcr8Z,
-     u'3aJhBzUtAMnCUmpEHKJsqLdm1Z9p': Backend => DigitalOcean, digitalocean, 3aJhBzUtAMnCUmpEHKJsqLdm1Z9p,
-     u'B3rbEA6bteaqMWJ4obVbgbqrXWf': Backend => Docker, docker, B3rbEA6bteaqMWJ4obVbgbqrXWf,
-     u'W16qxKErSArH9DSNJyxXU81n35w': Backend => NephoScale, nephoscale, W16qxKErSArH9DSNJyxXU81n35w}
+    [Backend => EC2 AP NORTHEAST, ec2_ap_northeast, D1g9abwqGUmQuZKGGBMfCgw8AUQ,
+     Backend => openstackaf0.mist.io, bare_metal, 2Mn2ZnCoXhK3ywqzGn1fzWVmSSe6,
+     Backend => Icehouse, openstack, 4ukW6Juooqa8bTu2YgM4mE8RAsk7,
+     Backend => EC2 AP Sydney, ec2_ap_southeast_2, 25ykPERh5D17DyoeKsCgw35DLmvw,
+     Backend => Openstack Juno, openstack, 2u5yKqXmDiZ7BHCk1u17FFcmFS2m,
+     Backend => HP Helion Cloud, hpcloud, 3WwgPBXETjdeMEbM5fUCACSvedGT,
+     Backend => Google Compute Engine, gce, g6T3HYae2ZMcHfHyFGKVtMG6PZU,
+     Backend => Docker, docker, B3rbEA6bteaqMWJ4obVbgbqrXWf,
+     Backend => openstackdfe.mist.io, bare_metal, XMdRN2u3NVASMm14BuHo4HJnS15]
 
-You can choose a backend::
-
-    backend = client.backends['2zMXgapqqaw9bSNUzSmuygFLy6Kp']
 
 You can also choose a backend by providing either the backend's name or id::
 
-    backend = client.backend_from_id("2zMXgapqqaw9bSNUzSmuygFLy6Kp")
-    backend = client.backend_from_name("DigitalOcean")
+    backend = client.backends(id="XMdRN2u3NVASMm14BuHo4HJnS15")[0]
+    backend = client.backends(name="Docker")[0]
 
-You can also use the overloaded function ``client.search_backend("search_term")`` by providing either an id
-or a name and it will return the first backend with that has either an id or name that matches the given
-parameter.
+You can also search in all the backends' ids and names::
+
+    backend = client.backends(search="OpenStack")[0]
 
 Your new backend object has a lot of attributes and methods::
 
@@ -93,11 +94,11 @@ Your new backend object has a lot of attributes and methods::
     backend.images
     ...
 
-See ``mist.client.model.Backend`` class for detailed information.
+See ``mistclient.model.Backend`` class for detailed information.
 
 You have the option to rename a backend::
 
-    backend.rename("newName"
+    backend.rename("newName")
 
 
 Finally, you can delete a backend::

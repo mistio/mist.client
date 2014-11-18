@@ -6,18 +6,26 @@
 Welcome to mist.client's documentation!
 ***************************************
 
-:Version: 0.1.1
+:Version: 0.3.0
 :Author: Mist.io Inc
 :Source: https://github.com/mistio/mist.client
 :License: GPL v3
 
-Mist.client is a Python and a command line interface for managing and monitoring servers across clouds from any device
+Mist is a Python and a command line interface for managing and monitoring servers across clouds from any device
 that can access the web. To use it you need an account to the freemium https://mist.io service or a private open
 source installation of `mist.io`_.
 
 .. _mist.io: https://github.com/mistio/mist.io
 
-mist.client - Python interface
+Quickstart
+===========
+
+.. toctree::
+   :maxdepth: 1
+
+   quickstart/python
+
+mistclient - Python interface
 ==============================
 
 .. toctree::
@@ -41,7 +49,7 @@ mist - command line interface
    cmd/cmd_key
    cmd/cmd_machine
    cmd/cmd_monitor
-   cmd/sync
+   cmd/cmd_run
 
 mist.ansible - Ansible modules for mist.io service
 ==================================================

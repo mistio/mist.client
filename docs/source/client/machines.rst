@@ -5,7 +5,7 @@ Before you can provision a machine, you have to know some data that are necessar
 backend has different OS Images, locations, machine sizes. You can list all the available options after you have chosen
 a backend::
 
-    backend = client.backend_from_name("NephoScale")
+    backend = client.backends(search="NephoScale")
 
 Images
 ======
@@ -102,7 +102,7 @@ a machine with that image::
 You also have the option to search for an image. Especially in EC2 backends, the result of the search will include
 community and public images::
 
-    client.search_image("Debian")
+    backend.search_image("Debian")
 
 Sizes
 =====
@@ -150,27 +150,24 @@ name for the machine::
 
     backend.create_machine(name="production.server", key=key, image_id=image_id, location_id=location_id, size_id=size_id)
 
-In some backends some extra information is needed. You can see ``mist.client.model.Backend.create_machine`` method for more details.
+In some backends some extra information is needed. You can see ``mistclient.model.Backend.create_machine`` method for more details.
 
 Machine actions
 ===============
 You can see a list of all your created machines for a given backend::
 
-    backend.machines
+    client.machines()
+
+Or for a specific backend::
+
+    backend.machines()
+
 
 You can choose one::
 
-    machine = backend.machines[machine_id]
+    machine = client.machines(search="dev")[0]
+    machine = client.machines(name="dbserver1")[0]
 
-Or you can choose a machine by providing the machine's id, name or public_ip::
-
-    machine = backend.machine_from_ip("132.34.65.0")
-    machine = backend.machine_from_name("prodServer1')
-    machine = backend.machine_from_id("i-7983873")
-
-
-You can also use the overloaded function ``backend.search_machine("search_term")`` by providing either id, name or ip and it
-will return the first machine instance that it finds with a matching id, name or ip.
 
 Machines support actions like::
 

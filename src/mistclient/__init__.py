@@ -1,7 +1,7 @@
 import json
 
-from mist.client.helpers import RequestsHandler
-from mist.client.model import Backend, Key
+from mistclient.helpers import RequestsHandler
+from mistclient.model import Backend, Key
 
 
 class MistClient(object):
@@ -25,6 +25,7 @@ class MistClient(object):
         self.user_details = None
 
         self._backends = None
+        self._machines = None
         self._keys = None
 
         if self.email and self.password:
@@ -82,8 +83,7 @@ class MistClient(object):
         else:
             self._backends = {}
 
-    @property
-    def backends(self):
+    def backends(self, id=None, name=None, provider=None, search=None):
         """
         Property-like function to call the _list_backends function in order to populate self._backends dict
 
@@ -93,49 +93,22 @@ class MistClient(object):
             self._backends = {}
             self._list_backends()
 
-        return self._backends
-
-    def backend_from_id(self, backend_id):
-        self.backends
-        if backend_id in self._backends.keys():
-            return self._backends[backend_id]
+        if id:
+            return [self._backends[backend_id] for backend_id in self._backends.keys()
+                    if id == self._backends[backend_id].id]
+        elif name:
+            return [self._backends[backend_id] for backend_id in self._backends.keys()
+                    if name == self._backends[backend_id].title]
+        elif provider:
+            return [self._backends[backend_id] for backend_id in self._backends.keys()
+                    if provider == self._backends[backend_id].provider]
+        elif search:
+            return [self._backends[backend_id] for backend_id in self._backends.keys()
+                    if search in self._backends[backend_id].title
+                    or search in self._backends[backend_id].id
+                    or search in self._backends[backend_id].provider]
         else:
-            return None
-
-    def backend_from_title(self, backend_title):
-        self.backends
-        for key in self._backends.keys():
-            backend = self._backends[key]
-            if backend_title == backend.title:
-                return backend
-
-        return None
-
-    def backend_from_provider(self, backend_provider):
-        self.backends
-        for key in self._backends.keys():
-            backend = self._backends[key]
-            if backend_provider == backend.provider:
-                return backend
-
-        return None
-
-    def search_backend(self, backend_key):
-        """
-        Choose a backend by providing a backend's id, title or provider
-        """
-        self.backends
-        backend = self.backend_from_id(backend_key)
-        if backend:
-            return backend
-
-        backend = self.backend_from_title(backend_key)
-        if backend:
-            return backend
-
-        backend = self.backend_from_provider(backend_key)
-        if backend:
-            return backend
+            return [self._backends[backend_id] for backend_id in self._backends.keys()]
 
     def update_backends(self):
         """
@@ -208,8 +181,7 @@ class MistClient(object):
         else:
             self._keys = {}
 
-    @property
-    def keys(self):
+    def keys(self, id=None, search=None):
         """
         Property-like function to call the _list_keys function in order to populate self._keys dict
 
@@ -219,7 +191,14 @@ class MistClient(object):
             self._keys = {}
             self._list_keys()
 
-        return self._keys
+        if id:
+            return [self._keys[key_id] for key_id in self._keys.keys()
+                    if id == self._keys[key_id].id]
+        elif search:
+            return [self._keys[key_id] for key_id in self._keys.keys()
+                    if search in self._keys[key_id].id]
+        else:
+            return [self._keys[key_id] for key_id in self._keys.keys()]
 
     def update_keys(self):
         """
@@ -264,3 +243,23 @@ class MistClient(object):
         req.put()
         self.update_keys()
 
+    def _list_machines(self):
+        self._machines = []
+        for backend in self.backends():
+            machines = backend.machines()
+            for machine in machines:
+                self._machines.append(machine)
+
+    def machines(self, id=None, name=None, search=None):
+        if self._machines is None:
+            self._list_machines()
+
+        if id:
+            return [machine for machine in self._machines if machine.id == id]
+        elif name:
+            return [machine for machine in self._machines if machine.name == name]
+        elif search:
+            return [machine for machine in self._machines
+                    if search in machine.id or search in machine.name]
+        else:
+            return self._machines

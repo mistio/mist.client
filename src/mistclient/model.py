@@ -4,7 +4,7 @@ import re
 
 from time import time
 
-from mist.client.helpers import RequestsHandler
+from mistclient.helpers import RequestsHandler
 
 
 class Backend(object):
@@ -128,9 +128,12 @@ class Backend(object):
 
         :returns: A list of available networks associated to a provider.
         """
-        req = self.request(self.mist_client.uri+'/backends/'+self.id+'/networks')
-        networks = req.get().json()
-        return networks
+        if self.provider in ['openstack', 'nephoscale']:
+            req = self.request(self.mist_client.uri+'/backends/'+self.id+'/networks')
+            networks = req.get().json()
+            return networks
+        else:
+            print "Network actions not supported yet for %s provider" % self.provider
 
     @property
     def images(self):
@@ -174,52 +177,7 @@ class Backend(object):
         else:
             self._machines = {}
 
-    def machine_from_id(self, machine_id):
-        self.machines
-        if machine_id in self._machines.keys():
-            return self._machines[machine_id]
-        else:
-            return None
-
-    def machine_from_name(self, machine_name):
-        self.machines
-        for key in self._machines.keys():
-            machine = self._machines[key]
-            if machine_name == machine.name:
-                return machine
-
-        return None
-
-    def machine_from_ip(self, machine_ip):
-        self.machines
-        for key in self._machines.keys():
-            machine = self._machines[key]
-            public_ips = machine.info.get('public_ips', None)
-            if public_ips:
-                if machine_ip == public_ips[0]:
-                    return machine
-
-        return None
-
-    def search_machine(self, machine_key):
-        """
-        Choose a machine by providing a machine's id, name or ip
-        """
-        self.machines
-        machine = self.machine_from_id(machine_key)
-        if machine:
-            return machine
-
-        machine = self.machine_from_name(machine_key)
-        if machine:
-            return machine
-
-        machine = self.machine_from_ip(machine_key)
-        if machine:
-            return machine
-
-    @property
-    def machines(self):
+    def machines(self, id=None, name=None, search=None):
         """
         Property-like function to call the _list_machines function in order to populate self._machines dict
 
@@ -229,7 +187,18 @@ class Backend(object):
             self._machines = {}
             self._list_machines()
 
-        return self._machines
+        if id:
+            return [self._machines[machine_id] for machine_id in self._machines.keys()
+                    if id == self._machines[machine_id].id]
+        elif name:
+            return [self._machines[machine_id] for machine_id in self._machines.keys()
+                    if name == self._machines[machine_id].name]
+        elif search:
+            return [self._machines[machine_id] for machine_id in self._machines.keys()
+                    if search in self._machines[machine_id].name
+                    or search in self._machines[machine_id].id]
+        else:
+            return [self._machines[machine_id] for machine_id in self._machines.keys()]
 
     def update_machines(self):
         """
@@ -246,7 +215,7 @@ class Backend(object):
 
     def create_machine(self, name, key, image_id, location_id, size_id, 
                        image_extra="", disk="", script="", monitoring=False, 
-                       ips=[]):
+                       ips=[], networks=[]):
         """
         Create a new machine on the given backend
 
@@ -269,7 +238,8 @@ class Backend(object):
             'disk': disk,
             'script': script,
             'monitoring': monitoring,
-            'ips': ips
+            'ips': ips,
+            'networks': networks
         }
         data = json.dumps(payload)
         req = self.request(self.mist_client.uri+'/backends/'+self.id+'/machines', data=data)
@@ -357,8 +327,12 @@ class Machine(object):
         :param ssh_user: Optional. Give if you explicitly want a specific user
         :returns: A list of data received by the probing (e.g. uptime etc)
         """
+        ips = [ip for ip in self.info['public_ips'] if ':' not in ip]
+
+        if not ips:
+            raise Exception("No public IPv4 address available to connect to")
         payload = {
-            'host': self.info['public_ips'][0],
+            'host': ips[0],
             'key': key_id,
             'ssh_user': ssh_user
         }
@@ -380,7 +354,7 @@ class Machine(object):
         req.put()
         self.mist_client.update_keys()
 
-    def _toggle_monitoring(self, action):
+    def _toggle_monitoring(self, action, no_ssh=False):
         """
         Enable or disable monitoring on a machine
 
@@ -388,7 +362,8 @@ class Machine(object):
         """
         payload = {
             'action': action,
-            'machine_name': self.name,
+            'name': self.name,
+            'no_ssh': no_ssh,
             'public_ips': self.info['public_ips'],
             'dns_name': self.info['extra'].get('dns_name', 'n/a')
         }
@@ -399,17 +374,17 @@ class Machine(object):
                            data=data)
         req.post()
 
-    def enable_monitoring(self):
+    def enable_monitoring(self, no_ssh=False):
         """
         Enable monitoring
         """
-        self._toggle_monitoring(action="enable")
+        return self._toggle_monitoring(action="enable", no_ssh=no_ssh)
 
-    def disable_monitoring(self):
+    def disable_monitoring(self, no_ssh=False):
         """
         Disable monitoring
         """
-        self._toggle_monitoring(action="disable")
+        return self._toggle_monitoring(action="disable", no_ssh=no_ssh)
 
     def get_stats(self, start=int(time()), stop=int(time())+10, step=10):
         """
@@ -520,6 +495,16 @@ class Machine(object):
         req = self.request(self.mist_client.uri+"/backends/"+self.backend.id+"/machines/"+self.id+"/plugins/"+plugin_id,
                            data=data)
         req.post()
+
+    def tag(self, tag):
+        payload = {
+            'tag': tag
+        }
+        data = json.dumps(payload)
+        req = self.request(self.mist_client.uri+"/backends/"+self.backend.id+"/machines/"+self.id+"/metadata",
+                           data=data)
+        req.post()
+        self.backend.update_machines()
 
 
 class Key(object):

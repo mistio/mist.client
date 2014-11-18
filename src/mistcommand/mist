@@ -1,0 +1,644 @@
+#!/usr/bin/env python
+# PYTHON_ARGCOMPLETE_OK
+
+import sys
+import argparse
+import argcomplete
+
+from ansible.runner import Runner
+from ansible.inventory import Inventory
+
+from mistcommand.helpers.login import user_info
+from mistcommand.helpers.backends import backend_action
+from mistcommand.helpers.providers import provider_action
+from mistcommand.helpers.keys import key_action
+from mistcommand.helpers.machines import machine_action
+from mistcommand.helpers.images import image_action
+from mistcommand.helpers.sizes import size_action
+from mistcommand.helpers.locations import location_action
+from mistcommand.helpers.networks import network_action
+from mistcommand.helpers.metrics import metric_action
+from mistcommand.helpers.mistansible import ansible_action
+
+
+def main():
+
+    main_parser = argparse.ArgumentParser(description="Mist.io command line tool")
+    subparsers = main_parser.add_subparsers(help='action to perform',
+                                            dest='action')
+
+    # -------------SUPPORTED PROVIDERS----------------
+    p_list_providers = subparsers.add_parser(
+        'list-providers',
+        description="List all supported providers"
+    )
+
+    p_list_providers.add_argument(
+        '--pretty', action='store_true', default=False,
+        help="Print in a table format"
+    )
+
+    # ---------------BACKEND ACTIONS------------------
+    p_list_backends = subparsers.add_parser(
+        'list-backends',
+        description="List all of your added backends"
+    )
+
+    p_list_backends.add_argument(
+        '--pretty', action='store_true', default=False,
+        help="Print in a table format"
+    )
+
+    p_rename_backend = subparsers.add_parser(
+        'rename-backend',
+        description="Rename a specified backend"
+    )
+
+    p_rename_backend.add_argument(
+        '--new-name', required=True,
+        help="New name for the key"
+    )
+
+    p_delete_backend = subparsers.add_parser(
+        'delete-backend',
+        description="Delete the specified backend"
+    )
+
+    p_describe_backend = subparsers.add_parser(
+        'describe-backend',
+        description="Show information about a specified backend"
+    )
+
+    for parser in [p_rename_backend, p_delete_backend, p_describe_backend]:
+        group = parser.add_mutually_exclusive_group(required=True)
+        group.add_argument(
+            '--id',
+            help="Id of the specified backend"
+        )
+        group.add_argument(
+            '--name',
+            help="Name of the specified backend"
+        )
+        group.add_argument(
+            'backend', nargs="?",
+            help="Name or id of the backend you want to specify"
+        )
+
+    p_add_backend = subparsers.add_parser(
+        'add-backend',
+        help="Add a new backend"
+    )
+
+    provider_choices = [
+        'bare_metal',
+        'ec2_ap_northeast',
+        'ec2_ap_southeast',
+        'ec2_ap_southeast_2',
+        'ec2_eu_west',
+        'ec2_sa_east',
+        'ec2_us_east',
+        'ec2_us_west',
+        'ec2_us_west_oregon',
+        'gce',
+        'nephoscale',
+        'digitalocean',
+        'linode',
+        'openstack',
+        'rackspace:dfw',
+        'rackspace:ord',
+        'rackspace:iad',
+        'rackspace:lon',
+        'rackspace:syd',
+        'rackspace:hkg',
+        'rackspace_first_gen:us',
+        'rackspace_first_gen:uk',
+        'softlayer',
+        'hpcloud:region-a.geo-1',
+        'hpcloud:region-b.geo-1',
+        'docker',
+        'azure'
+    ]
+    p_add_backend.add_argument(
+        '--provider', required=True, choices=provider_choices,
+        help="The provider id for the new backend, e.g. ec2_ap_northeast. You can"
+             " list supported-providers to see all available provider ids"
+    )
+
+    p_add_backend.add_argument(
+        '--name', required=True,
+        help="Name for the new backend"
+    )
+
+    ec2_group = p_add_backend.add_argument_group('EC2')
+    ec2_group.add_argument(
+        '--ec2-api-key',
+        help="The ec2 API key"
+    )
+    ec2_group.add_argument(
+        '--ec2-api-secret',
+        help="The ec2 API secret"
+    )
+
+    rackspace_group = p_add_backend.add_argument_group('Rackspace')
+    rackspace_group.add_argument(
+        '--rackspace-username',
+        help="Username for Rackspace"
+    )
+    rackspace_group.add_argument(
+        '--rackspace-api-key',
+        help="API Key for Rackspace"
+    )
+
+    nephoscale_group = p_add_backend.add_argument_group('NephoScale')
+    nephoscale_group.add_argument(
+        '--nepho-username',
+        help="Username for NephoScale"
+    )
+    nephoscale_group.add_argument(
+        '--nepho-password',
+        help="Password for nephoscale"
+    )
+
+    digital_group = p_add_backend.add_argument_group('DigitalOcean')
+    digital_group.add_argument(
+        '--digi-token',
+        help="Token for the DigitalOcean backend"
+    )
+
+    linode_group = p_add_backend.add_argument_group("Linode")
+    linode_group.add_argument(
+        '--linode-api-key',
+        help="API Key for the Linode backend"
+    )
+
+    openstack_group = p_add_backend.add_argument_group("Openstack")
+    openstack_group.add_argument(
+        '--openstack-username',
+        help="Username for the Openstack backend"
+    )
+    openstack_group.add_argument(
+        '--openstack-password',
+        help="Password for the Openstack backend"
+    )
+    openstack_group.add_argument(
+        '--openstack-auth-url',
+        help="Auth url, e.g. http://10.0.0.2:5000"
+    )
+    openstack_group.add_argument(
+        '--openstack-tenant',
+        help="Tenant name"
+    )
+    openstack_group.add_argument(
+        '--openstack-region',
+        help="OPTIONAL. Normally you do not have to explicitly set a region"
+    )
+
+    softlayer_group = p_add_backend.add_argument_group("SoftLayer")
+    softlayer_group.add_argument(
+        '--softlayer-username',
+        help="Username for the softlayer backend"
+    )
+    softlayer_group.add_argument(
+        '--softlayer-api-key',
+        help="API Key for the SoftLayer backend"
+    )
+
+    hp_group = p_add_backend.add_argument_group("HP")
+    hp_group.add_argument(
+        '--hp-username',
+        help="Username for the HP backend"
+    )
+    hp_group.add_argument(
+        '--hp-password',
+        help="Passord for the HP backend"
+    )
+    hp_group.add_argument(
+        '--hp-tenant',
+        help="Tenant name for the HP backend"
+    )
+
+    docker_group = p_add_backend.add_argument_group("Docker")
+    docker_group.add_argument(
+        '--docker-host',
+        help="Ip of the Docker host"
+    )
+    docker_group.add_argument(
+        '--docker-port', default="4243",
+        help="Port for the Docker API. By default 4243."
+    )
+    docker_group.add_argument(
+        '--docker-auth-user',
+        help="OPTIONAL. In case you have a basic auth set up."
+    )
+    docker_group.add_argument(
+        '--docker-auth-password',
+        help="OPTIONAL. In case you have a basic auth set up"
+    )
+
+    bare_group = p_add_backend.add_argument_group("Bare Metal Server")
+    bare_group.add_argument(
+        '--bare-hostname',
+        help="Hostname of the machine"
+    )
+    bare_group.add_argument(
+        '--bare-user', default="root",
+        help="By default root"
+    )
+    bare_group.add_argument(
+        '--bare-port', default="22",
+        help="Port of the ssh-server. By default 22"
+    )
+    bare_group.add_argument(
+        '--bare-ssh-key-id',
+        help="The id of the ssh key that is associated with the machine"
+    )
+
+    azure_group = p_add_backend.add_argument_group("Azure")
+    azure_group.add_argument(
+        '--azure-sub-id',
+        help="Subscription ID of azure account "
+    )
+    azure_group.add_argument(
+        '--azure-cert-path',
+        help="Path of azure cert file"
+    )
+
+    # ---------------KEY ACTIONS----------------------
+    p_list_keys = subparsers.add_parser(
+        'list-keys',
+        description="List added keys",
+    )
+
+    p_list_keys.add_argument(
+        '--pretty', action='store_true', default=False,
+        help="Print in a table format"
+    )
+
+    p_add_key = subparsers.add_parser(
+        'add-key',
+        help="Add a new SSH Key"
+    )
+
+    p_add_key.add_argument(
+        '--name', required=True,
+        help="Name of the new SSH Key"
+    )
+
+    group = p_add_key.add_mutually_exclusive_group(required=True)
+    group.add_argument(
+        '--key-path',
+        help="Path to private SSH Key file"
+    )
+    group.add_argument(
+        '--auto-generate', action='store_true',
+        help="If given, then mist.io will auto-generate an SSH Key"
+    )
+
+    p_delete_key = subparsers.add_parser(
+        'delete-key',
+        description="Delete a key"
+    )
+
+    p_rename_key = subparsers.add_parser(
+        'rename-key',
+        description="Rename key"
+    )
+
+
+    p_rename_key.add_argument(
+        '--new-name', required=True,
+        help="New name for the key"
+    )
+
+    p_describe_key = subparsers.add_parser(
+        'describe-key',
+        description="Show information about a specified key"
+    )
+
+    for parser in [p_delete_key, p_rename_key, p_describe_key]:
+        group = parser.add_mutually_exclusive_group(required=True)
+        group.add_argument(
+            '--key-id',
+            help="Id of the key you want to delete"
+        )
+        group.add_argument(
+            'key_name', nargs="?",
+            help="Name of the key you want to delete"
+        )
+
+    # ----------------IMAGES/SIZES/LOCATIONS/NETWORKS------------------
+    p_list_images = subparsers.add_parser(
+        'list-images',
+        description="List images for a specified backend"
+    )
+
+    p_list_images.add_argument(
+        '--pretty', action='store_true', default=False,
+        help="Print in a table format"
+    )
+
+    p_list_images.add_argument(
+        '--search', required=False,
+        help="Search for OS Images that contain this."
+    )
+
+    p_list_sizes = subparsers.add_parser(
+        'list-sizes',
+        description="List images for a specified backend"
+    )
+
+    p_list_sizes.add_argument(
+        '--pretty', action='store_true', default=False,
+        help="Print in a table format"
+    )
+
+    p_list_locations = subparsers.add_parser(
+        'list-locations',
+        description="List images for a specified backend"
+    )
+
+    p_list_locations.add_argument(
+        '--pretty', action='store_true', default=False,
+        help="Print in a table format"
+    )
+
+    p_list_networks = subparsers.add_parser(
+        'list-networks',
+        help="List availablen networks for specified provider (currently only OPENSTACK support)"
+    )
+
+    p_list_networks.add_argument(
+        '--pretty', action='store_true', default=False,
+        help="Print in a table format"
+    )
+
+    for parser in [p_list_images, p_list_sizes, p_list_locations, p_list_networks]:
+        group = parser.add_mutually_exclusive_group(required=True)
+        group.add_argument(
+            '--backend',
+            help="This can be either a backend's name or id"
+        )
+        group.add_argument(
+            '--backend-id',
+            help="Specify a backend's id"
+        )
+        group.add_argument(
+            '--backend-name',
+            help="Sepcify a backend's name"
+        )
+
+    # --------------MACHINE ACTIONS-------------------------
+    p_list_machines = subparsers.add_parser(
+        'list-machines',
+        description="List all machines or on a specific backend"
+    )
+
+    group = p_list_machines.add_mutually_exclusive_group()
+    group.add_argument(
+        '--backend',
+        help="This can be either a backend's name or id"
+    )
+    group.add_argument(
+        '--backend-id',
+        help="Specify a backend's id"
+    )
+    group.add_argument(
+        '--backend-name',
+        help="Sepcify a backend's name"
+    )
+
+    p_list_machines.add_argument(
+        '--pretty', action='store_true', default=False,
+        help="Print in a table format"
+    )
+
+    p_describe_machine = subparsers.add_parser(
+        'describe-machine',
+        help="Show information about a specified machine"
+    )
+
+    p_probe = subparsers.add_parser(
+        'probe',
+        description="Probe a specified machine"
+    )
+
+    p_start = subparsers.add_parser(
+        'start',
+        description='Start a stopped machine'
+    )
+
+    p_stop = subparsers.add_parser(
+        'stop',
+        description="Stop a running machine"
+    )
+
+    p_reboot = subparsers.add_parser(
+        'reboot',
+        description="Reboot a machine"
+    )
+
+    p_destroy = subparsers.add_parser(
+        'destroy',
+        description="Destroy a machine"
+    )
+
+    p_tag = subparsers.add_parser(
+        'tag',
+        description="Tag a machine"
+    )
+
+    p_tag.add_argument(
+        '--new-tag', required=True,
+        help="Add this tag to the machine"
+    )
+
+    p_enable_monitoring = subparsers.add_parser(
+        'enable-monitoring',
+        description="Enable monitoring on a machine"
+    )
+
+    p_disable_monitoring = subparsers.add_parser(
+        'disable-monitoring',
+        description="Disable monitoring on a machine"
+    )
+
+    for parser in [p_describe_machine, p_probe, p_start, p_stop, p_reboot, p_destroy, p_tag,
+                   p_enable_monitoring, p_disable_monitoring]:
+        group = parser.add_mutually_exclusive_group(required=True)
+        group.add_argument(
+            '--id',
+            help="Id of the specified machine"
+        )
+        group.add_argument(
+            '--name',
+            help="Name of the specified machine"
+        )
+        group.add_argument(
+            'machine', nargs="?",
+            help="Name or id of the machine you want to specify"
+        )
+
+    p_create_machine = subparsers.add_parser(
+        'create-machine',
+        help="Create a new machine"
+    )
+
+    group = p_create_machine.add_mutually_exclusive_group(required=True)
+    group.add_argument(
+        '--backend',
+        help="This can be either a backend's name or id"
+    )
+    group.add_argument(
+        '--backend-id',
+        help="Specify a backend's id"
+    )
+    group.add_argument(
+        '--backend-name',
+        help="Sepcify a backend's name"
+    )
+
+    p_create_machine.add_argument(
+        '--machine-name', required=True,
+        help="Name for the new machine"
+    )
+    p_create_machine.add_argument(
+        '--key-id',
+        help="Id of SSH Key to associate with the machine"
+    )
+    p_create_machine.add_argument(
+        '--image-id', required=True,
+        help="Id of OS Image. You can list images for the given backend to find their ids"
+    )
+    p_create_machine.add_argument(
+        '--size-id', required=True,
+        help="Id of machine size. You can list sizes for the given backend to find their ids"
+    )
+    p_create_machine.add_argument(
+        '--location-id', required=True,
+        help="Id of the backend location. You can list locations for the given backend to find their ids"
+    )
+
+    p_create_machine.add_argument(
+        '--network-id', required=False,
+        help="Currently supported only for Openstack. Required if multiple openstack networks are available"
+    )
+
+
+    # -------------------METRICS ACTIONS-------------------
+    p_list_metrics = subparsers.add_parser(
+        'list-metrics',
+        description="List available metrics for this monitored machine"
+    )
+
+    p_list_metrics.add_argument(
+        '--pretty', action='store_true', default=False,
+        help="Print in a table format"
+    )
+
+    p_add_metric = subparsers.add_parser(
+        'add-metric',
+        help="Add a new metric to the machine"
+    )
+
+    p_add_metric.add_argument(
+        '--metric-id',
+        help="The id of the metric you want to add"
+    )
+
+    p_add_custom_metric = subparsers.add_parser(
+        'add-custom-metric',
+        description="Add custom python metric"
+    )
+
+    p_add_custom_metric.add_argument(
+        '--metric-name', required=True,
+        help="Name of the new custom metric"
+    )
+
+    p_add_custom_metric.add_argument(
+        '--file-path', required=True,
+        help="Path of the python metric"
+    )
+
+    p_add_custom_metric.add_argument(
+        '--value-type', default='gauge', choices=['gauge', 'derive'],
+        help="Value type can be gauge or derive"
+    )
+
+    p_add_custom_metric.add_argument(
+        '--unit', default=None,
+        help="Unit of the new custom metric"
+    )
+
+    for parser in [p_list_metrics, p_add_metric, p_add_custom_metric]:
+        group = parser.add_mutually_exclusive_group(required=True)
+        group.add_argument(
+            '--machine-id',
+            help="Id of the specified machine"
+        )
+        group.add_argument(
+            '--machine-name',
+            help="Name of the specified machine"
+        )
+        group.add_argument(
+            '--machine', nargs="?",
+            help="Name or id of the machine you want to specify"
+        )
+
+
+
+    # p_get_stats = subparsers.add_parser(
+    #     'get-stats',
+    #     description="Get stats from a monitored machine"
+    # )
+
+    p_run = subparsers.add_parser(
+        'run',
+        description="Run a command in multiple machines"
+    )
+
+    p_run.add_argument(
+        '--command', required=True,
+        help="Run this command"
+    )
+
+    p_run.add_argument(
+        '--tag', required=True,
+        help="Run the command in machines that have this tag"
+    )
+
+    # ----------------USER ACTIONS---------------------
+    p_user_info = subparsers.add_parser(
+        'user-info',
+        help='Get info about the user'
+    )
+
+    argcomplete.autocomplete(main_parser)
+    args = main_parser.parse_args()
+
+    if args.action == 'run':
+        ansible_action(args, Runner, Inventory)
+    elif args.action == 'list-providers':
+        provider_action(args)
+    elif args.action in ['list-keys', 'add-key', 'describe-key', 'rename-key', 'delete-key']:
+        key_action(args)
+    elif args.action in ['list-backends', 'rename-backend', 'delete-backend', 'describe-backend',
+                         'add-backend']:
+        backend_action(args)
+    elif args.action == 'list-images':
+        image_action(args)
+    elif args.action == 'list-sizes':
+        size_action(args)
+    elif args.action == 'list-locations':
+        location_action(args)
+    elif args.action == 'list-networks':
+        network_action(args)
+    elif args.action in ['list-machines', 'describe-machine', 'probe', 'start', 'stop', 'reboot',
+                         'destroy', 'tag', 'create-machine', 'enable-monitoring', 'disable-monitoring']:
+        machine_action(args)
+    elif args.action in ['list-metrics', 'add-metric', 'add-custom-metric']:
+        metric_action(args)
+    elif args.action == 'user-info':
+        user_info()
+if __name__ == "__main__":
+    main()

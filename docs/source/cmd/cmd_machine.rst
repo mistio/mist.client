@@ -10,40 +10,32 @@ Images
 To see all the available images for a backend. *The* ``--backend`` *option can be either the backend's id or name. Both will do.*
 ::
 
-    mist list images --backend DigitalOcean
+    mist list-images --backend Juno
 
 
 Output::
 
-    +--------------------------------------+-----+
-    |                 Name                 |  ID |
-    +--------------------------------------+-----+
-    |       Linux CentOS 5.5 32-bit        |  3  |
-    |       Linux CentOS 5.5 64-bit        |  5  |
-    |   Linux Debian Server 5.05 32-bit    |  23 |
-    | Linux Ubuntu Server 10.04 LTS 32-bit |  43 |
-    |       Linux CentOS 5.7 32-bit        |  45 |
-    | Linux Ubuntu Server 10.04 LTS 64-bit |  49 |
-    |   Linux Debian Server 6.0.3 64-bit   |  51 |
-    |      Linux Debian 5.0.9 64-bit       |  55 |
-    |      Linux Debian 5.0.9 32-bit       |  57 |
-    |       Linux CentOS 6.2 64-bit        |  59 |
-    |       Linux CentOS 5.8 64-bit        |  64 |
-    | Linux Ubuntu Server 12.04 LTS 64-bit |  75 |
-    |  VOD Cloud Storage Proxy (FTP:HTTP)  | 101 |
-    |    Linux Debian Server 7.1 64-bit    | 177 |
-    |       Linux CentOS 5.10 64-bit       | 269 |
-    |       Linux CentOS 6.5 64-bit        | 271 |
-    |       Ubuntu Server 14.04 LTS        | 317 |
-    +--------------------------------------+-----+
+    Fedora-x86_64-20-20140618-sda            755c8a98-882f-4dd2-9598-5c01c039e63a
+    cirros-0.3.2-x86_64-uec                  cbcc00f7-6ec0-41a5-ad42-3008143a77b2
+    cirros-0.3.2-x86_64-uec-ramdisk          586360b9-06f4-4353-9f62-7191a9f95d64
+    cirros-0.3.2-x86_64-uec-kernel           475ae832-7d2a-4b0b-a4d9-63e7d170a223
 
+And with the ``--pretty`` flag, ``mist list-images --backend Juno --pretty``::
 
+    +---------------------------------+--------------------------------------+
+    |               Name              |                  ID                  |
+    +---------------------------------+--------------------------------------+
+    |  Fedora-x86_64-20-20140618-sda  | 755c8a98-882f-4dd2-9598-5c01c039e63a |
+    |     cirros-0.3.2-x86_64-uec     | cbcc00f7-6ec0-41a5-ad42-3008143a77b2 |
+    | cirros-0.3.2-x86_64-uec-ramdisk | 586360b9-06f4-4353-9f62-7191a9f95d64 |
+    |  cirros-0.3.2-x86_64-uec-kernel | 475ae832-7d2a-4b0b-a4d9-63e7d170a223 |
+    +---------------------------------+--------------------------------------+
 The list of images can be huge, especially on providers such as EC2. My default mist.io will return a list of the most
 used images. You can however use the ``--search`` option. If you provide ``--search all`` mist.io will provide all
 available images. If you want to narrow your search you can search for a specific image::
 
-    mist list images --backend DigitalOcean --search all
-    mist list images --backend DigitalOcean --search gentoo
+    mist list-images --backend DigitalOcean --search all
+    mist list-images --backend DigitalOcean --search gentoo
 
 From the returned list you 'll need your desired image's ID to be used with machine creation.
 
@@ -52,7 +44,8 @@ Sizes - Locations/Regions
 Each provider offers different options for machine sizes and locations/regions to choose from. For each of them you'll
 need the corresponding ID::
 
-    mist list sizes --backend DigitalOcean
+    mist list-sizes --backend DigitalOcean
+    mist list-sizes --backend DigitalOcean --pretty
 
 Output::
 
@@ -89,7 +82,8 @@ Output::
 
 ::
 
-    mist ls locations --backend DigitalOcean
+    mist list-locations --backend DigitalOcean
+    mist list-locations --backend DigitalOcean --pretty
 
 Output::
 
@@ -106,28 +100,32 @@ Now that you have gathered the information needed for machine creation you can t
 specific backend. Alongside the image, location and size ID's you'll also need to provide a keys' name to be assigned to
 the newly created machine::
 
-    mist create machine --backend EC2 --name dev.machine --image ami-bddaa2bc --size t1.micro --location 0 --key MyKey
+    mist create-machine --backend EC2 --name dev.machine --image ami-bddaa2bc --size t1.micro --location 0 --key MyKey
 
 Machine Actions
 ===============
 You can list all your machines on all your Backends, or list machines on a specific backend::
 
-    mist list machines
-    mist list machines --backend Docker
-You can start, stop, reboot or destroy a machine::
+    mist list-machines
+    mist list-machines --backend Docker
 
-    mist reboot machine --backend Docker --name db-server-1
-    mist destroy machine --backend Docker --name db-server-1
+You can start, stop, reboot or destroy a machine. To specify a machine you can either directly use the machine's name
+or ID, or pass the ``--id``, ``--name`` flags::
+
+    mist reboot db-server-1
+    mist destroy db-server-1
 
 You can also probe a machine. By probing a machine you verify that sshd is up an running and that you have access to the
-machine with the previously assigned key. A successful probe will return the machine's uptime::
+machine with the previously assigned key::
 
-    mist probe machine --name db-server-1 --backend Docker
+    mist probe db-server-1
 
 
 After creating a new machine it might take a little time for the probe to be successful.
 
+You can also tag machine::
 
-You can see a full example `here`_
+    mist tag db-server-1 --new-tag dbservers
 
-.. _here: http://asciinema.org/a/11885
+Tagging will be useful later when you want to group your machines across different clouds and run multiple commands
+and configuration scripts.
