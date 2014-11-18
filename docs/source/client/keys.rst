@@ -30,15 +30,20 @@ Keys actions
 ============
 To see all added keys::
 
-    client.keys
+    client.keys()
 
-The result will be a dict like this::
+The result will be a list like this::
 
-    {u'MyKey': Key => MyKey, u'asd': Key => asd, u'newKey': Key => newKey}
+    [Key => Dummy,
+     Key => ParisDemo2,
+     Key => testkey,
+     Key => DemoKey,
+     Key => TestKey,
+     Key => ParisDemo]
 
-You can now choose a key::
+You can now search for key names::
 
-    key = client.keys['MyKey']
+    key = client.keys(search="Paris")[0]
 
 You have the option to set a key as the default one. This becomes handy if you want mist.io to auto-assign this key to
 a machine if you leave the association blank::
