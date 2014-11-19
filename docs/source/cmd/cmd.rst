@@ -14,7 +14,6 @@ file will look like this::
     email=user@mist.io
     password=mist_password
 
-.. Note:: *In case you have a private installation of mist.io you can change the mist_uri to point to your custom url*
 
 .. Note:: The ``mist`` command line tool supports bash completion.
 

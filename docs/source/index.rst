@@ -3,8 +3,8 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to mist.client's documentation!
-***************************************
+Welcome to mist documentation!
+******************************
 
 :Version: 0.3.0
 :Author: Mist.io Inc
@@ -18,12 +18,20 @@ source installation of `mist.io`_.
 .. _mist.io: https://github.com/mistio/mist.io
 
 Quickstart
-===========
+==========
 
 .. toctree::
    :maxdepth: 1
 
    quickstart/python
+
+Installation
+============
+
+.. toctree::
+   :maxdepth: 1
+
+   client/installation
 
 mist - command line interface
 =============================
@@ -44,7 +52,6 @@ mistclient - Python bindings
 .. toctree::
    :maxdepth: 1
 
-   client/installation
    client/getting_started
    client/backends
    client/keys
