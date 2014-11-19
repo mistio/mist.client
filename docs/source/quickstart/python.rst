@@ -1,5 +1,5 @@
-Quickstart  Guide
-*****************
+Quickstart
+**********
 
 Get started by installing mist using pip::
 
