@@ -47,15 +47,4 @@ Output::
     |               |            |         |                          |         |             |                           |
     +---------------+------------+---------+--------------------------+---------+-------------+---------------------------+
 
-General Usage
-=============
-The command line tool is used as ``mist <action> [--extra-params...]``
 
-For example:
-::
-
-    mist list-providers
-    mist list-machines
-    mist add-backend --name EC2 --provider ec2_ap_northeast --ec2-api-key IUOOLK9098OLIU --ec2-api-secret sahkjlhadoiu098098lLKlkjlkj
-    mist delete-backend Rackspace
-    mist create-machine --name dbServer
