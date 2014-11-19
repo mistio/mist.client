@@ -16,7 +16,7 @@ Or you can ask mist.io to auto-generate a key for you::
 
 Keys Actions
 ============
-To list all of your added keys::
+To list your keys::
 
     mist list-keys
 
