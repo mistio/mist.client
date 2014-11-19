@@ -47,7 +47,7 @@ Python API
 ==========
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 0
 
    client/getting_started
    client/backends
@@ -68,7 +68,6 @@ Package Info
    :maxdepth: 1
 
    notes/changelog
-   notes/roadmap
 
 Indices and tables
 ==================

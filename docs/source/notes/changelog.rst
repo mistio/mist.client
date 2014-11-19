@@ -5,6 +5,7 @@ Release 0.3.0 (released Nov 18,2014)
 ====================================
 
 Featured added:
+
 * Repackage ``mist.client`` to ``mist``
 * Refactor  ``mistclient.machines`` and ``mistclient.backends``
 * ``client.machines``, ``client.backends``, ``client.keys`` are now lists instead of dicts
