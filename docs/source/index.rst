@@ -12,10 +12,7 @@ Welcome to mist documentation!
 :License: GPL v3
 
 Mist is a Python and a command line interface for managing and monitoring servers across clouds from any device
-that can access the web. To use it you need an account to the freemium https://mist.io service or a private open
-source installation of `mist.io`_.
-
-.. _mist.io: https://github.com/mistio/mist.io
+that can access the web. To use it you need an account with the freemium https://mist.io service.
 
 Quickstart
 ==========
@@ -33,8 +30,8 @@ Installation
 
    client/installation
 
-mist - command line interface
-=============================
+The mist command
+================
 
 .. toctree::
    :maxdepth: 1
@@ -46,8 +43,8 @@ mist - command line interface
    cmd/cmd_monitor
    cmd/cmd_run
 
-mistclient - Python bindings
-============================
+Python API
+==========
 
 .. toctree::
    :maxdepth: 1
@@ -58,8 +55,8 @@ mistclient - Python bindings
    client/machines
    client/monitoring
 
-mist.ansible - Ansible modules for mist.io service
-==================================================
+Ansible modules
+===============
 You can see the mist.ansible documentation `here`_
 
 .. _here: http://mistansible.readthedocs.org/
