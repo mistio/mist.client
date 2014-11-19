@@ -25,19 +25,6 @@ Quickstart
 
    quickstart/python
 
-mistclient - Python interface
-==============================
-
-.. toctree::
-   :maxdepth: 1
-
-   client/installation
-   client/getting_started
-   client/backends
-   client/keys
-   client/machines
-   client/monitoring
-
 mist - command line interface
 =============================
 
@@ -50,6 +37,19 @@ mist - command line interface
    cmd/cmd_machine
    cmd/cmd_monitor
    cmd/cmd_run
+
+mistclient - Python bindings
+============================
+
+.. toctree::
+   :maxdepth: 1
+
+   client/installation
+   client/getting_started
+   client/backends
+   client/keys
+   client/machines
+   client/monitoring
 
 mist.ansible - Ansible modules for mist.io service
 ==================================================
