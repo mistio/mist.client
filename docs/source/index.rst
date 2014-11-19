@@ -36,24 +36,15 @@ The mist command
 .. toctree::
    :maxdepth: 1
 
-   cmd/cmd
-   cmd/cmd_backend
-   cmd/cmd_key
-   cmd/cmd_machine
-   cmd/cmd_monitor
-   cmd/cmd_run
+   cmd/index
 
 Python API
 ==========
 
 .. toctree::
-   :maxdepth: 0
+   :maxdepth: 1
 
-   client/getting_started
-   client/backends
-   client/keys
-   client/machines
-   client/monitoring
+   client/index
 
 Ansible modules
 ===============

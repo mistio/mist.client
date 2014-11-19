@@ -1,5 +1,5 @@
-Getting Started
-***************
+Introduction
+************
 
 Now that you have the ``mistclient`` package you can import it to use it::
 

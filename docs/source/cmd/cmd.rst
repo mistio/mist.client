@@ -1,5 +1,5 @@
-Getting Started with mist command
-*********************************
+Introduction
+************
 
 The ``mist`` command line tool gets installed alongside mist package.
 
