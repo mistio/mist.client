@@ -3,28 +3,19 @@ Installation
 
 Install using pip
 =================
-This is the easiest way to obtain the mist.client package::
+This is the easiest way to obtain the mist package::
 
     pip install mist
 
 You now have the ``mistclient`` module and the ``mist`` command line tool installed.
 
-.. Note:: You may have to install ansible separately: ``pip install ansible``, prior to installing ``mist``.
+Bash completion
+===============
+To enable bash completion, you have to do the following::
 
-Clone from Github
-=================
+    sudo activate-global-python-argcomplete
 
-``mist`` is an opensource project and can be found here on its github page: https://github.com/mistio/mist.client ::
+And then add the following line in your ``~/.bashrc``::
 
-    git clone https://github.com/mistio/mist.client
-
-
-Install mist.client::
-
-    python setup.py install
-
-Install for development::
-
-    python setup.py develop
-
+    eval "$(register-python-argcomplete  /usr/bin/mist)"
 

@@ -1,5 +1,5 @@
-mist machines
-*************
+Machines
+********
 Now that you have added your backends and keys you can provision and monitor any machine on any of your providers.
 
 Before you provision a machine, you'll need to provide some information, regarding the OS Image to use, the size of the machine

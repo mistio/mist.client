@@ -14,43 +14,15 @@ Welcome to mist documentation!
 Mist is a Python and a command line interface for managing and monitoring servers across clouds from any device
 that can access the web. To use it you need an account with the freemium https://mist.io service.
 
-Quickstart
-==========
 
 .. toctree::
    :maxdepth: 1
 
    quickstart/python
-
-Installation
-============
-
-.. toctree::
-   :maxdepth: 1
-
    client/installation
-
-The mist command
-================
-
-.. toctree::
-   :maxdepth: 1
-
    cmd/index
-
-Python API
-==========
-
-.. toctree::
-   :maxdepth: 1
-
    client/index
-
-Ansible modules
-===============
-You can see the mist.ansible documentation `here`_
-
-.. _here: http://mistansible.readthedocs.org/
+   ansible
 
 Package Info
 ============

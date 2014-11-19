@@ -1,5 +1,5 @@
-mist run
-********
+Run commands
+************
 
 With ``mist`` command line tool you can run a bash command in multiple tagged servers at once.
 For example to run a command in all your dev servers::

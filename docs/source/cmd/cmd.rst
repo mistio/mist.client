@@ -1,29 +1,13 @@
 Introduction
 ************
 
-The ``mist`` command line tool gets installed alongside mist package.
-
-``mist`` will prompt for your mist email and password. At the end it will ask you to create a config file ``~/.mist``.
+``mist`` will prompt for your mist.io email and password. You have the option config file ``~/.mist``.
 By having the config file you'll be able to use mist command without providing your credentials every time. The config
 file will look like this::
-
-    [mist.io]
-    mist_uri=https://mist.io
 
     [mist.credentials]
     email=user@mist.io
     password=mist_password
-
-
-.. Note:: The ``mist`` command line tool supports bash completion.
-
-To enable auto-completion, you have to do the following::
-
-    sudo activate-global-python-argcomplete
-
-And then add the following line in your ``~/.bashrc``::
-
-    eval "$(register-python-argcomplete  /usr/bin/mist)"
 
 
 To see your accounts' specific information::

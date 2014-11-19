@@ -1,5 +1,5 @@
-mist keys
-*********
+Keys
+****
 By uploading your SSH keys to mist.io you can access all your machines through mist.io, have a shell prompt from your browser
 and even let mist.io take care of enabling monitoring to your machines. You also can have mist.io run commands to your machines
 during provisiong or after an alert is triggered.

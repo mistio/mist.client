@@ -1,5 +1,5 @@
-mist backends
-*************
+Backends
+********
 
 With mist you can handle multiple machines on multiple providers from one interface, the mist.io service.
 In order to do so, the very first thing to do when using mist.io is to ensure that you have added your backends.

@@ -1,5 +1,5 @@
-mist monitoring
-***************
+Monitoring
+**********
 `Mist.io`_ offers plans for monitoring your machines. By default it will install a ``collectd`` instance pre-configured with some basic
 metrics and send the results to mist.io's servers. By visiting mist.io you can see live graphs of your monitored machines.
 
