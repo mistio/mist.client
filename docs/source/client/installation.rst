@@ -7,7 +7,6 @@ This is the easiest way to obtain the mist package::
 
     pip install mist
 
-You now have the ``mistclient`` module and the ``mist`` command line tool installed.
 
 Bash completion
 ===============

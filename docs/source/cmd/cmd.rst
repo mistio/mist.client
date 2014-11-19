@@ -1,8 +1,8 @@
 Introduction
 ************
 
-``mist`` will prompt for your mist.io email and password. You have the option config file ``~/.mist``.
-By having the config file you'll be able to use mist command without providing your credentials every time. The config
+``mist`` will prompt for your mist.io email and password. You have the option to create a config file at ``~/.mist``.
+By having this config file you'll be able to use the mist command without providing your credentials every time. The config
 file will look like this::
 
     [mist.credentials]
