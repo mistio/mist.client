@@ -1,45 +1,33 @@
 Quickstart  Guide
 *****************
 
-In this quickstart guide we'll see how to provision and manage servers on an Openstack backend.
+Get started by installing mist using pip::
 
-``pip install mist``
+    pip install mist
 
-After installing mist::
 
-    from mistclient import MistClient
-    client = MistClient(email="demo@mist.io", password="supersecret")
+After installing mist we can add our backends, for example an ec2 and an Openstack::
 
-We have a stack of 4 machines to provision::
+    mist add-backend --provider ec2_ap_northeast --name EC2 --ec2-api-key ALKI098IGGYUG --ec2-api-secret dioLKNlkhiu89oiukhj
+    mist add-backend --provider openstack --name Openstack --openstack--username admin --openstack-tenant admin --openstack-password admin_pass --openstack-auth-url http://10.0.1:5000
 
-    machines = [
-    'dbserver1',
-    'dbserver2',
-    'haproxy',
-    'webserver'
-    ]
+We can now provision new machines just like that::
 
-We add our Openstack backend::
+    mist create-machine --backend EC2 --name mongo.myserver --location_id 0 --size_id m1.small --image_id ami-d9134ed8
+    mist create_machine --backend Openstack --name mongo2.myopenstackserver --location_id 0 --size_id 2 --image_id 9l98oiji-8uklhjh-234-23444
 
-    client.add_backend(title="Openstack", proviser="openstack", key="admin', secret="admin_pass", apiurl="http://10.0.0.1:5000", tenant_name="admin")
+And even enable monitoring with a single command::
 
-We then provision those machines in this newly added Openstack backend, using a auto-generated key::
+    mist enable-monitoring mongo.myserver
+    mist enable-monitoring mongo2.myopenstackserver
 
-    private = client.generate_key()
-    key = client.add_key(key_name="MyKey", private=private)
-    backend = client.backends(search="Openstack")[0]
+We can tag machines into groups::
 
-    for machine in machines:
-        backend.create_machine(name=machine, key=key, image_id="a098798798-9809808-098098", size_id="2", location_id="1")
+    mist tag mongo.myserver --new-tag dev
+    mist tag mongo2.myopenstackserver --new-tag dev
 
-We then tag the machines with the ``dev`` tag::
-
-    for machine_name in machines:
-        machine = client.machines(name=machine_name)
-        machine.tag("dev")
-
-We will now use the ``mist`` command line tool to manage those servers. Use the ``mist run`` option to run a command
-accross tagged servers::
+We can run batch commands to all machines in the dev group::
 
     mist run --command "apt-get update -y" --tag dev
+
 
