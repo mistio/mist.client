@@ -20,7 +20,7 @@ def readme():
 
 setup(
     name='mist',
-    version='0.3.1',
+    version='1.0.0',
     description='Python client for mist.io',
     long_description=readme(),
     classifiers=[
@@ -36,8 +36,10 @@ setup(
     author_email='commixon@gmail.com',
     license='GPLv3',
     packages=find_packages('src'),
-    scripts=['src/mistcommand/mist'],
+    scripts=['src/mistcommand/mist',
+             'src/mistansible/mistplay'],
     package_dir={'': 'src'},
     install_requires=requires,
-    zip_safe=False
+    zip_safe=False,
+    include_package_data=True
 )

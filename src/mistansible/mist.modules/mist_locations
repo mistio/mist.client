@@ -1,0 +1,120 @@
+#!/usr/bin/env python
+import os
+
+import ConfigParser
+
+from ansible.module_utils.basic import *
+
+from mist.client import MistClient
+
+
+
+DOCUMENTATION = '''
+module: mist_locations
+short_description: Lists all available locations/regions for a backend
+description:
+  - Returns a list of all available locations/regions for a given backend
+  - I(mist_email) and I(mist_password) can be skipped if I(~/.mist) config file is present.
+  - See mist.client documentation for config file U(http://mistclient.readthedocs.org/en/latest/cmd/cmd.html)
+requirements:
+  - mist.client
+options:
+  mist_email:
+    description:
+      - Email to login to the mist.io service
+    required: false
+  mist_password:
+    description:
+      - Password to login to the mist.io service
+    required: false
+  mist_uri:
+    default: https://mist.io
+    description:
+      - Url of the mist.io service. By default https://mist.io. But if you have a custom installation of mist.io you can provide the url here
+    required: false
+  backend:
+    description:
+      - Can be either backend's id or name
+    required: true
+author: "Mist.io Inc"
+version_added: "1.7.1"
+
+'''
+
+EXAMPLES = '''
+- name: List locations for a backend
+  mist_locations:
+    mist_email: your@email.com
+    mist_password: yourpassword
+    backend: DigitalOcean
+  register: locations
+
+'''
+
+
+def authenticate(module):
+    home_path = os.getenv("HOME")
+    config_path = os.path.join(home_path, ".mist")
+    config = ConfigParser.ConfigParser()
+
+    mist_uri = module.params.get('mist_uri')
+    mist_email = module.params.get('mist_email')
+    mist_password = module.params.get('mist_password')
+
+
+    # Set default mist uri
+    config.add_section("mist.io")
+    config.set("mist.io", "mist_uri", "https://mist.io")
+
+    # Set default credentials
+    config.add_section("mist.credentials")
+    config.set("mist.credentials", "email", None)
+    config.set("mist.credentials", "password", None)
+
+    # Read configuration file
+    if os.path.isfile(config_path):
+            config.readfp(open(config_path))
+
+    mist_uri = config.get("mist.io", "mist_uri")
+    if not mist_email:
+        mist_email = config.get("mist.credentials", "email") or ""
+
+    if not mist_password:
+        mist_password = config.get("mist.credentials", "password") or ""
+
+    return init_client(mist_uri, mist_email, mist_password)
+
+
+def init_client(mist_uri="https://mist.io", email=None, password=None):
+    client = MistClient(mist_uri, email, password)
+    return client
+
+
+def list_locations(module, client):
+    backend_name = module.params.get('backend')
+    backend = client.search_backend(backend_name)
+
+    if not backend:
+        module.fail_json(msg="You have to provide a valid backend id or name")
+
+    return backend.locations
+
+
+def main():
+    module = AnsibleModule(
+        argument_spec=dict(
+            mist_uri=dict(default='https://mist.io', type='str'),
+            mist_email=dict(required=False, type='str'),
+            mist_password=dict(required=False, type='str'),
+            backend=dict(required=True, type='str'),
+        )
+    )
+
+    client = authenticate(module)
+
+    locations = list_locations(module, client)
+
+    module.exit_json(changed=False, locations=locations)
+
+
+main()
