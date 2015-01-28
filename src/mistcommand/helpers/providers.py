@@ -8,14 +8,23 @@ def list_providers(client, pretty):
     providers = client.supported_providers
 
     if pretty:
-        x = PrettyTable(["Title", "Provider ID"])
+        x = PrettyTable(["Provider", "Provider ID", "Region", "Region ID"])
         for provider in providers:
-            x.add_row([provider['title'], provider['provider']])
+            if provider['regions']:
+                for region in provider['regions']:
+                    x.add_row([provider['title'], provider['provider'], region['location'], region['id']])
+            else:
+                x.add_row([provider['title'], provider['provider'], '-', '-'])
 
         print x
     else:
         for provider in providers:
-            print "%-30s %-20s" % (provider['title'], provider['provider'])
+            if provider['regions']:
+                for region in provider['regions']:
+                    print "%-30s %-20s %-20s %-20s" % \
+                          (provider['title'], provider['provider'], region['location'], region['id'])
+            else:
+                print "%-30s %-20s" % (provider['title'], provider['provider'])
 
 
 def provider_action(args):

@@ -12,7 +12,7 @@ class RequestsHandler(object):
     A wrapper-like class to be used with all the requests being made to mist.io service.
     """
 
-    def __init__(self, mist_uri, data=None, api_token=None, timeout=None):
+    def __init__(self, mist_uri, data=None, api_token=None, timeout=None, api_version=None):
         """
 
         :param mist_uri: The uri to make the requests to.
@@ -23,6 +23,8 @@ class RequestsHandler(object):
         :returns: A RequestsHandler instance.
         """
         self.headers = {'Authorization': api_token}
+        if api_version:
+            self.headers['Api-Version'] = api_version
         self.uri = mist_uri
         self.data = data
         self.timeout = timeout
