@@ -1,10 +1,6 @@
 #!/usr/bin/env python
-import os
-import ConfigParser
-
+from mistansible.helpers import authenticate
 from ansible.module_utils.basic import *
-
-from mist.client import MistClient
 
 DOCUMENTATION = '''
 module: mist_keys
@@ -99,44 +95,6 @@ EXAMPLES = '''
 '''
 
 
-def authenticate(module):
-    home_path = os.getenv("HOME")
-    config_path = os.path.join(home_path, ".mist")
-    config = ConfigParser.ConfigParser()
-
-    mist_uri = module.params.get('mist_uri')
-    mist_email = module.params.get('mist_email')
-    mist_password = module.params.get('mist_password')
-
-
-    # Set default mist uri
-    config.add_section("mist.io")
-    config.set("mist.io", "mist_uri", "https://mist.io")
-
-    # Set default credentials
-    config.add_section("mist.credentials")
-    config.set("mist.credentials", "email", None)
-    config.set("mist.credentials", "password", None)
-
-    # Read configuration file
-    if os.path.isfile(config_path):
-            config.readfp(open(config_path))
-
-    mist_uri = config.get("mist.io", "mist_uri")
-    if not mist_email:
-        mist_email = config.get("mist.credentials", "email") or ""
-
-    if not mist_password:
-        mist_password = config.get("mist.credentials", "password") or ""
-
-    return init_client(mist_uri, mist_email, mist_password)
-
-
-def init_client(mist_uri="https://mist.io", email=None, password=None):
-    client = MistClient(mist_uri, email, password)
-    return client
-
-
 def determine_action(state):
     if not state:
         return "list"
@@ -148,25 +106,23 @@ def list_keys(module, client):
     changed = False
     key_name = module.params.get('name')
     if not key_name:
-        result = {}
-        for key in client.keys:
-            result[key] = client.keys[key].info
-        module.exit_json(changed=False, info=result)
+        result = [key.id for key in client.keys()]
+        module.exit_json(changed=False, keys=result)
     else:
-        result = {}
-        key = client.keys[key_name]
-        result = key.info
+        result = client.keys(search=key_name)
+        key = result[0] if result else []
 
         #Determine if we want to save the key locally
         save_locally = module.params.get('save_locally')
         local_save_path = module.params.get('local_save_path')
 
-        if save_locally and local_save_path:
+        if key and save_locally and local_save_path:
             private = key.private
             with open(local_save_path, "w") as f:
                 f.write(private)
             changed = True
-        module.exit_json(changed=changed, info=result, private=key.private, public=key.public)
+        module.exit_json(changed=changed, info=key.info if key else "",
+                         private=key.private if key else "", public=key.public if key else "")
 
 
 def key_action(module, client):
@@ -190,12 +146,12 @@ def key_action(module, client):
 def check_state(client, key_name):
     key_state = 'absent'
     key = None
-    if key_name not in client.keys.keys():
-        return key_state, key
-    else:
+
+    result = client.keys(id=key_name)
+    if result:
         key_state = 'present'
-        key = client.keys[key_name]
-        return key_state, key
+        key = result[0]
+    return key_state, key
 
 
 def remove_key(key_name, client):
@@ -219,7 +175,7 @@ def add_key(module, client):
 
     client.add_key(key_name=key_name, private=private)
     client.update_keys()
-    key = client.keys[key_name]
+    key = client.keys(id=key_name)[0]
 
     if save_locally and local_save_path:
         with open(local_save_path, "w") as f:
