@@ -128,33 +128,26 @@ def determine_action(state):
 
 
 def list_backends(module, client):
-    backends = client.backends
-    backend = module.params.get('backend')
+    backends = client.backends()
+    title = module.params.get('title')
 
-    if not backend:
-        result = {}
-        for backend_key in backends.keys():
-            result[backend_key] = backends[backend_key].info
+    if not title:
+        result = [backend.title for backend in backends]
+        module.exit_json(changed=False, backends=result)
     else:
-        found = client.backend_from_id(backend)
-        if not found:
-            found = client.backend_from_title(backend)
-
-        if not found:
-            result = {}
+        backends = client.backends(search=title)
+        if backends:
+            module.exit_json(changed=False, info=backends[0].info)
         else:
-            result = {}
-            result[found.id] = found.info
-
-    module.exit_json(changed=False, info=result)
+            module.exit_json(changed=False, info="Not Found")
 
 
 def backend_action(module, client):
     provider = module.params.get('provider')
-    backend_name = module.params.get('name')
+    title = module.params.get('title')
     desired_state = module.params.get('state')
 
-    backend_state, chosen_backend = check_state(client, provider, backend_name)
+    backend_state, chosen_backend = check_state(client, provider, title)
 
     if backend_state == 'present' and desired_state == 'present':
         module.exit_json(changed=False, info=chosen_backend.info)
@@ -169,16 +162,14 @@ def backend_action(module, client):
     module.exit_json(changed=False, info="paparia")
 
 
-def check_state(client, provider, backend_name):
+def check_state(client, provider, title):
     backend_state = 'absent'
     chosen_backend = None
 
-    for key in client.backends:
-        backend = client.backends[key]
-        if backend.info['provider'] == provider and backend.title == backend_name:
-            backend_state = 'present'
-            chosen_backend = backend
-            break
+    backends = [backend.title for backend in client.backends()]
+    if title in backends:
+        backend_state = 'present'
+        chosen_backend = client.backends(search=title)[0]
 
     return backend_state, chosen_backend
 
@@ -192,49 +183,150 @@ def remove_backend(provider, client):
 
 
 def add_backend(module, client):
-    title = module.params.get('name')
+    title = module.params.get('title')
     provider = module.params.get('provider')
-    key = module.params.get('backend_key')
-    secret = module.params.get('backend_secret')
-    tenant_name = module.params.get('tenant_name')
-    region = module.params.get('region')
-    apiurl = module.params.get('api_url')
-    machine_ip = module.params.get('machine_ip')
-    machine_key = module.params.get('machine_key')
-    machine_user = module.params.get('machine_user')
-    compute_endpoint = module.params.get('compute_endpoint')
-    machine_port = module.params.get('machine_port')
 
-    client.add_backend(title, provider, key, secret, tenant_name, region, apiurl, machine_ip, machine_key, machine_user,
-                       compute_endpoint, machine_port)
+    if provider == "ec2":
+        api_key = module.params.get('api_key')
+        api_secret = module.params.get('api_secret')
+        region = module.params.get('region')
+        client.add_backend(title, provider, api_key=api_key,
+                           api_secret=api_secret, region=region)
+    elif provider == "rackspace":
+        username = module.params.get('username')
+        api_key = module.params.get('api_key')
+        region = module.params.get('region')
+        client.add_backend(title, provider, username=username,
+                           api_key=api_key, region=region)
+    elif provider == "nephoscale":
+        username = module.params.get('username')
+        password = module.params.get('password')
+        client.add_backend(title, provider, username=username,
+                           password=password)
+    elif provider == "softlayer":
+        username = module.params.get('username')
+        api_key = module.params.get('api_key')
+        client.add_backend(title, provider, username=username,
+                           api_key=api_key)
+    elif provider == "digitalocean":
+        token = module.params.get('token')
+        client.add_backend(title, provider, token=token)
+    elif provider == "gce":
+        email = module.params.get('email')
+        private_key_path = module.params.get('private_key')
+        with open(private_key_path, 'r') as f:
+            private_key = f.read()
+        project_id = module.params.get('project_id')
+        client.add_backend(title, provider, email=email,
+                           private_key=private_key, project_id=project_id)
+    elif provider == "azure":
+        subscription_id = module.params.get('subscription_id')
+        certificate_path = module.params.get('certificate')
+        with open(certificate_path, 'r') as f:
+            certificate = f.read()
+        client.add_backend(title, provider, subscription_id=subscription_id,
+                           certificate=certificate)
+    elif provider == "linode":
+        api_key = module.params.get('api_key')
+        client.add_backend(title, provider, api_key=api_key)
+    elif provider == "bare_metal":
+        machine_ip = module.params.get('machine_ip')
+        machine_key = module.params.get('machine_key')
+        machine_user = module.params.get('machine_user')
+        machine_port = module.params.get('machine_port')
+        client.add_backend(title, provider, machine_ip=machine_ip,
+                           machine_key=machine_key, machine_user=machine_user,
+                           machine_port=int(machine_port))
+    elif provider in ['vcloud', 'indonesian_vcloud']:
+        username = module.params.get('username')
+        password = module.params.get('password')
+        organization = module.params.get('organization')
+        host = module.params.get('host')
+        client.add_backend(title, provider, username=username,
+                           password=password, organization=organization, host=host)
+    elif provider == "libvirt":
+        machine_hostname = module.params.get('machine_hostname')
+        machine_user = module.params.get('machine_user')
+        machine_key = module.params.get('machine_key')
+        client.add_backend(title, provider, machine_hostname=machine_hostname,
+                           machine_user=machine_user, machine_key=machine_key)
+    elif provider == "hpcloud":
+        username = module.params.get('username')
+        password = module.params.get('password')
+        tenant_name = module.params.get('tenant_name')
+        region = module.params.get('region')
+        client.add_backend(title, provider, username=username,
+                           password=password, tenant_name=tenant_name, region=region)
+    elif provider == "openstack":
+        username = module.params.get('username')
+        password = module.params.get('password')
+        auth_url = module.params.get('auth_url')
+        tenant_name = module.params.get('tenant_name')
+        region = module.params.get('region')
+        compute_endpoint = module.params.get('compute_endpoint')
+        client.add_backend(title, provider, username=username, password=password,
+                           auth_url=auth_url, tenant_name=tenant_name, region=region,
+                           compute_endpoint=compute_endpoint)
+    elif provider == "docker":
+        docker_port = module.params.get('docker_port')
+        docker_host = module.params.get('docker_host')
+        auth_user = module.params.get('auth_user')
+        auth_password = module.params.get('auth_password')
+        key_file_path = module.params.get('key_file')
+        if key_file_path:
+            with open(key_file_path, 'r') as f:
+                key_file = f.read()
+        else:
+            key_file = None
+        cert_file_path = module.params.get('cert_file')
+        if cert_file_path:
+            with open(cert_file_path, 'r') as f:
+                cert_file = f.read()
+        else:
+            cert_file = None
+        client.add_backend(title, provider, docker_host=docker_host, docker_port=docker_port,
+                           auth_user=auth_user, auth_password=auth_password, key_file=key_file,
+                           cert_file=cert_file)
 
     client.update_backends()
-
-    backend = client.backend_from_title(title)
+    backend = client.backends(search=title)[0]
     return backend
 
 
 def main():
     module = AnsibleModule(
         argument_spec=dict(
-            provider=dict(required=False, type='str'),
             state=dict(required=False, choices=['present', 'absent']),
-            # enabled=dict(required=False, default=True, type='bool'),
-            name=dict(required=False, type='str'),
-            backend=dict(required=False, type='str'),
-            backend_key=dict(required=False, type='str'),
-            backend_secret=dict(required=False, type='str'),
-            tenant_name=dict(required=False, type='str'),
-            region=dict(required=False, type='str'),
-            api_url=dict(required=False, type='str'),
-            compute_endpoint=dict(required=False, type='str'),
-            machine_ip=dict(required=False, type='str'),
-            machine_key=dict(required=False, type='str'),
-            machine_user=dict(required=False, type='str'),
-            machine_port=dict(required=False, type='str'),
+            provider=dict(required=False, type='str'),
+            title=dict(required=False, type='str'),
             mist_uri=dict(default='https://mist.io', type='str'),
             mist_email=dict(required=False, type='str'),
             mist_password=dict(required=False, type='str'),
+            api_key=dict(required=False, type='str'),
+            api_secret=dict(required=False, type='str'),
+            region=dict(required=False, type='str'),
+            username=dict(required=False, type='str'),
+            password=dict(required=False, type='str'),
+            token=dict(required=False, type='str'),
+            email=dict(required=False, type='str'),
+            private_key=dict(required=False, type='str'),
+            project_id=dict(required=False, type='str'),
+            certificate=dict(required=False, type='str'),
+            subscription_id=dict(required=False, type='str'),
+            machine_ip=dict(required=False, type='str'),
+            machine_key=dict(required=False, type='str'),
+            machine_user=dict(required=False, type='str', default='root'),
+            machine_port=dict(required=False, type='str', default='22'),
+            machine_hostname=dict(required=False, type='str'),
+            host=dict(required=False, type='str'),
+            organization=dict(required=False, type='str'),
+            tenant_name=dict(required=False, type='str'),
+            docker_port=dict(required=False, type='str', default='4243'),
+            docker_host=dict(required=False, type='str'),
+            auth_user=dict(required=False, type='str'),
+            auth_password=dict(required=False, type='str'),
+            key_file=dict(required=False, type='str'),
+            cert_file=dict(required=False, type='str'),
         )
     )
 
