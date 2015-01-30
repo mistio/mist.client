@@ -123,48 +123,157 @@ class MistClient(object):
         self._list_backends()
         return self._backends
 
-    def add_backend(self, title, provider, key, secret, tenant_name=None, 
-                    region=None, apiurl=None, machine_ip=None, machine_key=None, 
-                    machine_user=None, compute_endpoint=None, machine_port=None,
-                    remove_on_error=True):
-        """
-        Add a backend (hint: run supported_providers first in order to see all the available options)
+    def add_backend(self, title, provider, **kwargs):
+        payload = {}
+        if provider == "ec2":
+            payload = self._add_backend_ec2(**kwargs)
+        elif provider == "rackspace":
+            payload = self._add_backend_rackspace(**kwargs)
+        elif provider == "nephoscale":
+            payload = self._add_backend_nephoscale(**kwargs)
+        elif provider == "softlayer":
+            payload = self._add_backend_softlayer(**kwargs)
+        elif provider == "digitalocean":
+            payload = self._add_backend_digitalocean(**kwargs)
+        elif provider == "gce":
+            payload = self._add_backend_gce(**kwargs)
+        elif provider == "azure":
+            payload = self._add_backend_azure(**kwargs)
+        elif provider == "linode":
+            payload = self._add_backend_linode(**kwargs)
+        elif provider == "bare_metal":
+            payload = self._add_backend_bare_metal(**kwargs)
+        elif provider in ['vcloud', 'indonesian_vcloud']:
+            payload = self._add_backend_vcloud(**kwargs)
+        elif provider == "docker":
+            payload = self._add_backend_docker(**kwargs)
+        elif provider == "libvirt":
+            payload = self._add_backend_libvirt(**kwargs)
+        elif provider == "hpcloud":
+            payload = self._add_backend_hp(**kwargs)
+        elif provider == "openstack":
+            payload = self._add_backend_openstack(**kwargs)
 
-        :param title: Title of the backend
-        :param provider: A provider's name (must be one of the list of supported_providers)
-        :param key: According to each provider can be a username, a api_key etc.
-        :param secret: According to each provider can be a simple password, a api_secret etc.
-        :param tenant_name: Used if needed for OpenStack backends.
-        :param region: Necessary only if there is a custom Openstack region.
-        :param apiurl: APIURL needed by Openstack and HP Cloud.
-        :param machine_ip: Ip address needed when adding Bare Metal Server.
-        :param machine_key: Id of ssh key needed when adding Bare Metal Server. The key must have been added first.
-        :param machine_user: User for Bare Metal Server.
-        :param compute_endpoint: Needed by some OpenStack installations.
-        :param machine_port: Used when adding a Bare Metal Server
-        :returns: Updates self._backends dict.
-
-        """
-        payload = {
-            'title': title,
-            'provider': provider,
-            'apikey': key,
-            'apisecret': secret,
-            'tenant_name': tenant_name,
-            'region': region,
-            'apiurl': apiurl,
-            'machine_ip': machine_ip,
-            'machine_key': machine_key,
-            'machine_user': machine_user,
-            'compute_endpoint': compute_endpoint,
-            'machine_port': machine_port,
-            'remove_on_error': remove_on_error
-        }
-
-        req = self.request(self.uri+'/backends', data=json.dumps(payload))
+        payload['title'] = title
+        payload['provider'] = provider
+        req = self.request(self.uri+'/backends', data=json.dumps(payload), api_version=2)
         response = req.post()
         self.update_backends()
         return
+
+    def _add_backend_rackspace(self, **kwargs):
+        payload = {
+            'username': kwargs.get('username', ''),
+            'api_key': kwargs.get('api_key', ''),
+            'region': kwargs.get('region', '')
+        }
+        return payload
+
+    def _add_backend_ec2(self, **kwargs):
+        payload = {
+            'api_key': kwargs.get('api_key', ''),
+            'api_secret': kwargs.get('api_secret', ''),
+            'region': kwargs.get('region', '')
+        }
+        return payload
+
+    def _add_backend_nephoscale(self, **kwargs):
+        payload = {
+            'username': kwargs.get('username', ''),
+            'password': kwargs.get('password', '')
+        }
+        return payload
+
+    def _add_backend_softlayer(self, **kwargs):
+        payload = {
+            'username': kwargs.get('username', ''),
+            'api_key': kwargs.get('api_key', '')
+        }
+        return payload
+
+    def _add_backend_digitalocean(self, **kwargs):
+        payload = {
+            'token': kwargs.get('token', '')
+        }
+        return payload
+
+    def _add_backend_gce(self, **kwargs):
+        payload = {
+            'email': kwargs.get('email', ''),
+            'private_key': kwargs.get('private_key', ''),
+            'project_id': kwargs.get('project_id', '')
+        }
+        return payload
+
+    def _add_backend_azure(self, **kwargs):
+        payload = {
+            'subscription_id': kwargs.get('subscription_id', ''),
+            'certificate': kwargs.get('certificate', '')
+        }
+        return payload
+
+    def _add_backend_linode(self, **kwargs):
+        payload = {
+            'api_key': kwargs.get('api_key', '')
+        }
+        return payload
+
+    def _add_backend_bare_metal(self, **kwargs):
+        payload = {
+            'machine_ip': kwargs.get('machine_ip', ''),
+            'machine_key': kwargs.get('machine_key', ''),
+            'machine_user': kwargs.get('machine_user', 'root'),
+            'machine_port': kwargs.get('machine_port', 22)
+        }
+        return payload
+
+    def _add_backend_vcloud(self, **kwargs):
+        payload = {
+            'username': kwargs.get('username', ''),
+            'password': kwargs.get('password', ''),
+            'organization': kwargs.get('organization', ''),
+            'host': kwargs.get('host', '')
+        }
+        return payload
+
+    def _add_backend_docker(self, **kwargs):
+        payload = {
+            'docker_port': int(kwargs.get('docker_port', 4243)),
+            'docker_host': kwargs.get('docker_host', ''),
+            'auth_user': kwargs.get('auth_user', ''),
+            'auth_password': kwargs.get('auth_password', ''),
+            'key_file': kwargs.get('key_file', ''),
+            'cert_file': kwargs.get('cert_file', '')
+        }
+        return payload
+
+    def _add_backend_libvirt(self, **kwargs):
+        payload = {
+            'machine_hostname': kwargs.get('machine_hostname', ''),
+            'machine_user': kwargs.get('machine_user', 'root'),
+            'machine_key': kwargs.get('machine_key', '')
+        }
+        return payload
+
+    def _add_backend_hp(self, **kwargs):
+        payload = {
+            'username': kwargs.get('username', ''),
+            'password': kwargs.get('password', ''),
+            'tenant_name': kwargs.get('tenant_name', ''),
+            'region': kwargs.get('region', '')
+        }
+        return payload
+
+    def _add_backend_openstack(self, **kwargs):
+        payload = {
+            'username': kwargs.get('username', ''),
+            'password': kwargs.get('password', ''),
+            'auth_url': kwargs.get('auth_url', ''),
+            'tenant_name': kwargs.get('tenant_name', ''),
+            'region': kwargs.get('region', ''),
+            'compute_endpoint': kwargs.get('compute_endpoint', '')
+        }
+        return payload
 
     def _list_keys(self):
         """
