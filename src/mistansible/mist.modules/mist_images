@@ -77,7 +77,7 @@ def list_images(module, client):
     else:
         images = backend.search_image(search)
 
-    return [image['name'] for image in images]
+    return [{'name': image['name'], 'id': image['id']} for image in images]
 
 
 def main():
