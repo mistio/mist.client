@@ -137,6 +137,24 @@ Add a Bare Metal Server (or any server)::
 
     mist add-backend --provider bare_metal --bare-hostname 198.230.89.3 --bare-user root --bare-port 22 --bare-ssh-key-id my_ssh_key
 
+Add a Google Compute Engine backend::
+
+    To add a GCE backend you have to download the private key file
+
+    mist add-backend --provider gce --gce-email 46234234246-3oiuoiu0980989873yui@developer.gserviceaccount.com --gce-project-id gifted-electron-10 --gce-private-key /home/user/gce.key
+
+Add VMware(vCloud) backend::
+
+    mist add-backend --provider vcloud --vcloud-username admin --vcloud-password ioiuYoiuOIU --vcloud-organization MyOrg.io --vcloud-host compute.idcloudonline.com
+
+Add Indonesian vCloud backend::
+
+    mist add-backend --provider indonesian_vcloud --indonesian-username admin --indonesian-password kjOIULKJLlkj --indonesian-organization MyOrg.io
+
+Add KVM(via libvirt) backend::
+
+    mist add-backend --provider libvirt --libvirt-hostname 10.0.0.1 --libvirt-user root --libvirt-key MyAddedKey
+
 
 You can now see a list of all your added backends::
 
