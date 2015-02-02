@@ -91,32 +91,20 @@ def main():
 
     provider_choices = [
         'bare_metal',
-        'ec2_ap_northeast',
-        'ec2_ap_southeast',
-        'ec2_ap_southeast_2',
-        'ec2_eu_west',
-        'ec2_sa_east',
-        'ec2_us_east',
-        'ec2_us_west',
-        'ec2_us_west_oregon',
+        'ec2',
         'gce',
         'nephoscale',
         'digitalocean',
         'linode',
         'openstack',
-        'rackspace:dfw',
-        'rackspace:ord',
-        'rackspace:iad',
-        'rackspace:lon',
-        'rackspace:syd',
-        'rackspace:hkg',
-        'rackspace_first_gen:us',
-        'rackspace_first_gen:uk',
+        'rackspace',
         'softlayer',
-        'hpcloud:region-a.geo-1',
-        'hpcloud:region-b.geo-1',
+        'hpcloud',
         'docker',
-        'azure'
+        'azure',
+        'vcloud',
+        'indonesian_vcloud',
+        'libvirt',
     ]
     p_add_backend.add_argument(
         '--provider', required=True, choices=provider_choices,
@@ -130,6 +118,21 @@ def main():
     )
 
     ec2_group = p_add_backend.add_argument_group('EC2')
+    ec2_regions = [
+        'ec2_ap_northeast',
+        'ec2_ap_southeast',
+        'ec2_ap_southeast_2',
+        'ec2_eu_west',
+        'ec2_sa_east',
+        'ec2_us_east',
+        'ec2_us_west',
+        'ec2_us_west_oregon'
+    ]
+
+    ec2_group.add_argument(
+        '--ec2-region', choices=ec2_regions,
+        help="Region for the EC2 backend"
+    )
     ec2_group.add_argument(
         '--ec2-api-key',
         help="The ec2 API key"
@@ -140,6 +143,20 @@ def main():
     )
 
     rackspace_group = p_add_backend.add_argument_group('Rackspace')
+    rackspace_regions = [
+        'dfw',
+        'ord',
+        'iad',
+        'lon',
+        'syd',
+        'hkg',
+        'rackspace_first_gen:us',
+        'rackspace_first_gen:uk'
+    ]
+    rackspace_group.add_argument(
+        '--rackspace-region', choices=rackspace_regions,
+        help="Region for the Rackspace backend"
+    )
     rackspace_group.add_argument(
         '--rackspace-username',
         help="Username for Rackspace"
@@ -204,6 +221,15 @@ def main():
     )
 
     hp_group = p_add_backend.add_argument_group("HP")
+    hp_regions = [
+        'region-a.geo-1',
+        'region-b.geo-1'
+    ]
+
+    hp_group.add_argument(
+        '--hp-region', choices=hp_regions,
+        help="Region for the HP Cloud Backend"
+    )
     hp_group.add_argument(
         '--hp-username',
         help="Username for the HP backend"
@@ -234,7 +260,14 @@ def main():
         '--docker-auth-password',
         help="OPTIONAL. In case you have a basic auth set up"
     )
-
+    docker_group.add_argument(
+        '--docker-key-file',
+        help="OPTIONAL. Path of your key file used for TLS"
+    )
+    docker_group.add_argument(
+        '--docker-cert-file',
+        help="OPTIONAL. Path of your cert file used for TLS"
+    )
     bare_group = p_add_backend.add_argument_group("Bare Metal Server")
     bare_group.add_argument(
         '--bare-hostname',
@@ -263,6 +296,51 @@ def main():
         help="Path of azure cert file"
     )
 
+    vcloud_group = p_add_backend.add_argument_group("vCloud")
+    vcloud_group.add_argument(
+        '--vcloud-username',
+        help="Username for vCloud backend"
+    )
+    vcloud_group.add_argument(
+        '--vcloud-password',
+        help="Password for vCloud backend"
+    )
+    vcloud_group.add_argument(
+        '--vcloud-host',
+        help="Host for vCloud backend"
+    )
+    vcloud_group.add_argument(
+        '--vcloud-organization',
+        help="Your organization's name - the one you are registered to vCloud with"
+    )
+
+    indonesian_group = p_add_backend.add_argument_group("Indonesian vCloud")
+    indonesian_group.add_argument(
+        '--indonesian-username',
+        help="Username for vCloud backend"
+    )
+    indonesian_group.add_argument(
+        '--indonesian-password',
+        help="Password for vCloud backend"
+    )
+    indonesian_group.add_argument(
+        '--indonesian-organization',
+        help="Your organization's name - the one you are registered to vCloud with"
+    )
+
+    libvirt_group = p_add_backend.add_argument_group("KVM via libvirt")
+    libvirt_group.add_argument(
+        '--libvirt-hostname',
+        help="The hostname of your libvirt machine"
+    )
+    libvirt_group.add_argument(
+        '--libvirt-user',
+        help="User for your libvirt machine"
+    )
+    libvirt_group.add_argument(
+        '--libvirt-key',
+        help="The SSH Key name that you have added to Mist.io and is associated with your libvirt machine"
+    )
     # ---------------KEY ACTIONS----------------------
     p_list_keys = subparsers.add_parser(
         'list-keys',
