@@ -14,69 +14,77 @@ Before you add a new backend, you'll find it useful to see a list of all the pro
 
 Output::
 
-    Bare Metal Server              bare_metal
+    Other Server                   bare_metal
     Azure                          azure
-    EC2 AP NORTHEAST               ec2_ap_northeast
-    EC2 AP SOUTHEAST               ec2_ap_southeast
-    EC2 AP Sydney                  ec2_ap_southeast_2
-    EC2 EU Ireland                 ec2_eu_west
-    EC2 SA EAST                    ec2_sa_east
-    EC2 US EAST                    ec2_us_east
-    EC2 US WEST                    ec2_us_west
-    EC2 US WEST OREGON             ec2_us_west_oregon
+    EC2                            ec2                  Tokyo                ec2_ap_northeast
+    EC2                            ec2                  Singapore            ec2_ap_southeast
+    EC2                            ec2                  Sydney               ec2_ap_southeast_2
+    EC2                            ec2                  Ireland              ec2_eu_west
+    EC2                            ec2                  Sao Paulo            ec2_sa_east
+    EC2                            ec2                  N. Virginia          ec2_us_east
+    EC2                            ec2                  N. California        ec2_us_west
+    EC2                            ec2                  Oregon               ec2_us_west_oregon
     Google Compute Engine          gce
     NephoScale                     nephoscale
     DigitalOcean                   digitalocean
     Linode                         linode
     OpenStack                      openstack
-    Rackspace DFW                  rackspace:dfw
-    Rackspace ORD                  rackspace:ord
-    Rackspace IAD                  rackspace:iad
-    Rackspace LON                  rackspace:lon
-    Rackspace AU                   rackspace:syd
-    Rackspace HKG                  rackspace:hkg
-    Rackspace US (OLD)             rackspace_first_gen:us
-    Rackspace UK (OLD)             rackspace_first_gen:uk
+    Rackspace                      rackspace            Dallas               dfw
+    Rackspace                      rackspace            Chicago              ord
+    Rackspace                      rackspace            N. Virginia          iad
+    Rackspace                      rackspace            London               lon
+    Rackspace                      rackspace            Sydney               syd
+    Rackspace                      rackspace            Hong Kong            hkg
+    Rackspace                      rackspace            US-First Gen         rackspace_first_gen:us
+    Rackspace                      rackspace            UK-First Gen         rackspace_first_gen:uk
     SoftLayer                      softlayer
-    HP Helion Cloud - US West      hpcloud:region-a.geo-1
-    HP Helion Cloud - US East      hpcloud:region-b.geo-1
+    HP Helion Cloud                hpcloud              US West              region-a.geo-1
+    HP Helion Cloud                hpcloud              US East              region-b.geo-1
     Docker                         docker
+    VMware vCloud                  vcloud
+    Indonesian Cloud               indonesian_vcloud
+    KVM (via libvirt)              libvirt
+
 
 .. Note:: With every *list* action, you can have the output in a more *pretty* format by providing the ``--pretty`` flag.
 
 For example, ``mist list-providers --pretty`` will return this output::
 
-    +---------------------------+------------------------+
-    |           Title           |      Provider ID       |
-    +---------------------------+------------------------+
-    |     Bare Metal Server     |       bare_metal       |
-    |           Azure           |         azure          |
-    |      EC2 AP NORTHEAST     |    ec2_ap_northeast    |
-    |      EC2 AP SOUTHEAST     |    ec2_ap_southeast    |
-    |       EC2 AP Sydney       |   ec2_ap_southeast_2   |
-    |       EC2 EU Ireland      |      ec2_eu_west       |
-    |        EC2 SA EAST        |      ec2_sa_east       |
-    |        EC2 US EAST        |      ec2_us_east       |
-    |        EC2 US WEST        |      ec2_us_west       |
-    |     EC2 US WEST OREGON    |   ec2_us_west_oregon   |
-    |   Google Compute Engine   |          gce           |
-    |         NephoScale        |       nephoscale       |
-    |        DigitalOcean       |      digitalocean      |
-    |           Linode          |         linode         |
-    |         OpenStack         |       openstack        |
-    |       Rackspace DFW       |     rackspace:dfw      |
-    |       Rackspace ORD       |     rackspace:ord      |
-    |       Rackspace IAD       |     rackspace:iad      |
-    |       Rackspace LON       |     rackspace:lon      |
-    |        Rackspace AU       |     rackspace:syd      |
-    |       Rackspace HKG       |     rackspace:hkg      |
-    |     Rackspace US (OLD)    | rackspace_first_gen:us |
-    |     Rackspace UK (OLD)    | rackspace_first_gen:uk |
-    |         SoftLayer         |       softlayer        |
-    | HP Helion Cloud - US West | hpcloud:region-a.geo-1 |
-    | HP Helion Cloud - US East | hpcloud:region-b.geo-1 |
-    |           Docker          |         docker         |
-    +---------------------------+------------------------+
+    +-----------------------+-------------------+---------------+------------------------+
+    |        Provider       |    Provider ID    |     Region    |       Region ID        |
+    +-----------------------+-------------------+---------------+------------------------+
+    |      Other Server     |     bare_metal    |       -       |           -            |
+    |         Azure         |       azure       |       -       |           -            |
+    |          EC2          |        ec2        |     Tokyo     |    ec2_ap_northeast    |
+    |          EC2          |        ec2        |   Singapore   |    ec2_ap_southeast    |
+    |          EC2          |        ec2        |     Sydney    |   ec2_ap_southeast_2   |
+    |          EC2          |        ec2        |    Ireland    |      ec2_eu_west       |
+    |          EC2          |        ec2        |   Sao Paulo   |      ec2_sa_east       |
+    |          EC2          |        ec2        |  N. Virginia  |      ec2_us_east       |
+    |          EC2          |        ec2        | N. California |      ec2_us_west       |
+    |          EC2          |        ec2        |     Oregon    |   ec2_us_west_oregon   |
+    | Google Compute Engine |        gce        |       -       |           -            |
+    |       NephoScale      |     nephoscale    |       -       |           -            |
+    |      DigitalOcean     |    digitalocean   |       -       |           -            |
+    |         Linode        |       linode      |       -       |           -            |
+    |       OpenStack       |     openstack     |       -       |           -            |
+    |       Rackspace       |     rackspace     |     Dallas    |          dfw           |
+    |       Rackspace       |     rackspace     |    Chicago    |          ord           |
+    |       Rackspace       |     rackspace     |  N. Virginia  |          iad           |
+    |       Rackspace       |     rackspace     |     London    |          lon           |
+    |       Rackspace       |     rackspace     |     Sydney    |          syd           |
+    |       Rackspace       |     rackspace     |   Hong Kong   |          hkg           |
+    |       Rackspace       |     rackspace     |  US-First Gen | rackspace_first_gen:us |
+    |       Rackspace       |     rackspace     |  UK-First Gen | rackspace_first_gen:uk |
+    |       SoftLayer       |     softlayer     |       -       |           -            |
+    |    HP Helion Cloud    |      hpcloud      |    US West    |     region-a.geo-1     |
+    |    HP Helion Cloud    |      hpcloud      |    US East    |     region-b.geo-1     |
+    |         Docker        |       docker      |       -       |           -            |
+    |     VMware vCloud     |       vcloud      |       -       |           -            |
+    |    Indonesian Cloud   | indonesian_vcloud |       -       |           -            |
+    |   KVM (via libvirt)   |      libvirt      |       -       |           -            |
+    +-----------------------+-------------------+---------------+------------------------+
+
 
 From here on you'll need your desired provider's id in order to use it when adding a new backend.
 
@@ -85,15 +93,15 @@ Backend Actions
 
 Add an EC2 backend::
 
-    mist add-backend --provider ec2_ap_northeast --ec2-api-key AKIAHKIB7OIJCX7YLIO3JA --ec2-api-secret knbkGJKHG9gjhUuhgfjtiu987
+    mist add-backend --provider ec2 --region ec2_ap_northeast --ec2-api-key AKIAHKIB7OIJCX7YLIO3JA --ec2-api-secret knbkGJKHG9gjhUuhgfjtiu987
 
 Add a Rackspace backend::
 
-    mist add-backend --provider rackspace:iad --rackspace-username my_username --rackspace-api-key 098er098eqwec98dqdqd098
+    mist add-backend --provider rackspace --region iad --rackspace-username my_username --rackspace-api-key 098er098eqwec98dqdqd098
 
 Add a Nephoscale backend::
 
-    mist list backends --provider nephoscale --nepho-username nepho_username --nepho-password nepho_passwd
+    mist add-backend --provider nephoscale --nepho-username nepho_username --nepho-password nepho_passwd
 
 Add a DigitalOcean backend::
 
@@ -113,7 +121,7 @@ Add a Softlayer backend::
 
 Add a HP Cloud backend::
 
-    mist add-backend --provider hpcloud:region-a.geo-1 --hp-username hp_username --hp-password my_pass --hp-tenant my_tenant
+    mist add-backend --provider hpcloud --region region-a.geo-1 --hp-username hp_username --hp-password my_pass --hp-tenant my_tenant
 
 Add a Azure backend::
 

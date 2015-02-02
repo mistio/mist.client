@@ -99,12 +99,32 @@ def add_backend(client, args):
         add_azure_backend(client, args)
     elif "bare" in provider:
         add_bare_metal_backend(client, args)
+    elif "gce" in provider:
+        add_gce_backend(client, args)
     elif provider == "vcloud":
         add_vcloud_backend(client, args)
     elif provider == "indonesian_vcloud":
         add_indonesian_backend(client, args)
     elif provider == "libvirt":
         add_libvirt_backend(client, args)
+
+
+def add_gce_backend(client, args):
+    title = args.name
+    provider = args.provider
+
+    email = args.gce_email
+    project_id = args.gce_project_id
+    private_key_path = args.gce_private_key
+
+    if private_key_path:
+        with open(private_key_path, 'r') as f:
+            private_key = f.read()
+    else:
+        private_key = ""
+
+    client.add_backend(title=title, provider=provider, email=email, project_id=project_id,
+                       private_key=private_key)
 
 
 def add_libvirt_backend(client, args):

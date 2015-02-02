@@ -341,6 +341,19 @@ def main():
         '--libvirt-key',
         help="The SSH Key name that you have added to Mist.io and is associated with your libvirt machine"
     )
+    gce_group = p_add_backend.add_argument_group("GCE")
+    gce_group.add_argument(
+        '--gce-email',
+        help="Email of your Google Compute Engine account"
+    )
+    gce_group.add_argument(
+        '--gce-project-id',
+        help="Your Google Compute Engine's Project ID"
+    )
+    gce_group.add_argument(
+        '--gce-private-key',
+        help="Path of file that contains your GCE private key"
+    )
     # ---------------KEY ACTIONS----------------------
     p_list_keys = subparsers.add_parser(
         'list-keys',
