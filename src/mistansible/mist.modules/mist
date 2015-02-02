@@ -1,11 +1,6 @@
 #!/usr/bin/env python
-import os
-import time
-import ConfigParser
-
+from mistansible.helpers import authenticate
 from ansible.module_utils.basic import *
-
-from mist.client import MistClient
 
 DOCUMENTATION = '''
 ---
@@ -165,44 +160,6 @@ EXAMPLES = '''
 '''
 
 
-def authenticate(module):
-    home_path = os.getenv("HOME")
-    config_path = os.path.join(home_path, ".mist")
-    config = ConfigParser.ConfigParser()
-
-    mist_uri = module.params.get('mist_uri')
-    mist_email = module.params.get('mist_email')
-    mist_password = module.params.get('mist_password')
-
-
-    # Set default mist uri
-    config.add_section("mist.io")
-    config.set("mist.io", "mist_uri", "https://mist.io")
-
-    # Set default credentials
-    config.add_section("mist.credentials")
-    config.set("mist.credentials", "email", None)
-    config.set("mist.credentials", "password", None)
-
-    # Read configuration file
-    if os.path.isfile(config_path):
-            config.readfp(open(config_path))
-
-    mist_uri = config.get("mist.io", "mist_uri")
-    if not mist_email:
-        mist_email = config.get("mist.credentials", "email") or ""
-
-    if not mist_password:
-        mist_password = config.get("mist.credentials", "password") or ""
-
-    return init_client(mist_uri, mist_email, mist_password)
-
-
-def init_client(mist_uri="https://mist.io", email=None, password=None):
-    client = MistClient(mist_uri, email, password)
-    return client
-
-
 def determine_action(state):
     if not state:
         return "list"
@@ -212,10 +169,10 @@ def determine_action(state):
 
 def choose_backend(module, client):
     backend_name = module.params.get('backend')
-    backend = client.search_backend(backend_name)
-
-    if not backend:
-        module.fail_json(msg="You have to provide a valid backend id or name")
+    backends = client.backends(search=backend_name)
+    if not backends:
+        module.fail_json(msg="You have to provide a valid backend id or title")
+    backend = backends[0]
 
     return backend
 
@@ -225,25 +182,19 @@ def list_machines(module, client):
     machine_name = module.params.get('name')
 
     if not machine_name:
-        result = {}
-        for key in backend.machines.keys():
-            machine = backend.machines[key]
-            result[key] = machine.info
+        machines = backend.machines()
+        result = [{'name': machine.name, 'id': machine.id} for machine in machines]
+        module.exit_json(changed=False, machines=result)
     else:
-        result = {}
-        machine = backend.search_machine(machine_name)
+        machine = backend.machines(search=machine_name)
+        if not machine:
+            module.fail_json(msg="Machine not found")
+
+        machine = machine[0]
+        result = {'name': machine.name, 'id': machine.id, 'info': machine.info}
+        module.exit_json(changed=False, machine=result)
         if machine:
             result = machine.info
-
-    if result:
-        info = result
-        network_interfaces = info['extra'].get('network_interfaces', None)
-        if network_interfaces:
-            info['extra'].pop('network_interfaces')
-    else:
-        info = result
-
-    module.exit_json(changed=False, info=info)
 
 
 def handle_metrics(module, machine):
@@ -327,8 +278,9 @@ def machine_action(module, client):
 
 def check_state(backend, machine_name):
     state = "absent"
-    machine = backend.search_machine(machine_name)
+    machine = backend.machines(search=machine_name)
     if machine:
+        machine = machine[0]
         state = "present"
 
     return state, machine
@@ -336,7 +288,11 @@ def check_state(backend, machine_name):
 
 def create_machine(module, client, backend):
     key_name = module.params.get('key')
-    key = client.keys[key_name]
+    key = client.keys(search=key_name)
+    if key:
+        key = key[0]
+    else:
+        key = ""
 
     machine_name = module.params.get('name')
     image_id = module.params.get('image_id')
