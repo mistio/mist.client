@@ -10,9 +10,7 @@ description:
   - Manage machines in all of your added backends
   - You can add/remove multiple backends from multiple providers through mist.io service.
   - I(mist_email) and I(mist_password) can be skipped if I(~/.mist) config file is present.
-  - See mist.client documentation for config file U(http://mistclient.readthedocs.org/en/latest/cmd/cmd.html)
-requirements:
-  - mist.client
+  - See documentation for config file U(http://mistclient.readthedocs.org/en/latest/cmd/cmd.html)
 options:
   mist_email:
     description:

@@ -8,11 +8,9 @@ DOCUMENTATION = '''
 module: mist_providers
 short_description: Lists all available providers supported by the mist.io service
 description:
-  - Returns a list of all available providers that you can add and control through mist.io service
+  - Returns a list of all available providers and the corresponding regions that you can add and control through mist.io service.
   - I(mist_email) and I(mist_password) can be skipped if I(~/.mist) config file is present.
-  - See mist.client documentation for config file U(http://mistclient.readthedocs.org/en/latest/cmd/cmd.html)
-requirements:
-  - mist.client
+  - See documentation for config file U(http://mist.readthedocs.org/en/latest/cmd/cmd.html)
 options:
   mist_email:
     description:
@@ -40,6 +38,10 @@ options:
       - docker
       - hpcloud
       - softlayer
+      - azure
+      - libvirt
+      - vcloud
+      - indonesian_vcloud
       - all
     default: all
     description:

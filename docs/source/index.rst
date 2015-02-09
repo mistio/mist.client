@@ -22,7 +22,7 @@ that can access the web. To use it you need an account with the freemium https:/
    client/installation
    cmd/index
    client/index
-   ansible
+   ansible/getting_started
 
 Package Info
 ============
