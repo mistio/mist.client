@@ -1,6 +1,6 @@
 Ansible modules
 ***************
-Once you have install the ``mist`` package you'll be able to use the mist ansible modules in your playbooks.
+Once you have installed the ``mist`` package you'll be able to use the mist ansible modules in your playbooks.
 The easiest way to do so is to run the ``mistplay`` command, which is a wrapper of ``ansible-playbook``::
 
     mistplay main.yml
@@ -14,4 +14,4 @@ The easiest way to do so is to run the ``mistplay`` command, which is a wrapper 
    mist_sizes_module
    mist_locations_module
    mist_keys_module
-   mist
+   mist_module
