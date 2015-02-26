@@ -6,7 +6,7 @@
 Welcome to mist documentation!
 ******************************
 
-:Version: 0.3.0
+:Version: 1.0.0
 :Author: Mist.io Inc
 :Source: https://github.com/mistio/mist.client
 :License: GPL v3
@@ -22,7 +22,7 @@ that can access the web. To use it you need an account with the freemium https:/
    client/installation
    cmd/index
    client/index
-   ansible
+   ansible/getting_started
 
 Package Info
 ============
@@ -32,10 +32,4 @@ Package Info
 
    notes/changelog
 
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
 

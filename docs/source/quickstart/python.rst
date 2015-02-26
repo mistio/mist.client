@@ -8,7 +8,7 @@ Install mist using pip::
 
 Let's add our backends, for example an ec2 and an Openstack::
 
-    mist add-backend --provider ec2_ap_northeast --name EC2 --ec2-api-key ALKI098IGGYUG --ec2-api-secret dioLKNlkhiu89oiukhj
+    mist add-backend --provider ec2 --region ec2_ap_northeast --name EC2 --ec2-api-key ALKI098IGGYUG --ec2-api-secret dioLKNlkhiu89oiukhj
     mist add-backend --provider openstack --name Openstack --openstack--username admin --openstack-tenant admin --openstack-password admin_pass --openstack-auth-url http://10.0.1:5000
 
 We can now provision new machines just like that::

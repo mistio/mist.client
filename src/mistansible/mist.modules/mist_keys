@@ -1,0 +1,212 @@
+#!/usr/bin/env python
+from mistansible.helpers import authenticate
+from ansible.module_utils.basic import *
+
+DOCUMENTATION = '''
+module: mist_keys
+short_description: Manage ssh-keys from mist.io service
+description:
+  - By uploading your SSH keys to mist.io you can access all your machines through mist.io, have a shell prompt from your browser and even let mist.io take care of enabling monitoring to your machines.
+  - You also can have mist.io run commands to your machines during provisiong or after an alert is triggered.
+  - I(mist_email) and I(mist_password) can be skipped if I(~/.mist) config file is present.
+  - See documentation for config file U(http://mistclient.readthedocs.org/en/latest/cmd/cmd.html)
+options:
+  mist_email:
+    description:
+      - Email to login to the mist.io service
+    required: false
+  mist_password:
+    description:
+      - Password to login to the mist.io service
+    required: false
+  mist_uri:
+    default: https://mist.io
+    description:
+      - Url of the mist.io service. By default https://mist.io. But if you have a custom installtion of mist.io you can provide the url here
+    required: false
+  state:
+    description:
+      - If provided it will instruct the module to tirgger keys actions, otherwise it will only list information
+    choices: ["present", "absent"]
+    required: false
+  name:
+    description:
+      - Name of the key to add or list
+    required: false
+  key:
+    description:
+      - When adding a new key, you can provide a local key's path to add to mist.io
+    required: false
+  auto_generate:
+    description:
+      - If I(True) it will ask mist.io to randomly generate a key and save it to the added keys
+    default: False
+    required: false
+  save_locally:
+    description:
+      - If I(True) the auto generated key will be saved locally
+    default: False
+    required: false
+  local_save_path:
+    description:
+      - If I(save_locally), the local save path will be used to save the key
+    default: "~/.ssh"
+    required: false
+author: "Mist.io Inc"
+version_added: "1.7.1"
+
+'''
+
+EXAMPLES = '''
+- name: Add local key named my_key to mist.io
+  mist_keys:
+    mist_email: your@email.com
+    mist_password: yourpassword
+    name: myKey
+    state: present
+    key: /home/user/.ssh/my_key
+
+- name: Auto-generate key and save locally
+  mist_keys:
+    mist_email: your@email.com
+    mist_password: yourpassword
+    name: autoKey
+    state: present
+    auto_generate: true
+    save_locally: true
+    local_save_path: /path/to/save
+
+- name: Delete key named myKey
+  mist_keys:
+    mist_email: your@email.com
+    mist_password: yourpassword
+    name: myKey
+    state: absent
+
+- name: List info for key named myKey
+  mist_keys:
+    mist_email: your@email.com
+    mist_password: yourpassword
+    name: myKey
+  register: key
+
+'''
+
+
+def determine_action(state):
+    if not state:
+        return "list"
+    else:
+        return "addremove"
+
+
+def list_keys(module, client):
+    changed = False
+    key_name = module.params.get('name')
+    if not key_name:
+        result = [key.id for key in client.keys()]
+        module.exit_json(changed=False, keys=result)
+    else:
+        result = client.keys(search=key_name)
+        key = result[0] if result else []
+
+        #Determine if we want to save the key locally
+        save_locally = module.params.get('save_locally')
+        local_save_path = module.params.get('local_save_path')
+
+        if key and save_locally and local_save_path:
+            private = key.private
+            with open(local_save_path, "w") as f:
+                f.write(private)
+            changed = True
+        module.exit_json(changed=changed, info=key.info if key else "",
+                         private=key.private if key else "", public=key.public if key else "")
+
+
+def key_action(module, client):
+    key_name = module.params.get('name')
+    key_state, key = check_state(client, key_name)
+
+    desired_state = module.params.get('state')
+
+    if key_state == "present" and desired_state == "present":
+        module.exit_json(changed=False, info=key.info, private=key.private, public=key.public)
+    elif key_state == "present" and desired_state == "absent":
+        key.delete()
+        module.exit_json(changed=True)
+    elif key_state == "absent" and desired_state == "absent":
+        module.exit_json(changed=False)
+    elif key_state == 'absent' and desired_state == "present":
+        key = add_key(module, client)
+        module.exit_json(changed=True, info=key.info, private=key.private, public=key.public)
+
+
+def check_state(client, key_name):
+    key_state = 'absent'
+    key = None
+
+    result = client.keys(id=key_name)
+    if result:
+        key_state = 'present'
+        key = result[0]
+    return key_state, key
+
+
+def remove_key(key_name, client):
+    key = client.keys[key_name]
+    key.delete()
+    return
+
+
+def add_key(module, client):
+    local_key_path = module.params.get('key')
+    auto_generate = module.params.get('auto_generate')
+    save_locally = module.params.get('save_locally')
+    local_save_path = module.params.get('local_save_path')
+    key_name = module.params.get('name')
+
+    if auto_generate:
+        private = client.generate_key()
+    else:
+        with open(local_key_path, "r") as f:
+            private = f.read().strip("\n")
+
+    client.add_key(key_name=key_name, private=private)
+    client.update_keys()
+    key = client.keys(id=key_name)[0]
+
+    if save_locally and local_save_path:
+        with open(local_save_path, "w") as f:
+            f.write(key.private)
+
+    return key
+
+
+def main():
+    module = AnsibleModule(
+        argument_spec=dict(
+            mist_uri=dict(default='https://mist.io', type='str'),
+            mist_email=dict(required=False, type='str'),
+            mist_password=dict(required=False, type='str'),
+            key=dict(required=False, type='str'),
+            state=dict(required=False, type='str', choices=['present', 'absent']),
+            name=dict(required=False, type='str'),
+            auto_generate=dict(required=False, default=False, type='bool'),
+            save_locally=dict(required=False, default=False, type='bool'),
+            local_save_path=dict(required=False, type='str'),
+        )
+    )
+
+    client = authenticate(module)
+
+    #Determine which action to run (e.g. list keys, add key etc)
+    state = module.params.get('state')
+    action = determine_action(state)
+
+    if action == "list":
+        list_keys(module, client)
+    else:
+        key_action(module, client)
+
+
+main()

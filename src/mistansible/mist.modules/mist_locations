@@ -1,0 +1,74 @@
+#!/usr/bin/env python
+from mistansible.helpers import authenticate
+from ansible.module_utils.basic import *
+
+DOCUMENTATION = '''
+module: mist_locations
+short_description: Lists all available locations/regions for a backend
+description:
+  - Returns a list of all available locations/regions for a given backend
+  - I(mist_email) and I(mist_password) can be skipped if I(~/.mist) config file is present.
+  - See documentation for config file U(http://mistclient.readthedocs.org/en/latest/cmd/cmd.html)
+options:
+  mist_email:
+    description:
+      - Email to login to the mist.io service
+    required: false
+  mist_password:
+    description:
+      - Password to login to the mist.io service
+    required: false
+  mist_uri:
+    default: https://mist.io
+    description:
+      - Url of the mist.io service. By default https://mist.io. But if you have a custom installation of mist.io you can provide the url here
+    required: false
+  backend:
+    description:
+      - Can be either backend's id or name
+    required: true
+author: "Mist.io Inc"
+version_added: "1.7.1"
+
+'''
+
+EXAMPLES = '''
+- name: List locations for a backend
+  mist_locations:
+    mist_email: your@email.com
+    mist_password: yourpassword
+    backend: DigitalOcean
+  register: locations
+
+'''
+
+
+def list_locations(module, client):
+    backend_name = module.params.get('backend')
+    backends = client.backends(search=backend_name)
+    if not backends:
+        module.fail_json(msg="You have to provide a valid backend id or title")
+    backend = backends[0]
+
+    locations = backend.locations
+    return [{'name': location['name'], 'id': location['id']} for location in locations]
+
+
+def main():
+    module = AnsibleModule(
+        argument_spec=dict(
+            mist_uri=dict(default='https://mist.io', type='str'),
+            mist_email=dict(required=False, type='str'),
+            mist_password=dict(required=False, type='str'),
+            backend=dict(required=True, type='str'),
+        )
+    )
+
+    client = authenticate(module)
+
+    locations = list_locations(module, client)
+
+    module.exit_json(changed=False, locations=locations)
+
+
+main()

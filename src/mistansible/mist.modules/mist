@@ -1,0 +1,394 @@
+#!/usr/bin/env python
+from mistansible.helpers import authenticate
+from ansible.module_utils.basic import *
+
+DOCUMENTATION = '''
+---
+module: mist
+short_description: Provision, monitor and manage machines with the mist.io service
+description:
+  - Manage machines in all of your added backends
+  - You can add/remove multiple backends from multiple providers through mist.io service.
+  - I(mist_email) and I(mist_password) can be skipped if I(~/.mist) config file is present.
+  - See documentation for config file U(http://mistclient.readthedocs.org/en/latest/cmd/cmd.html)
+options:
+  mist_email:
+    description:
+      - Email to login to the mist.io service
+    required: false
+  mist_password:
+    description:
+      - Password to login to the mist.io service
+    required: false
+  mist_uri:
+    default: https://mist.io
+    description:
+      - Url of the mist.io service. By default https://mist.io. But if you have a custom installation of mist.io you can provide the url here
+    required: false
+  state:
+    description:
+      - If provided it will instruct the module to trigger machine actions, otherwise it will only list information
+    choices: ["present", "absent"]
+    required: false
+  name:
+    description:
+      - The name you want the machine to have
+    required: false
+  backend:
+    description:
+      - Can be either the backend's id or name
+    required: true
+  image_id:
+    description:
+      - Id of the OS image you want to use to provision your machine
+    required: false
+  size_id:
+    description:
+      - Id of the machine size you want to use
+    required: false
+  location_id:
+    description:
+      - Id of the location/region you want to provision your machine to
+    required: false
+  key:
+    description:
+      - Name of the SSH-Key you want to associate with the machine. If I(None), the default SSH Key will be used
+    required: false
+  image_extra:
+    description:
+      - Needed only when provisioning to Linode Provider
+    required: false
+  image_extra:
+    description:
+      - Needed only when provisioning to Linode Provider
+    required: false
+  wait:
+    description:
+    - If I(True), the module will wait for the machine's SSH Daemon to be up and running and the SSH Key associated
+    default: False
+    required: false
+  wait_time:
+    description:
+      - Time to wait when waiting for machine to be probed or monitor to be up and running
+    default: 600
+    required: false
+  monitoring:
+    description:
+      - If I(True), it will enable monitor to the machine
+    default: False
+    required: false
+  wait_for_stats:
+    description:
+      - When enabling monitoring for the first time, it may take some time for the collectd agent to be installed.
+      - If I(True), it will wait for the monitoring stats to start
+    default: False
+    required: false
+  metric:
+    description:
+        - It will be either the metric id for the supported metrics, or the name in case I(python_file) is provided
+        - I(wait_for_stats) needs to be true
+    required: False
+  python_file:
+    description:
+        - This is the path of a python file in case you want to add a custom python metric
+    required: False
+  value_type:
+    description:
+        - What type of value has the plugin
+    choices: ["gauge", "derive"]
+    default: gauge
+    required: False
+  unit:
+    description:
+        - The unit of the metric you add. Can be left none
+    required: False
+author: "Mist.io Inc"
+version_added: "1.7.1"
+
+'''
+
+EXAMPLES = '''
+- name: Provision Ubuntu machine to EC2
+  mist:
+    mist_email: your@email.com
+    mist_password: yourpassword
+    backend: EC2
+    state: present
+    name: MyMachine
+    key: myKey
+    image_id: ami-bddaa2bc
+    size_id: m1.small
+    location_id: 0
+
+- name: Provision SUSE machine on EC2 and enable monitoring
+  mist:
+    mist_email: your@email.com
+    mist_password: yourpassword
+    backend: EC2
+    state: present
+    name: MyMachine
+    key: myKey
+    image_id: ami-9178e890
+    size_id: m1.small
+    location_id: 0
+    monitoring: true
+    wait_for_stats: true
+
+- name: List info for machine with name dbServer
+  mist:
+    mist_email: your@email.com
+    mist_password: yourpassword
+    backend: EC2
+    name: dbServer
+  register: machine
+
+- name: Enable monitoring and add custom plugin.py
+  mist:
+    mist_email: your@email.com
+    mist_password: yourpassword
+    backend: EC2
+    name: dbServer
+    state: present
+    key: newKey
+    wait: true
+    monitoring: true
+    wait_for_stats: true
+    metric: MyPlugin
+    python_file: /home/user/plugin.py
+'''
+
+
+def determine_action(state):
+    if not state:
+        return "list"
+    else:
+        return "addremove"
+
+
+def choose_backend(module, client):
+    backend_name = module.params.get('backend')
+    backends = client.backends(search=backend_name)
+    if not backends:
+        module.fail_json(msg="You have to provide a valid backend id or title")
+    backend = backends[0]
+
+    return backend
+
+
+def list_machines(module, client):
+    backend = choose_backend(module, client)
+    machine_name = module.params.get('name')
+
+    if not machine_name:
+        machines = backend.machines()
+        result = [{'name': machine.name, 'id': machine.id} for machine in machines]
+        module.exit_json(changed=False, machines=result)
+    else:
+        machine = backend.machines(search=machine_name)
+        if not machine:
+            module.fail_json(msg="Machine not found")
+
+        machine = machine[0]
+        result = {'name': machine.name, 'id': machine.id, 'info': machine.info}
+        module.exit_json(changed=False, machine=result)
+        if machine:
+            result = machine.info
+
+
+def handle_metrics(module, machine):
+    took_action = False
+    metric = module.params.get('metric')
+    python_file = module.params.get('python_file')
+    value_type = module.params.get('value_type')
+    unit = module.params.get('unit')
+
+    if python_file and not metric:
+        module.fail_json(msg="You have to provide metric id")
+
+    if python_file:
+        machine.add_python_plugin(name=metric, python_file=python_file, value_type=value_type, unit=unit)
+        took_action = True
+        return took_action
+    elif metric:
+        machine.add_metric(metric)
+        took_action = True
+        return took_action
+
+    return took_action
+
+
+def machine_action(module, client):
+    backend = choose_backend(module, client)
+    machine_name = module.params.get('name')
+    if not machine_name:
+        module.fail_json(msg="You have to provide a name for the machine")
+
+    machine_state, machine = check_state(backend, machine_name)
+
+    desired_state = module.params.get('state')
+
+    if machine_state == "present" and desired_state == "present":
+        change = False
+        wait_time = module.params.get('wait_time')
+        monitoring = module.params.get('monitoring')
+        wait_for_stats = module.params.get('wait_for_stats')
+
+        if monitoring:
+            try:
+                machine.enable_monitoring()
+                change = True
+            except:
+                pass
+            change = handle_metrics(module, machine)
+
+        if monitoring and wait_for_stats:
+            start_time = time.time()
+            while time.time() < start_time + wait_time:
+                try:
+                    time.sleep(15)
+                    stats = machine.get_stats()
+                    if stats:
+                        break
+                except:
+                    backend.update_machines()
+                    machine = backend.search_machine(machine_name)
+
+        info = machine.info
+        network_interfaces = info['extra'].get('network_interfaces', None)
+        if network_interfaces:
+            info['extra'].pop('network_interfaces')
+        module.exit_json(changed=change, info=info)
+    elif machine_state == "present" and desired_state == "absent":
+        machine.destroy()
+        module.exit_json(changed=True)
+    elif machine_state == "absent" and desired_state == "absent":
+        module.exit_json(changed=False)
+    elif machine_state == "absent" and desired_state == "present":
+        machine = create_machine(module, client, backend)
+
+        info = machine.info
+        network_interfaces = info['extra'].get('network_interfaces', None)
+        if network_interfaces:
+            info['extra'].pop('network_interfaces')
+
+        module.exit_json(changed=True, info=info)
+
+
+def check_state(backend, machine_name):
+    state = "absent"
+    machine = backend.machines(search=machine_name)
+    if machine:
+        machine = machine[0]
+        state = "present"
+
+    return state, machine
+
+
+def create_machine(module, client, backend):
+    key_name = module.params.get('key')
+    key = client.keys(search=key_name)
+    if key:
+        key = key[0]
+    else:
+        key = ""
+
+    machine_name = module.params.get('name')
+    image_id = module.params.get('image_id')
+    size_id = module.params.get('size_id')
+    location_id = module.params.get('location_id')
+    image_extra = module.params.get('image_extra')
+    disk = module.params.get('disk')
+
+    backend.create_machine(machine_name, key, image_id, location_id, size_id, image_extra, disk)
+    backend.update_machines()
+
+    wait = module.params.get('wait')
+    wait_time = module.params.get('wait_time')
+    monitoring = module.params.get('monitoring')
+    wait_for_stats = module.params.get('wait_for_stats')
+
+    if backend.provider == "nephoscale":
+        start_time = time.time()
+        while time.time() < start_time + wait_time:
+            time.sleep(15)
+            machine = backend.search_machine(machine_name)
+            if machine:
+                break
+            else:
+                backend.update_machines()
+    else:
+        machine = backend.search_machine(machine_name)
+
+    if wait or monitoring:
+        start_time = time.time()
+        while time.time() < start_time + wait_time:
+            try:
+                time.sleep(15)
+                probe_info = machine.probe()
+                uptime = probe_info.get('uptime', None)
+                if uptime:
+                    backend.update_machines()
+                    machine = backend.search_machine(machine_name)
+                    break
+            except:
+                backend.update_machines()
+                machine = backend.search_machine(machine_name)
+
+    if monitoring:
+        machine.enable_monitoring()
+
+    if monitoring and wait_for_stats:
+        start_time = time.time()
+        while time.time() < start_time + wait_time:
+            try:
+                time.sleep(15)
+                stats = machine.get_stats()
+                if stats:
+                    break
+            except:
+                backend.update_machines()
+                machine = backend.search_machine(machine_name)
+
+    if monitoring and wait_for_stats:
+        handle_metrics(module, machine)
+    return machine
+
+
+def main():
+    module = AnsibleModule(
+        argument_spec=dict(
+            mist_uri=dict(default='https://mist.io', type='str'),
+            mist_email=dict(required=False, type='str'),
+            mist_password=dict(required=False, type='str'),
+            backend=dict(required=True, type='str'),
+            state=dict(required=False, type='str', choices=['present', 'absent']),
+            image_id=dict(required=False, type='str'),
+            size_id=dict(required=False, type='str'),
+            location_id=dict(required=False, type='str'),
+            key=dict(required=False, type='str'),
+            image_extra=dict(required=False),
+            disk=dict(required=False, type='int'),
+            name=dict(required=False, type='str'),
+            wait=dict(required=False, default=False, type='bool'),
+            wait_time=dict(required=False, default=600, type='int'),
+            monitoring=dict(required=False, type='bool', default=False),
+            wait_for_stats=dict(required=False, type='bool', default=False),
+            metric=dict(required=False, type='str'),
+            python_file=dict(required=False, type='str'),
+            unit=dict(required=False, type='str'),
+            value_type=dict(required=False, type='str', default='gauge', choices=["gauge", "derive"])
+        )
+    )
+
+    client = authenticate(module)
+
+    #Determine which action to run (e.g. list machines, create machine etc)
+    state = module.params.get('state')
+    action = determine_action(state)
+
+    if action == "list":
+        list_machines(module, client)
+    else:
+        machine_action(module, client)
+
+main()

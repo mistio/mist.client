@@ -1,0 +1,71 @@
+#!/usr/bin/env python
+import os
+import json
+
+from ansible.module_utils.basic import *
+
+
+def ensure_file_present(file_name):
+    CHANGED = False
+
+    if os.path.isfile(file_name):
+        return CHANGED
+    else:
+        fp = open(file_name, 'w+')
+        fp.close()
+        CHANGED = True
+        return CHANGED
+
+
+def update_registry(file_name, var, value):
+    with open(file_name, "r") as f:
+        file_content = f.read()
+
+    try:
+        registered_vars = json.loads(file_content)
+        updated_vars = json.loads(file_content)
+    except ValueError:
+        registered_vars = {}
+        updated_vars = {}
+
+    updated_vars[var] = value
+
+    updated_content = json.dumps(updated_vars)
+
+    with open(file_name, "w") as f:
+        f.write(updated_content)
+
+    if registered_vars == updated_vars:
+        CHANGED = False
+    else:
+        CHANGED = True
+
+    return CHANGED
+
+
+def main():
+    module = AnsibleModule(
+        argument_spec=dict(
+            dest=dict(required=False, type='str', default="output.json"),
+            key=dict(required=True, type='str'),
+            value=dict(required=True),
+        )
+    )
+
+    file_name = module.params.get('dest')
+    var = module.params.get('key')
+    value = module.params.get('value')
+
+    file_changed = ensure_file_present(file_name)
+
+    vars_changed = update_registry(file_name, var, value)
+
+    if file_changed or vars_changed:
+        CHANGED = True
+    else:
+        CHANGED = False
+
+    module.exit_json(changed=CHANGED)
+
+
+main()

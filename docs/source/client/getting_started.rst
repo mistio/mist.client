@@ -1,7 +1,7 @@
 Introduction
 ************
 
-Now that you have the ``mistclient`` package you can import it to use it::
+Now that you have the ``mist`` package you can import MistClient::
 
     from mistclient import MistClient
     client = MistClient(email="yourmail@mist.io", password="yourpassword")

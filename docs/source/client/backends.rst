@@ -14,34 +14,44 @@ In order to see the list of all supported providers::
 
 The result will look like this::
 
-    [{u'provider': u'bare_metal', u'title': u'Bare Metal Server'},
-    {u'provider': u'ec2_ap_northeast', u'title': u'EC2 AP NORTHEAST'},
-    {u'provider': u'ec2_ap_southeast', u'title': u'EC2 AP SOUTHEAST'},
-    {u'provider': u'ec2_ap_southeast_2', u'title': u'EC2 AP Sydney'},
-    {u'provider': u'ec2_eu_west', u'title': u'EC2 EU Ireland'},
-    {u'provider': u'ec2_sa_east', u'title': u'EC2 SA EAST'},
-    {u'provider': u'ec2_us_east', u'title': u'EC2 US EAST'},
-    {u'provider': u'ec2_us_west', u'title': u'EC2 US WEST'},
-    {u'provider': u'ec2_us_west_oregon', u'title': u'EC2 US WEST OREGON'},
-    {u'provider': u'gce', u'title': u'Google Compute Engine'},
-    {u'provider': u'nephoscale', u'title': u'NephoScale'},
-    {u'provider': u'digitalocean', u'title': u'DigitalOcean'},
-    {u'provider': u'linode', u'title': u'Linode'},
-    {u'provider': u'openstack', u'title': u'OpenStack'},
-    {u'provider': u'rackspace:dfw', u'title': u'Rackspace DFW'},
-    {u'provider': u'rackspace:ord', u'title': u'Rackspace ORD'},
-    {u'provider': u'rackspace:iad', u'title': u'Rackspace IAD'},
-    {u'provider': u'rackspace:lon', u'title': u'Rackspace LON'},
-    {u'provider': u'rackspace:syd', u'title': u'Rackspace AU'},
-    {u'provider': u'rackspace:hkg', u'title': u'Rackspace HKG'},
-    {u'provider': u'rackspace_first_gen:us', u'title': u'Rackspace US (OLD)'},
-    {u'provider': u'rackspace_first_gen:uk', u'title': u'Rackspace UK (OLD)'},
-    {u'provider': u'softlayer', u'title': u'SoftLayer'},
-    {u'provider': u'hpcloud:region-a.geo-1',
-    u'title': u'HP Helion Cloud - US West'},
-    {u'provider': u'hpcloud:region-b.geo-1',
-    u'title': u'HP Helion Cloud - US East'},
-    {u'provider': u'docker', u'title': u'Docker'}]
+    [{u'provider': u'bare_metal', u'regions': [], u'title': u'Other Server'},
+     {u'provider': u'azure', u'regions': [], u'title': u'Azure'},
+     {u'provider': u'ec2',
+      u'regions': [{u'id': u'ec2_ap_northeast', u'location': u'Tokyo'},
+       {u'id': u'ec2_ap_southeast', u'location': u'Singapore'},
+       {u'id': u'ec2_ap_southeast_2', u'location': u'Sydney'},
+       {u'id': u'ec2_eu_west', u'location': u'Ireland'},
+       {u'id': u'ec2_sa_east', u'location': u'Sao Paulo'},
+       {u'id': u'ec2_us_east', u'location': u'N. Virginia'},
+       {u'id': u'ec2_us_west', u'location': u'N. California'},
+       {u'id': u'ec2_us_west_oregon', u'location': u'Oregon'}],
+      u'title': u'EC2'},
+     {u'provider': u'gce', u'regions': [], u'title': u'Google Compute Engine'},
+     {u'provider': u'nephoscale', u'regions': [], u'title': u'NephoScale'},
+     {u'provider': u'digitalocean', u'regions': [], u'title': u'DigitalOcean'},
+     {u'provider': u'linode', u'regions': [], u'title': u'Linode'},
+     {u'provider': u'openstack', u'regions': [], u'title': u'OpenStack'},
+     {u'provider': u'rackspace',
+      u'regions': [{u'id': u'dfw', u'location': u'Dallas'},
+       {u'id': u'ord', u'location': u'Chicago'},
+       {u'id': u'iad', u'location': u'N. Virginia'},
+       {u'id': u'lon', u'location': u'London'},
+       {u'id': u'syd', u'location': u'Sydney'},
+       {u'id': u'hkg', u'location': u'Hong Kong'},
+       {u'id': u'rackspace_first_gen:us', u'location': u'US-First Gen'},
+       {u'id': u'rackspace_first_gen:uk', u'location': u'UK-First Gen'}],
+      u'title': u'Rackspace'},
+     {u'provider': u'softlayer', u'regions': [], u'title': u'SoftLayer'},
+     {u'provider': u'hpcloud',
+      u'regions': [{u'id': u'region-a.geo-1', u'location': u'US West'},
+       {u'id': u'region-b.geo-1', u'location': u'US East'}],
+      u'title': u'HP Helion Cloud'},
+     {u'provider': u'docker', u'regions': [], u'title': u'Docker'},
+     {u'provider': u'vcloud', u'regions': [], u'title': u'VMware vCloud'},
+     {u'provider': u'indonesian_vcloud',
+      u'regions': [],
+      u'title': u'Indonesian Cloud'},
+     {u'provider': u'libvirt', u'regions': [], u'title': u'KVM (via libvirt)'}]
 
 Add Backend
 ===========
@@ -51,7 +61,7 @@ machines from the mist.io service or the service's API.
 In order to add a backend, you'll need the ``provider`` information from the supported providers you listed before. For
 example to add a "Rackspace LON" backend::
 
-    client.add_backend(provider="rackspace:lon", title="My Rack London", key="rack_username", secret="rack_api_secret")
+    client.add_backend(provider="rackspace", title="My Rack London", region="lon", username="rack_username", api_key="rack_api_secret")
 
 
 
