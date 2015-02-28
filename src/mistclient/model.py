@@ -215,7 +215,8 @@ class Backend(object):
 
     def create_machine(self, name, key, image_id, location_id, size_id, 
                        image_extra="", disk="", script="", monitoring=False, 
-                       ips=[], networks=[], location_name=""):
+                       ips=[], networks=[], location_name="", async=False,
+                       docker_command="", quantity=1, persist=False):
         """
         Create a new machine on the given backend
 
@@ -240,12 +241,18 @@ class Backend(object):
             'monitoring': monitoring,
             'ips': ips,
             'networks': networks,
-            'location_name': location_name
+            'location_name': location_name,
+            'docker_command': docker_command,
+            'async': async,
+            'quantity': quantity,
+            'persist': persist
+
         }
         data = json.dumps(payload)
         req = self.request(self.mist_client.uri+'/backends/'+self.id+'/machines', data=data)
-        req.post()
+        result = req.post()
         self.update_machines()
+        return result
 
 
 class Machine(object):

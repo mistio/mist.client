@@ -372,3 +372,9 @@ class MistClient(object):
                     if search in machine.id or search in machine.name]
         else:
             return self._machines
+
+    def get_job(self, job_id):
+        req = self.request(self.uri + '/jobs/' + job_id)
+        response = req.get()
+        import ipdb
+        ipdb.set_trace()
