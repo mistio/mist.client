@@ -376,5 +376,4 @@ class MistClient(object):
     def get_job(self, job_id):
         req = self.request(self.uri + '/jobs/' + job_id)
         response = req.get()
-        import ipdb
-        ipdb.set_trace()
+        return response.json()
