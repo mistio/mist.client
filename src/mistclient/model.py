@@ -217,7 +217,7 @@ class Backend(object):
                        image_extra="", disk="", script="", monitoring=False, 
                        ips=[], networks=[], location_name="", async=False,
                        docker_command="", quantity=1, persist=False, fire_and_forget=True,
-                       timeout=600):
+                       timeout=600, script_id=None, script_params=None):
         """
         Create a new machine on the given backend
 
@@ -246,7 +246,9 @@ class Backend(object):
             'docker_command': docker_command,
             'async': async,
             'quantity': quantity,
-            'persist': persist
+            'persist': persist,
+            'script_id': script_id,
+            'script_params': script_params
 
         }
         data = json.dumps(payload)
@@ -272,18 +274,15 @@ class Backend(object):
                 print "Probed machines: %d/%d" % (probed_machines, quantity)
                 print "Machines Successfully Created: %d/%d" % (machines_succeeded, quantity)
                 print "Machines Failure on creation: %d/%d" % (machines_failed, quantity)
-                print
 
-
-                if job.get('finished_at', 0) != 0:
+                if job.get('finished_at', 0):
                     print "DONE! FINISHED! FINITO!"
                     return job
                 elif time() - started_at > timeout:
                     print "Timed out!"
                     return job
 
-                sleep(10)
-
+                sleep(5)
 
 
 class Machine(object):
