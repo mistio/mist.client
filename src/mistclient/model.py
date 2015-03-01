@@ -2,7 +2,7 @@ import json
 import os
 import re
 
-from time import time
+from time import time, sleep
 
 from mistclient.helpers import RequestsHandler
 
@@ -216,7 +216,8 @@ class Backend(object):
     def create_machine(self, name, key, image_id, location_id, size_id, 
                        image_extra="", disk="", script="", monitoring=False, 
                        ips=[], networks=[], location_name="", async=False,
-                       docker_command="", quantity=1, persist=False):
+                       docker_command="", quantity=1, persist=False, fire_and_forget=True,
+                       timeout=100):
         """
         Create a new machine on the given backend
 
@@ -252,7 +253,37 @@ class Backend(object):
         req = self.request(self.mist_client.uri+'/backends/'+self.id+'/machines', data=data)
         result = req.post()
         self.update_machines()
-        return result
+
+        if not async or fire_and_forget:
+            return result
+        else:
+            job_id = result.json()['job_id']
+
+            started_at = time()
+            while True:
+                job = self.mist_client.get_job(job_id)
+
+                probed_machines = int(job.get('probes', 0))
+                machines_succeeded = int(job.get('machine_creation_succeeded', 0))
+                machines_failed = int(job.get('machine_creation_failed', 0))
+
+                print "SUMMARY:"
+                print "Started at: %s" % job['started_at']
+                print "Probed machines: %d/%d" % (probed_machines, quantity)
+                print "Machines Successfully Created: %d/%d" % (machines_succeeded, quantity)
+                print "Machines Failure on creation: %d/%d" % (machines_failed, quantity)
+                print
+
+
+                if job.get('finished_at', 0) != 0:
+                    print "DONE! FINISHED! FINITO!"
+                    return job
+                elif time() - started_at > timeout:
+                    print "Timed out!"
+                    return job
+
+                sleep(10)
+
 
 
 class Machine(object):
