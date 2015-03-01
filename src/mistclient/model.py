@@ -217,7 +217,7 @@ class Backend(object):
                        image_extra="", disk="", script="", monitoring=False, 
                        ips=[], networks=[], location_name="", async=False,
                        docker_command="", quantity=1, persist=False, fire_and_forget=True,
-                       timeout=100):
+                       timeout=600):
         """
         Create a new machine on the given backend
 
