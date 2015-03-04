@@ -2,9 +2,10 @@ import json
 import os
 import re
 
-from time import time
+from time import time, sleep
 
 from mistclient.helpers import RequestsHandler
+from prettytable import PrettyTable
 
 
 class Backend(object):
@@ -215,7 +216,9 @@ class Backend(object):
 
     def create_machine(self, name, key, image_id, location_id, size_id, 
                        image_extra="", disk="", script="", monitoring=False, 
-                       ips=[], networks=[], location_name=""):
+                       ips=[], networks=[], location_name="", async=False,
+                       docker_command="", quantity=1, persist=False, fire_and_forget=True,
+                       timeout=6000, script_id=None, script_params=None, verbose=False):
         """
         Create a new machine on the given backend
 
@@ -240,12 +243,95 @@ class Backend(object):
             'monitoring': monitoring,
             'ips': ips,
             'networks': networks,
-            'location_name': location_name
+            'location_name': location_name,
+            'docker_command': docker_command,
+            'async': async,
+            'quantity': quantity,
+            'persist': persist,
+            'script_id': script_id,
+            'script_params': script_params
+
         }
         data = json.dumps(payload)
         req = self.request(self.mist_client.uri+'/backends/'+self.id+'/machines', data=data)
-        req.post()
+        result = req.post()
         self.update_machines()
+
+        if not async or fire_and_forget:
+            return result
+        else:
+            job_id = result.json()['job_id']
+
+            started_at = time()
+            while True:
+                job = self.mist_client.get_job(job_id)
+
+                if verbose:
+                    summary = job.get('summary', {})
+
+                    probes = summary.get('probe', {})
+                    creates = summary.get('create', {})
+                    scripts = summary.get('script', {})
+                    monitoring = summary.get('monitoring', {})
+
+                    states = [
+                        'success',
+                        'error',
+                        'skipped',
+                        'pending'
+                    ]
+
+                    x = PrettyTable(['', 'SUCCESS', 'ERROR', 'SKIPPED', 'PENDING'])
+
+                    if creates:
+                        machines_created = {}
+                        for state in states:
+                            machines_created[state] = '%s/%s' % (creates.get(state, 'Undefined'), quantity)
+                        x.add_row(["Create:", machines_created['success'], machines_created['error'],
+                                   machines_created['skipped'], machines_created['pending']])
+
+                    if probes:
+                        probed_machines = {}
+                        for state in states:
+                            probed_machines[state] = '%s/%s' % (probes.get(state, 'Undefined'), quantity)
+                        x.add_row(["Probe:", probed_machines['success'], probed_machines['error'],
+                                   probed_machines['skipped'], probed_machines['pending']])
+
+                    if scripts:
+                        scripted_machines = {}
+                        for state in states:
+                            scripted_machines[state] = '%s/%s' % (scripts.get(state, 'Undefined'), quantity)
+                        x.add_row(["Script:", scripted_machines['success'], scripted_machines['error'],
+                                   scripted_machines['skipped'], scripted_machines['pending']])
+
+                    if monitoring:
+                        monitored_machines = {}
+                        for state in states:
+                            monitored_machines[state] = '%s/%s' % (monitoring.get(state, 'Undefined'), quantity)
+                        x.add_row(["Monitoring:", monitored_machines['success'], monitored_machines['error'],
+                                   monitored_machines['skipped'], monitored_machines['pending']])
+
+                    print x
+                    print
+
+                if job.get('finished_at', 0):
+                    error = job.get('error', None)
+                    if verbose and error:
+                        print "Finished with errors:"
+                        logs = job.get('logs', [])
+                        for log in logs:
+                            error = log.get('error', None)
+                            if error:
+                                print " - ", error
+                    elif verbose and not error:
+                        print "Finished without errors!"
+                    return job
+
+                elif time() - started_at > timeout:
+                    print "Timed out!"
+                    return job
+
+                sleep(5)
 
 
 class Machine(object):

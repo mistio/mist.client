@@ -8,7 +8,7 @@ class MistClient(object):
     """
     The base class that initiates a new client that connects with mist.io service.
     """
-    def __init__(self, mist_uri="https://mist.io", email=None, password=None):
+    def __init__(self, mist_uri="https://mist.io", email=None, password=None, verify=True):
         """
         Initialize the mist.client. In case email and password are given, it will try to authenticate with mist.io
         and keep the api_token that is returned to be used with the later requests.
@@ -23,6 +23,7 @@ class MistClient(object):
         self.password = password
         self.api_token = None
         self.user_details = None
+        self.verify = verify
 
         self._backends = None
         self._machines = None
@@ -55,7 +56,7 @@ class MistClient(object):
 
         :returns: An instance of mist.client.helpers.RequestsHandler
         """
-        return RequestsHandler(*args, api_token=self.api_token, **kwargs)
+        return RequestsHandler(*args, api_token=self.api_token, verify=self.verify, **kwargs)
 
     @property
     def supported_providers(self):
@@ -372,3 +373,23 @@ class MistClient(object):
                     if search in machine.id or search in machine.name]
         else:
             return self._machines
+
+    def get_job(self, job_id):
+        req = self.request(self.uri + '/jobs/' + job_id)
+        response = req.get()
+        return response.json()
+
+    def run_script(self, backend_id, machine_id, script_id, script_params="", fire_and_forget=True):
+        if not fire_and_forget:
+            raise NotImplementedError()
+
+        payload = {
+            'backend_id': backend_id,
+            'machine_id': machine_id,
+            'params': script_params,
+        }
+
+        data = json.dumps(payload)
+        req = self.request(self.uri+"/scripts/"+script_id, data=data)
+        re = req.post()
+        return re.json()

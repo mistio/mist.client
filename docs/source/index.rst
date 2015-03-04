@@ -6,7 +6,7 @@
 Welcome to mist documentation!
 ******************************
 
-:Version: 1.0.0
+:Version: 1.1.0
 :Author: Mist.io Inc
 :Source: https://github.com/mistio/mist.client
 :License: GPL v3
