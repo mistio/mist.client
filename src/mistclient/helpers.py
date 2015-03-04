@@ -12,7 +12,7 @@ class RequestsHandler(object):
     A wrapper-like class to be used with all the requests being made to mist.io service.
     """
 
-    def __init__(self, mist_uri, data=None, api_token=None, timeout=None, api_version=None):
+    def __init__(self, mist_uri, data=None, api_token=None, timeout=None, api_version=None, verify=True):
         """
 
         :param mist_uri: The uri to make the requests to.
@@ -28,6 +28,7 @@ class RequestsHandler(object):
         self.uri = mist_uri
         self.data = data
         self.timeout = timeout
+        self.verify = verify
 
     def response(self, resp):
         """
@@ -42,19 +43,23 @@ class RequestsHandler(object):
             raise Exception(resp.content)
 
     def post(self):
-        resp = requests.post(self.uri, data=self.data, headers=self.headers, timeout=self.timeout)
+        resp = requests.post(self.uri, data=self.data, headers=self.headers, timeout=self.timeout,
+                             verify=self.verify)
         return self.response(resp)
 
     def get(self):
-        resp = requests.get(self.uri, data=self.data, headers=self.headers, timeout=self.timeout)
+        resp = requests.get(self.uri, data=self.data, headers=self.headers, timeout=self.timeout,
+                            verify=self.verify)
         return self.response(resp)
 
     def put(self):
-        resp = requests.put(self.uri, data=self.data, headers=self.headers, timeout=self.timeout)
+        resp = requests.put(self.uri, data=self.data, headers=self.headers, timeout=self.timeout,
+                            verify=self.verify)
         return self.response(resp)
 
     def delete(self):
-        resp = requests.delete(self.uri, data=self.data, headers=self.headers, timeout=self.timeout)
+        resp = requests.delete(self.uri, data=self.data, headers=self.headers, timeout=self.timeout,
+                               verify=self.verify)
         return self.response(resp)
 
 

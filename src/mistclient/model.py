@@ -217,7 +217,7 @@ class Backend(object):
                        image_extra="", disk="", script="", monitoring=False, 
                        ips=[], networks=[], location_name="", async=False,
                        docker_command="", quantity=1, persist=False, fire_and_forget=True,
-                       timeout=600, script_id=None, script_params=None):
+                       timeout=6000, script_id=None, script_params=None):
         """
         Create a new machine on the given backend
 
@@ -265,18 +265,44 @@ class Backend(object):
             while True:
                 job = self.mist_client.get_job(job_id)
 
-                probed_machines = int(job.get('probes', 0))
-                machines_succeeded = int(job.get('machine_creation_succeeded', 0))
-                machines_failed = int(job.get('machine_creation_failed', 0))
+                summary = job.get('summary', {})
 
-                print "SUMMARY:"
-                print "Started at: %s" % job['started_at']
-                print "Probed machines: %d/%d" % (probed_machines, quantity)
-                print "Machines Successfully Created: %d/%d" % (machines_succeeded, quantity)
-                print "Machines Failure on creation: %d/%d" % (machines_failed, quantity)
+                probes = summary.get('probe', {})
+                creates = summary.get('create', {})
+                scripts = summary.get('script', {})
+                monitoring = summary.get('monitoring', {})
+
+                states = [
+                    'success',
+                    'error',
+                    'skipped',
+                    'pending'
+                ]
+
+                # Create Machine Creation Summary
+
+                if creates:
+                    print "Machine Creation Summary:"
+                    for state in states:
+                        print "%s: [%s/%s]" % (state.upper(), creates.get(state, 'Undefined'), quantity)
+
+                if probes:
+                    print "Probed Machines Summary:"
+                    for state in states:
+                        print "%s: [%s/%s]" % (state.upper(), probes.get(state, 'Undefined'), quantity)
+
+                if scripts:
+                    print "Scripts Summary:"
+                    for state in states:
+                        print "%s: [%s/%s]" % (state.upper(), scripts.get(state, 'Undefined'), quantity)
+
+                if monitoring:
+                    print "Monitoring Summary:"
+                    for state in states:
+                        print "%s: [%s/%s]" % (state.upper(), monitoring.get(state, 'Undefined'), quantity)
 
                 if job.get('finished_at', 0):
-                    print "DONE! FINISHED! FINITO!"
+                    print "Finished!"
                     return job
                 elif time() - started_at > timeout:
                     print "Timed out!"
