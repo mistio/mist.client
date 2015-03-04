@@ -378,3 +378,18 @@ class MistClient(object):
         req = self.request(self.uri + '/jobs/' + job_id)
         response = req.get()
         return response.json()
+
+    def run_script(self, backend_id, machine_id, script_id, script_params="", fire_and_forget=True):
+        if not fire_and_forget:
+            raise NotImplementedError()
+
+        payload = {
+            'backend_id': backend_id,
+            'machine_id': machine_id,
+            'params': script_params,
+        }
+
+        data = json.dumps(payload)
+        req = self.request(self.uri+"/scripts/"+script_id, data=data)
+        re = req.post()
+        return re.json()
