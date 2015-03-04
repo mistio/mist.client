@@ -5,6 +5,7 @@ import re
 from time import time, sleep
 
 from mistclient.helpers import RequestsHandler
+from prettytable import PrettyTable
 
 
 class Backend(object):
@@ -217,7 +218,7 @@ class Backend(object):
                        image_extra="", disk="", script="", monitoring=False, 
                        ips=[], networks=[], location_name="", async=False,
                        docker_command="", quantity=1, persist=False, fire_and_forget=True,
-                       timeout=6000, script_id=None, script_params=None):
+                       timeout=6000, script_id=None, script_params=None, verbose=False):
         """
         Create a new machine on the given backend
 
@@ -265,45 +266,67 @@ class Backend(object):
             while True:
                 job = self.mist_client.get_job(job_id)
 
-                summary = job.get('summary', {})
+                if verbose:
+                    summary = job.get('summary', {})
 
-                probes = summary.get('probe', {})
-                creates = summary.get('create', {})
-                scripts = summary.get('script', {})
-                monitoring = summary.get('monitoring', {})
+                    probes = summary.get('probe', {})
+                    creates = summary.get('create', {})
+                    scripts = summary.get('script', {})
+                    monitoring = summary.get('monitoring', {})
 
-                states = [
-                    'success',
-                    'error',
-                    'skipped',
-                    'pending'
-                ]
+                    states = [
+                        'success',
+                        'error',
+                        'skipped',
+                        'pending'
+                    ]
 
-                # Create Machine Creation Summary
+                    x = PrettyTable(['', 'SUCCESS', 'ERROR', 'SKIPPED', 'PENDING'])
 
-                if creates:
-                    print "Machine Creation Summary:"
-                    for state in states:
-                        print "%s: [%s/%s]" % (state.upper(), creates.get(state, 'Undefined'), quantity)
+                    if creates:
+                        machines_created = {}
+                        for state in states:
+                            machines_created[state] = '%s/%s' % (creates.get(state, 'Undefined'), quantity)
+                        x.add_row(["Create:", machines_created['success'], machines_created['error'],
+                                   machines_created['skipped'], machines_created['pending']])
 
-                if probes:
-                    print "Probed Machines Summary:"
-                    for state in states:
-                        print "%s: [%s/%s]" % (state.upper(), probes.get(state, 'Undefined'), quantity)
+                    if probes:
+                        probed_machines = {}
+                        for state in states:
+                            probed_machines[state] = '%s/%s' % (probes.get(state, 'Undefined'), quantity)
+                        x.add_row(["Probe:", probed_machines['success'], probed_machines['error'],
+                                   probed_machines['skipped'], probed_machines['pending']])
 
-                if scripts:
-                    print "Scripts Summary:"
-                    for state in states:
-                        print "%s: [%s/%s]" % (state.upper(), scripts.get(state, 'Undefined'), quantity)
+                    if scripts:
+                        scripted_machines = {}
+                        for state in states:
+                            scripted_machines[state] = '%s/%s' % (scripts.get(state, 'Undefined'), quantity)
+                        x.add_row(["Script:", scripted_machines['success'], scripted_machines['error'],
+                                   scripted_machines['skipped'], scripted_machines['pending']])
 
-                if monitoring:
-                    print "Monitoring Summary:"
-                    for state in states:
-                        print "%s: [%s/%s]" % (state.upper(), monitoring.get(state, 'Undefined'), quantity)
+                    if monitoring:
+                        monitored_machines = {}
+                        for state in states:
+                            monitored_machines[state] = '%s/%s' % (monitoring.get(state, 'Undefined'), quantity)
+                        x.add_row(["Monitoring:", monitored_machines['success'], monitored_machines['error'],
+                                   monitored_machines['skipped'], monitored_machines['pending']])
+
+                    print x
+                    print
 
                 if job.get('finished_at', 0):
-                    print "Finished!"
+                    error = job.get('error', None)
+                    if verbose and error:
+                        print "Finished with errors:"
+                        logs = job.get('logs', [])
+                        for log in logs:
+                            error = log.get('error', None)
+                            if error:
+                                print " - ", error
+                    elif verbose and not error:
+                        print "Finished without errors!"
                     return job
+
                 elif time() - started_at > timeout:
                     print "Timed out!"
                     return job
