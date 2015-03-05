@@ -51,24 +51,9 @@ def get_args():
     parser.add_argument('-u', '--user', nargs=1, required=True, help='email registered to mist.io', dest='username', type=str)
     parser.add_argument('-p', '--password', nargs=1, required=False, help='The password with which to connect to the host. If not specified, the user is prompted at runtime for a password', dest='password', type=str)
     parser.add_argument('-v', '--verbose', required=False, help='Enable verbose output', dest='verbose', action='store_true')
-    parser.add_argument('-w', '--wait-max', nargs=1, required=False, help='Maximum amount of seconds to wait when gathering information (default = 120)', dest='maxwait', type=int, default=[120])
+    parser.add_argument('-w', '--wait-max', nargs=1, required=False, help='Maximum amount of seconds to wait when gathering information (default = 600)', dest='maxwait', type=int, default=[600])
     args = parser.parse_args()
     return args
-
-
-def run_post_script(logger,post_script,vm,mac_ip):
-    """
-    Runs a post script for a vm
-    """
-    if mac_ip:
-        logger.info('Running post-script command: %s %s %s %s' % (post_script,vm.config.name,mac_ip[0],mac_ip[1]))
-        retcode = subprocess.call([post_script,vm.config.name,mac_ip[0],mac_ip[1]])
-        logger.debug('Received return code %s for command: %s %s %s %s' % (retcode,post_script,vm.config.name,mac_ip[0],mac_ip[1]))
-    else:
-        logger.info('Running post-script command: %s %s' % (post_script,vm.config.name))
-        retcode = subprocess.call([post_script,vm.config.name])
-        logger.debug('Received return code %s for command: %s %s' % (retcode,post_script,vm.config.name))
-    return retcode
 
 
 def main():
