@@ -34,7 +34,7 @@ def get_args():
     Supports the command-line arguments listed below.
     """
 
-    parser = argparse.ArgumentParser(description="Provision multiple VM's through mist.io. You can get information returned with the name of the virtual machine created and it's main mac and ip address in IPv4 format. Verbose and debug output can either be send to stdout, or saved to a log file. A post-script can be specified for post-processing.")
+    parser = argparse.ArgumentParser(description="Provision multiple VM's through mist.io. You can get information returned with the name of the virtual machine created and it's main mac and ip address in IPv4 format. A post-script can be specified for post-processing.")
     parser.add_argument('-b', '--basename', nargs=1, required=True, help='Basename of the newly deployed VMs', dest='basename', type=str)
     parser.add_argument('-d', '--debug', required=False, help='Enable debug output', dest='debug', action='store_true')
     parser.add_argument('-i', '--print-ips', required=False, help='Enable IP output', dest='ips', action='store_true')
@@ -57,10 +57,6 @@ def get_args():
 
 
 def main():
-    """
-    Clone a VM or template into multiple VMs with logical names with numbers and allow for post-processing
-    """
-
     # Handling arguments
     args = get_args()
 
@@ -144,8 +140,15 @@ def main():
         else:
             backend = backends[0]
 
+        # Create a new ssh keypair for this deployment
+        private = client.generate_key()
+        try:
+            client.add_key(key_name=basename, private=private)
+        except:
+            logger.warn('Key %s already exists' % basename)
+
         res = backend.create_machine(name=basename,
-                                     key=client.keys()[0], # TODO: create new key
+                                     key=client.keys(search=basename)[0],
                                      image_id=image_id,
                                      location_id=backend.locations[0]['id'],
                                      size_id=size_id,
@@ -159,10 +162,10 @@ def main():
 
         if print_ips or post_script:
             try:
-                print 'Updating VM list from backend'
+                logger.info('Updating VM list from backend')
                 backend.update_machines()
             except: # Retry in case of network glitch
-                print 'Backend unavailable. Retrying'
+                logger.warn('Backend unavailable. Retrying')
                 backend.update_machines()
 
             probes = [p for p in res['logs'] if p['action'] == 'probe' and not p['error']]
