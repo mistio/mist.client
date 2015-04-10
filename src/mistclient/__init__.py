@@ -45,7 +45,7 @@ class MistClient(object):
         data = json.dumps(payload)
         req = self.request(self.uri+'/auth', data=data)
         response = req.post().json()
-        token = response['mist_api_token']
+        token = response.get('mist_api_token', None)
         self.api_token = "mist_1 %s:%s" % (self.email, token)
         self.user_details = response
 
