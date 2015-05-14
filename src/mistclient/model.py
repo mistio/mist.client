@@ -42,7 +42,8 @@ class Backend(object):
 
         :returns: An instance of RequestsHandler
         """
-        return RequestsHandler(*args, api_token=self.api_token, **kwargs)
+        return RequestsHandler(*args, api_token=self.api_token,
+                               verify=self.mist_client.verify, **kwargs)
 
     def delete(self):
         """
