@@ -93,9 +93,10 @@ def find_key_assoc(client, machine):
             if machine.id == id:
                 connection_info['user'] = assoc_machine[3]
                 connection_info['port'] = assoc_machine[-1]
+                found_key = key
                 break
 
-    return key, connection_info
+    return found_key, connection_info
 
 
 def init_client(hostname, port, user, key_file):
@@ -103,7 +104,10 @@ def init_client(hostname, port, user, key_file):
     client = paramiko.SSHClient()
     client.load_system_host_keys()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    print "Connecting"
+    print "Connecting to: %s:%s" % (hostname, str(port))
+    print "User: %s" % user
+    print "Keyfile: %s" % key_file
+    print
 
     client.connect(hostname, port, user, key_filename=key_file)
     chan = client.invoke_shell()
