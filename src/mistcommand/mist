@@ -19,7 +19,10 @@ from mistcommand.helpers.locations import location_action
 from mistcommand.helpers.networks import network_action
 from mistcommand.helpers.metrics import metric_action
 from mistcommand.helpers.mistansible import ansible_action
+from mistcommand.helpers.ssh import ssh_action
 
+from requests.packages import urllib3
+urllib3.disable_warnings()
 
 def main():
 
@@ -698,6 +701,18 @@ def main():
         help="Run the command in machines that have this tag"
     )
 
+    # MIST SSH
+
+    p_ssh = subparsers.add_parser(
+        'ssh',
+        description="Open ssh connection and interactive shell to machine"
+    )
+
+    p_ssh.add_argument(
+        'machine',
+        help="Name of the machine you want to ssh into"
+    )
+
     # ----------------USER ACTIONS---------------------
     p_user_info = subparsers.add_parser(
         'user-info',
@@ -709,6 +724,8 @@ def main():
 
     if args.action == 'run':
         ansible_action(args, Runner, Inventory)
+    elif args.action == 'ssh':
+        ssh_action(args)
     elif args.action == 'list-providers':
         provider_action(args)
     elif args.action in ['list-keys', 'add-key', 'describe-key', 'rename-key', 'delete-key']:
