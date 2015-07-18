@@ -696,3 +696,34 @@ class Key(object):
                            data=data)
         req.put()
         self.mist_client.update_keys()
+
+
+class Script(object):
+    """
+    A script instance
+    """
+    def __init__(self, script, mist_client):
+        """
+
+        """
+        self.mist_client = mist_client
+        self.api_token = self.mist_client.api_token
+        self.id = script['script_id']
+        self.name = script['name']
+        self.description = script['description']
+
+
+    def __str__(self):
+        return "%s => %s" % (self.__class__.__name__, self.id)
+
+    def __repr__(self):
+        return "%s => %s" % (self.__class__.__name__, self.name)
+
+    def request(self, *args, **kwargs):
+        """
+        The main purpose of this is to be a wrapper-like function to pass the api_token and all the other params to the
+        requests that are being made
+
+        :returns: An instance of RequestsHandler
+        """
+        return RequestsHandler(*args, api_token=self.api_token, **kwargs)

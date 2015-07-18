@@ -18,6 +18,7 @@ from mistcommand.helpers.sizes import size_action
 from mistcommand.helpers.locations import location_action
 from mistcommand.helpers.networks import network_action
 from mistcommand.helpers.metrics import metric_action
+from mistcommand.helpers.scripts import script_action
 from mistcommand.helpers.mistansible import ansible_action
 from mistcommand.helpers.ssh import ssh_action
 
@@ -442,7 +443,7 @@ def main():
 
     p_list_sizes = subparsers.add_parser(
         'list-sizes',
-        description="List images for a specified backend"
+        description="List sizes for a specified backend"
     )
 
     p_list_sizes.add_argument(
@@ -456,6 +457,16 @@ def main():
     )
 
     p_list_locations.add_argument(
+        '--pretty', action='store_true', default=False,
+        help="Print in a table format"
+    )
+
+    p_list_scripts = subparsers.add_parser(
+        'list-scripts',
+        description="List scripts"
+    )
+
+    p_list_scripts.add_argument(
         '--pretty', action='store_true', default=False,
         help="Print in a table format"
     )
@@ -746,6 +757,8 @@ def main():
         size_action(args)
     elif args.action == 'list-locations':
         location_action(args)
+    elif args.action == 'list-scripts':
+        script_action(args)
     elif args.action == 'list-networks':
         network_action(args)
     elif args.action in ['list-machines', 'describe-machine', 'probe', 'start', 'stop', 'reboot',
