@@ -142,7 +142,7 @@ def create_machine(client, backend, args):
         networks.append(args.network_id)
 
     backend.create_machine(name=name, key=key, image_id=image_id, size_id=size_id, location_id=location_id,
-                           networks=networks, monitoring=args.monitoring)
+                           networks=networks, script_id=args.script_id, script_params=args.script_params, monitoring=args.monitoring)
 
 
 def machine_action(args):

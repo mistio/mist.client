@@ -633,6 +633,16 @@ def main():
     )
 
     p_create_machine.add_argument(
+        '--script-id', required=False,
+        help="The id of a script to run after machine is deployed"
+    )
+
+    p_create_machine.add_argument(
+        '--script-params', required=False,
+        help="Optional params for the script"
+    )
+
+    p_create_machine.add_argument(
         '--monitoring', action='store_true')
 
 
