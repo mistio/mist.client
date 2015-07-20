@@ -1,7 +1,7 @@
 import json
 
 from mistclient.helpers import RequestsHandler
-from mistclient.model import Backend, Key
+from mistclient.model import Backend, Key, Script
 
 
 class MistClient(object):
@@ -28,6 +28,7 @@ class MistClient(object):
         self._backends = None
         self._machines = None
         self._keys = None
+        self._scripts = None
 
         if self.email and self.password:
             self.__authenticate()
@@ -352,6 +353,27 @@ class MistClient(object):
         req = self.request(self.uri+'/keys', data=data)
         req.put()
         self.update_keys()
+
+    def _list_scripts(self):
+        """
+        """
+        req = self.request(self.uri+'/scripts')
+        scripts = req.get().json()
+        if scripts:
+            self._scripts = {}
+            for script in scripts:
+                self._scripts[script['script_id']] = Script(script, self)
+        else:
+            self._scripts = {}
+
+    def scripts(self, id=None, search=None):
+        """
+        """
+        if self._scripts is None:
+            self._scripts = {}
+            self._list_scripts()
+
+        return [self._scripts[script_id] for script_id in self._scripts.keys()]
 
     def _list_machines(self):
         self._machines = []

@@ -215,8 +215,8 @@ class Backend(object):
         self._list_machines()
         return self._machines
 
-    def create_machine(self, name, key, image_id, location_id, size_id, 
-                       image_extra="", disk="", script="", monitoring=False, 
+    def create_machine(self, name, key, image_id, location_id, size_id,
+                       image_extra="", disk="", script="", monitoring=False,
                        ips=[], networks=[], location_name="", async=False,
                        docker_command="", quantity=1, persist=False, fire_and_forget=True,
                        timeout=6000, script_id=None, script_params=None, verbose=False):
@@ -250,8 +250,7 @@ class Backend(object):
             'quantity': quantity,
             'persist': persist,
             'script_id': script_id,
-            'script_params': script_params
-
+            'script_params': script_params,
         }
         data = json.dumps(payload)
         req = self.request(self.mist_client.uri+'/backends/'+self.id+'/machines', data=data)
@@ -697,3 +696,34 @@ class Key(object):
                            data=data)
         req.put()
         self.mist_client.update_keys()
+
+
+class Script(object):
+    """
+    A script instance
+    """
+    def __init__(self, script, mist_client):
+        """
+
+        """
+        self.mist_client = mist_client
+        self.api_token = self.mist_client.api_token
+        self.id = script['script_id']
+        self.name = script['name']
+        self.description = script['description']
+
+
+    def __str__(self):
+        return "%s => %s" % (self.__class__.__name__, self.id)
+
+    def __repr__(self):
+        return "%s => %s" % (self.__class__.__name__, self.name)
+
+    def request(self, *args, **kwargs):
+        """
+        The main purpose of this is to be a wrapper-like function to pass the api_token and all the other params to the
+        requests that are being made
+
+        :returns: An instance of RequestsHandler
+        """
+        return RequestsHandler(*args, api_token=self.api_token, **kwargs)
