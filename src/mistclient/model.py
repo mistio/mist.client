@@ -219,7 +219,7 @@ class Backend(object):
                        image_extra="", disk="", script="", monitoring=False,
                        ips=[], networks=[], location_name="", async=False,
                        docker_command="", quantity=1, persist=False, fire_and_forget=True,
-                       timeout=6000, script_id=None, script_params=None, verbose=False):
+                       timeout=6000, script_id="", script_params="", verbose=False):
         """
         Create a new machine on the given backend
 
@@ -249,9 +249,12 @@ class Backend(object):
             'async': async,
             'quantity': quantity,
             'persist': persist,
-            'script_id': script_id,
-            'script_params': script_params,
         }
+        # add as params only if they are provided
+        if script_id:
+            payload['script_id'] = script_id
+        if script_params:
+            payload['script_params'] = script_params
         data = json.dumps(payload)
         req = self.request(self.mist_client.uri+'/backends/'+self.id+'/machines', data=data)
         result = req.post()
