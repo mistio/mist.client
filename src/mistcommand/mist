@@ -521,6 +521,11 @@ def main():
         help="Print in a table format"
     )
 
+    p_list_machines.add_argument(
+        '--metadata',
+        help="Shows the list of extra info for each machine", action='store_true'
+    )
+
     p_describe_machine = subparsers.add_parser(
         'describe-machine',
         help="Show information about a specified machine"
