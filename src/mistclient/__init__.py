@@ -1,4 +1,5 @@
 import json
+import multiprocessing.pool
 
 from mistclient.helpers import RequestsHandler
 from mistclient.model import Backend, Key, Script
@@ -377,10 +378,24 @@ class MistClient(object):
 
     def _list_machines(self):
         self._machines = []
-        for backend in self.backends():
-            machines = backend.machines()
-            for machine in machines:
-                self._machines.append(machine)
+        backends = self.backends()
+        # show only enabled backends
+        # enabled_backends = [backend for backend in backends if backend.enabled]
+
+        def _list_one(backend):
+            machines = []
+            try:
+                machines = backend.machines()
+            except:
+                # could be a cloud with expired creds, so don't fail
+                pass
+            return machines
+
+        pool = multiprocessing.pool.ThreadPool(10)
+        results = pool.map(_list_one, backends)
+        pool.terminate()
+        for result in results:
+            self._machines.extend(result)
 
     def machines(self, id=None, name=None, search=None):
         if self._machines is None:
