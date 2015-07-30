@@ -10,7 +10,6 @@ requires = [
     'argcomplete',
     'pyyaml',
     'prettytable',
-    'ansible'
 ]
 
 
@@ -20,7 +19,7 @@ def readme():
 
 setup(
     name='mist',
-    version='1.2.5',
+    version='1.3',
     description='Python client for mist.io',
     long_description=readme(),
     classifiers=[
@@ -36,8 +35,7 @@ setup(
     author_email='mgogoulos@mist.iom commixon@mist.io',
     license='GPLv3',
     packages=find_packages('src'),
-    scripts=['src/mistcommand/mist',
-             'src/mistansible/mistplay'],
+    scripts=['src/mistcommand/mist'],
     package_dir={'': 'src'},
     install_requires=requires,
     zip_safe=False,

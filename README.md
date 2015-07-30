@@ -1,8 +1,9 @@
 mist.client
 ===========
 
-Python Client for mist.io
+Mist.io Command Line Client (CLI)
 
+Work with Mist.io from your command line
 Installation
 ============
 
@@ -10,4 +11,4 @@ pip install mist
 
 Documentation
 =============
-http://mistclient.readthedocs.org
+http://docs.mist.io

@@ -5,8 +5,6 @@ import sys
 import argparse
 import argcomplete
 
-from ansible.runner import Runner
-from ansible.inventory import Inventory
 
 from mistcommand.helpers.login import user_info
 from mistcommand.helpers.backends import backend_action
@@ -19,7 +17,6 @@ from mistcommand.helpers.locations import location_action
 from mistcommand.helpers.networks import network_action
 from mistcommand.helpers.metrics import metric_action
 from mistcommand.helpers.scripts import script_action
-from mistcommand.helpers.mistansible import ansible_action
 from mistcommand.helpers.ssh import ssh_action
 
 from requests.packages import urllib3
@@ -719,20 +716,21 @@ def main():
     #     description="Get stats from a monitored machine"
     # )
 
-    p_run = subparsers.add_parser(
-        'run',
-        description="Run a command in multiple machines"
-    )
-
-    p_run.add_argument(
-        '--command', required=True,
-        help="Run this command"
-    )
-
-    p_run.add_argument(
-        '--tag', required=True,
-        help="Run the command in machines that have this tag"
-    )
+# TODO
+#    p_run = subparsers.add_parser(
+#        'run',
+#        description="Run a command in multiple machines"
+#    )
+#
+#    p_run.add_argument(
+#        '--command', required=True,
+#        help="Run this command"
+#    )
+#
+#    p_run.add_argument(
+#        '--tag', required=True,
+#        help="Run the command in machines that have this tag"
+#    )
 
     # MIST SSH
 
@@ -755,9 +753,7 @@ def main():
     argcomplete.autocomplete(main_parser)
     args = main_parser.parse_args()
 
-    if args.action == 'run':
-        ansible_action(args, Runner, Inventory)
-    elif args.action == 'ssh':
+    if args.action == 'ssh':
         ssh_action(args)
     elif args.action == 'list-providers':
         provider_action(args)
