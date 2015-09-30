@@ -1,4 +1,5 @@
 import json
+import multiprocessing.pool
 
 from mistclient.helpers import RequestsHandler
 from mistclient.model import Backend, Key, Script
@@ -162,6 +163,35 @@ class MistClient(object):
         response = req.post()
         self.update_backends()
         return
+    def add_script(self,**kwargs):
+
+        payload = {
+            'name':kwargs.get('name',''),
+            'description': kwargs.get('description',''),
+            'script': kwargs.get('script',''),
+            'location_type': kwargs.get('location_type',''),
+            'exec_type': kwargs.get('exec_type','')
+        }
+        req = self.request(self.uri+'/scripts', data=json.dumps(payload), api_version=2)
+        response = req.post().json()
+        return response
+
+    def run_script(self,**kwargs):
+        payload = {
+            'backend_id':kwargs.get('backend_id',''),
+            'machine_id': kwargs.get('machine_id',''),
+            'script_id': kwargs.get('script_id',''),
+            'params': kwargs.get('params','')
+        }
+        req = self.request(self.uri+'/script', data=json.dumps(payload), api_version=2)
+        response = req.post().json()
+        
+        return response
+
+    def get_scripts(self,**_):
+        req = self.request(self.uri+'/scripts')
+        response = req.get().json()
+        return response
 
     def _add_backend_rackspace(self, **kwargs):
         payload = {
@@ -377,10 +407,24 @@ class MistClient(object):
 
     def _list_machines(self):
         self._machines = []
-        for backend in self.backends():
-            machines = backend.machines()
-            for machine in machines:
-                self._machines.append(machine)
+        backends = self.backends()
+        # show only enabled backends
+        # enabled_backends = [backend for backend in backends if backend.enabled]
+
+        def _list_one(backend):
+            machines = []
+            try:
+                machines = backend.machines()
+            except:
+                # could be a cloud with expired creds, so don't fail
+                pass
+            return machines
+
+        pool = multiprocessing.pool.ThreadPool(10)
+        results = pool.map(_list_one, backends)
+        pool.terminate()
+        for result in results:
+            self._machines.extend(result)
 
     def machines(self, id=None, name=None, search=None):
         if self._machines is None:

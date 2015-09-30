@@ -17,41 +17,46 @@ def choose_machines_by_tag(client, tag):
     return chosen_machines
 
 
-def list_machines(client, backend, pretty):
-    x = PrettyTable(["Name", "ID", "State", "Public Ips", "Backend Title", "Tags"])
+def list_machines(client, backend, metadata, pretty):
+    # metadata will show the extra info for each machine
+
     if not backend:
         machines = client.machines()
-        for machine in machines:
-            try:
-                public_ips = machine.info['public_ips']
-                ips = " -- ".join(public_ips)
-            except:
-                ips = ""
-            machine_tags = machine.info.get('tags', [])
-            tags = ",".join(machine_tags)
-
-            if pretty:
-                x.add_row([machine.name, machine.id, machine.info['state'], ips, machine.backend.title, tags])
-            else:
-                print "%-25s %-60s %-10s %-20s %-30s %-20s" % (machine.name, machine.id, machine.info['state'], ips,
-                                                               machine.backend.title, tags)
-
     else:
         machines = backend.machines()
-        for machine in machines:
-            try:
-                public_ips = machine.info['public_ips']
-                ips = " -- ".join(public_ips)
-            except:
-                ips = ""
-            machine_tags = machine.info.get('tags', [])
-            tags = ",".join(machine_tags)
-            if pretty:
-                x.add_row([machine.name, machine.id, machine.info['state'], ips, backend.title, tags])
+
+    if pretty:
+        if metadata:
+            x = PrettyTable(["Name", "ID", "State", "Public Ips", "Backend Title", "Tags", "Extra"])
+        else:
+            x = PrettyTable(["Name", "ID", "State", "Public Ips", "Backend Title", "Tags"])
+    else:
+        if metadata:
+            print "%-25s %-60s %-10s %-20s %-25s %-15s %-10s" % ("Name", "ID", "State", "Public Ips", "Backend Title", "Tags", "extra")
+        else:
+            print "%-25s %-60s %-10s %-20s %-30s %-20s" % ("Name", "ID", "State", "Public Ips", "Backend Title", "Tags")
+
+    for machine in machines:
+        try:
+            public_ips = machine.info['public_ips']
+            ips = " -- ".join(public_ips)
+        except:
+            ips = ""
+        machine_tags = machine.info.get('tags', [])
+        tags = ",".join(machine_tags)
+
+        if pretty:
+            if metadata:
+                x.add_row([machine.name, machine.id, machine.info['state'], ips, machine.backend.title, tags, machine.info])
+            else:
+                x.add_row([machine.name, machine.id, machine.info['state'], ips, machine.backend.title, tags])
+        else:
+            if metadata:
+                print "%-25s %-60s %-10s %-20s %-25s %-15s %-10s" % (machine.name, machine.id, machine.info['state'], ips,
+                                                           machine.backend.title, tags, machine.info)
             else:
                 print "%-25s %-60s %-10s %-20s %-30s %-20s" % (machine.name, machine.id, machine.info['state'], ips,
-                                                               machine.backend.title, tags)
-
+                                                           machine.backend.title, tags)
     if pretty:
         print x
 
@@ -156,8 +161,9 @@ def machine_action(args):
             backend = None
 
         pretty = args.pretty
+        metadata = args.metadata
 
-        list_machines(client, backend, pretty)
+        list_machines(client, backend, metadata, pretty)
 
     elif args.action == 'describe-machine':
         machine = choose_machine(client, args)
