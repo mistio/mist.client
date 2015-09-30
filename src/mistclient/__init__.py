@@ -401,6 +401,11 @@ class MistClient(object):
         response = req.get()
         return response.json()
 
+    def get_scripts(self,**_):
+        req = self.request(self.uri+'/scripts')
+        response = req.get().json()
+        return response
+        
     def run_script(self, backend_id, machine_id, script_id, script_params="", fire_and_forget=True):
         if not fire_and_forget:
             raise NotImplementedError()
