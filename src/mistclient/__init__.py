@@ -403,9 +403,23 @@ class MistClient(object):
 
     def get_scripts(self,**_):
         req = self.request(self.uri+'/scripts')
-        response = req.get().json()
-        return response
+        response = req.get()
+        return response.json()
+
+    def add_script(self,**kwargs):
+        payload = {
+            'name':kwargs.get('name',''),
+            'description': kwargs.get('description',''),
+            'script': kwargs.get('script',''),
+            'location_type': kwargs.get('location_type',''),
+            'exec_type': kwargs.get('exec_type','')
+        }
         
+        req = self.request(self.uri+'/scripts', data=json.dumps(payload), api_version=2)
+        response = req.post()
+        return response.json()
+
+
     def run_script(self, backend_id, machine_id, script_id, script_params="", fire_and_forget=True):
         if not fire_and_forget:
             raise NotImplementedError()
