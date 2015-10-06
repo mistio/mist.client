@@ -20,7 +20,7 @@ def readme():
 
 setup(
     name='mist',
-    version='1.2.4',
+    version='1.4',
     description='Python client for mist.io',
     long_description=readme(),
     classifiers=[
@@ -33,7 +33,7 @@ setup(
     url='https://github.com/mistio/mist.client',
     keywords='web cloud server management monitoring automation mobile libcloud pyramid amazon aws rackspace openstack linode softlayer digitalocean gce',
     author='Chris Loukas',
-    author_email='commixon@gmail.com',
+    author_email='commixon@mist.io',
     license='GPLv3',
     packages=find_packages('src'),
     scripts=['src/mistcommand/mist',
