@@ -97,6 +97,9 @@ def get_args():
                         help='Maximum amount of seconds to wait when gathering'
                         ' information (default = 600)', dest='maxwait',
                         type=int, default=[600])
+    parser.add_argument('-f', '--associate-floating-ip', required=False, action='store_true',
+                        help='Auto-associates floating ips to vms in Openstack backens',
+                        dest='associate_floating_ip',)
     args = parser.parse_args()
     return args
 
@@ -119,6 +122,8 @@ def main():
 
     print_ips = args.ips
     print_macs = args.macs
+
+    associate_floating_ip = args.associate_floating_ip
 
     host = args.host.rstrip('/')
 
@@ -223,6 +228,7 @@ def main():
                                      monitoring=monitoring,
                                      verbose=True,
                                      timeout=maxwait,
+                                     associate_floating_ip=associate_floating_ip
                                      )
 
         if print_ips or post_script:
