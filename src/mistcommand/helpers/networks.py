@@ -12,7 +12,11 @@ def list_networks(backend, pretty):
 
     networks = backend.networks
 
-    for network in networks:
+    all_nets = []
+    all_nets += networks['public']
+    all_nets += networks['private']
+
+    for network in all_nets:
         print "%-20s %-40s %-15s" % (network['name'], network['id'], network['status'])
 
 
