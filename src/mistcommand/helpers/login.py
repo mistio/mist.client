@@ -12,7 +12,7 @@ def init_client(mist_uri, email, password):
         client = MistClient(mist_uri=mist_uri, email=email, password=password)
 
         #Ensures that GET requests are autheticated
-        client.backends()
+        client.clouds()
         return client
     except Exception as e:
         print e

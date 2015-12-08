@@ -1,0 +1,1703 @@
+produces:
+  - application/json
+schemes:
+  - https
+swagger: '2.0'
+basePath: /
+host: 'null.mist.io'
+info:
+  description: Manage your clouds
+  title: '{{title}}'
+  version: '1.0'
+security:
+  - api_token: []
+paths:
+  /clouds:
+    get:
+      tags:
+        - clouds
+      description: ''
+      summary: Request a list of all added clouds.
+      operationId: list_clouds
+      responses:
+        '200':
+          description: Successfull request
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Cloud'
+        default:
+          description: Request failed
+    post:
+      tags:
+        - clouds
+      description: ' Adds a new cloud to the user and returns the cloud_id'
+      summary: Add a new cloud
+      operationId: add_cloud
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/newCloud'
+      responses:
+        '200':
+          description: Successfull request
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Cloud'
+        default:
+          description: Request failed
+  '/clouds/{cloud}':
+    delete:
+      tags:
+        - clouds
+      description: Deletes cloud with given cloud_id.
+      summary: Delete a cloud
+      operationId: delete_cloud
+      parameters:
+        - name: cloud
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Successfull request
+        default:
+          description: Request failed
+    post:
+      tags:
+        - clouds
+      description: Toggles cloud with given cloud_id.
+      summary: Toggle a cloud
+      operationId: toggle_cloud
+      parameters:
+        - name: cloud
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              new_state:
+                type: string
+                enum:
+                  - '0'
+                  - '1'
+      responses:
+        '200':
+          description: Successfull request
+        default:
+          description: Request failed
+    put:
+      tags:
+        - clouds
+      description: Renames cloud with given cloud_id.
+      summary: Rename a cloud
+      operationId: rename_cloud
+      parameters:
+        - name: cloud
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              new_name:
+                description: " New name for the key (will also serve as the key's id)"
+                type: string
+            required:
+              - new_name
+      responses:
+        '200':
+          description: Successfull request
+        default:
+          description: Request failed
+  '/clouds/{cloud}/images':
+    get:
+      tags:
+        - clouds
+      description: 'List images from each cloud. Furthermore if a search_term is provided, we loop through each cloud and search for that term in the ids and the names of the community images'
+      summary: List images of specified cloud
+      operationId: list_images
+      parameters:
+        - name: cloud
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: false
+          schema:
+            type: object
+            properties:
+              search_term:
+                type: string
+      responses:
+        '200':
+          description: Successfull request
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Image'
+        default:
+          description: Request failed
+  '/clouds/{cloud}/images/{image}':
+    post:
+      tags:
+        - clouds
+      description: Toggle image star (star/unstar)
+      summary: Star/unstar an image
+      operationId: star_image
+      parameters:
+        - name: cloud
+          in: path
+          required: true
+          type: string
+        - name: image
+          in: path
+          description: ' Id of image to be used with the creation'
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Successfull request
+        default:
+          description: Request failed
+  '/clouds/{cloud}/locations':
+    get:
+      tags:
+        - clouds
+      description: 'List locations from each cloud. Locations mean different things in each cloud. e.g. EC2 uses it as a datacenter in a given availability zone, whereas Linode lists availability zones. However all responses share id, name and country eventhough in some cases might be empty, e.g. Openstack. In EC2 all locations by a provider have the same name, so the availability zones are listed instead of name.'
+      summary: List locations of cloud
+      operationId: list_locations
+      parameters:
+        - name: cloud
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Successfull request
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Location'
+        default:
+          description: Request failed
+  '/clouds/{cloud}/machines':
+    post:
+      tags:
+        - machines
+      description: "Creates a new virtual machine on the specified cloud. If the cloud is Rackspace it attempts to deploy the node with an ssh key provided in config. the method used is the only one working in the old Rackspace cloud. create_node(), from libcloud.compute.base, with 'auth' kwarg doesn't do the trick. Didn't test if you can upload some ssh related files using the 'ex_files' kwarg from openstack 1.0 driver. In Linode creation is a bit different. There you can pass the key file directly during creation. The Linode API also requires to set a disk size and doesn't get it from size.id. So, send size.disk from the client and use it in all cases just to avoid provider checking. Finally, Linode API does not support association between a machine and the image it came from. We could set this, at least for machines created through mist.io in ex_comment, lroot or lconfig. lroot seems more appropriate. However, liblcoud doesn't support linode.config.list at the moment, so no way to get them. Also, it will create inconsistencies for machines created through mist.io and those from the Linode interface."
+      summary: Create a machine on cloud
+      operationId: create_machine
+      parameters:
+        - name: cloud
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          description: Machine object
+          required: false
+          schema:
+            $ref: '#/definitions/newMachine'
+      responses:
+        '200':
+          description: Successfull request
+        default:
+          description: Request failed
+    get:
+      tags:
+        - clouds
+      operationId: list_machines
+      summary: List machines on cloud
+      parameters:
+        - name: cloud
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Successfull request
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Machine'
+        default:
+          description: Request failed
+  '/clouds/{cloud}/machines/{machine}':
+    post:
+      tags:
+        - machines
+      description: Calls a machine action on clouds that support it
+      summary: Call an action on machine
+      operationId: machine_actions
+      parameters:
+        - name: cloud
+          in: path
+          required: true
+          type: string
+        - name: machine
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/machineAction'
+      responses:
+        '200':
+          description: Successfull request
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Machine'
+        default:
+          description: Request failed
+  '/clouds/{cloud}/machines/{machine}/keys/{key}':
+    delete:
+      tags:
+        - keys
+      description: Disassociates a key from a machine. If host is set it will also attempt to actually remove it from the machine.
+      summary: Disassociate a key from a machine
+      operationId: disassociate_key
+      parameters:
+        - in: path
+          name: key
+          required: true
+          type: string
+        - in: path
+          name: cloud
+          required: true
+          type: string
+        - in: path
+          name: machine
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: false
+          schema:
+            type: object
+            properties:
+              host:
+                type: string
+      responses:
+        '200':
+          description: Successfull request
+        default:
+          description: Request failed
+    put:
+      tags:
+        - keys
+      description: Associates a key with a machine. If host is set it will also attempt to actually deploy it to the machine. To do that it requires another keypair (existing_key) that can connect to the machine.
+      summary: Associate a key to a machine
+      operationId: associate_key
+      parameters:
+        - name: cloud
+          in: path
+          required: true
+          type: string
+        - name: machine
+          in: path
+          required: true
+          type: string
+        - in: path
+          name: key
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: false
+          schema:
+            $ref: '#/definitions/machineHostPortUser'
+      responses:
+        '200':
+          description: Successfull request
+        default:
+          description: Request failed
+  '/clouds/{cloud}/machines/{machine}/metrics':
+    get:
+      tags:
+        - metrics
+      description: Get all metrics associated with specific machine
+      summary: Get metrics of a machine
+      operationId: find_metrics
+      parameters:
+        - name: cloud
+          in: path
+          required: true
+          type: string
+        - name: machine
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Successfull request
+        default:
+          description: Request failed
+    delete:
+      tags:
+        - metrics
+      description: Disassociate metric from specific machine
+      summary: Disassociate metric from machine
+      operationId: disassoc_metric
+      parameters:
+        - name: cloud
+          in: path
+          required: true
+          type: string
+        - name: machine
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: false
+          schema:
+            type: object
+            properties:
+              metric_id:
+                description: ' Metric_id '
+                type: string
+      responses:
+        '200':
+          description: Successfull request
+        default:
+          description: Request failed
+    put:
+      tags:
+        - metrics
+      description: Associate metric with specific machine
+      operationId: assoc_metric
+      summary: Associate metric with machine
+      parameters:
+        - name: cloud
+          in: path
+          required: true
+          type: string
+        - name: machine
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: false
+          schema:
+            type: object
+            properties:
+              metric_id:
+                description: ' Metric_id '
+                type: string
+      responses:
+        '200':
+          description: Successfull request
+        default:
+          description: Request failed
+  '/clouds/{cloud}/machines/{machine}/probe':
+    post:
+      tags:
+        - metrics
+      description: Ping and SSH to machine and collect various metrics.
+      summary: Probe a machine
+      operationId: probe
+      parameters:
+        - name: cloud
+          in: path
+          required: true
+          type: string
+        - name: machine
+          in: path
+          required: true
+          type: string
+        - description: ' Optional. Give if you explicitly want to probe with a key and a host '
+          in: body
+          name: body
+          schema:
+            $ref: '#/definitions/probeAction'
+          required: false
+        - default: ''
+          description: ' Optional. Give if you explicitly want a specific user'
+          in: query
+          name: ssh_user
+          required: false
+          type: string
+      responses:
+        '200':
+          description: Successfull request
+        default:
+          description: Request failed
+  '/clouds/{cloud}/machines/{machine}/rdp':
+    get:
+      tags:
+        - machines
+      description: Generate and return an rdp file for windows machines
+      summary: Rdp file for windows machines
+      operationId: machine_rdp
+      parameters:
+        - name: cloud
+          in: path
+          required: true
+          type: string
+        - name: machine
+          in: path
+          required: true
+          type: string
+        - name: rdp_port
+          in: query
+          required: true
+          type: integer
+          default: 3389
+        - name: host
+          in: query
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Successfull request
+        default:
+          description: Request failed
+  '/clouds/{cloud}/machines/{machine}/stats':
+    get:
+      tags:
+        - metrics
+      description: Get all monitor data for this machine
+      summary: Get monitor data for a machine
+      operationId: get_stats
+      parameters:
+        - name: cloud
+          in: path
+          required: true
+          type: string
+        - name: machine
+          in: path
+          required: true
+          type: string
+        - description: ' Time formatted as integer, from when to fetch stats (default now)'
+          in: query
+          name: start
+          required: false
+          type: string
+        - default: ''
+          description: 'Time formatted as integer, until when to fetch stats (default +10 seconds)'
+          in: query
+          name: stop
+          required: false
+          type: string
+        - default: ''
+          description: ' Step to fetch stats (default 10 seconds)'
+          in: query
+          name: step
+          required: false
+          type: string
+        - default: ''
+          in: query
+          name: metrics
+          required: false
+          type: string
+        - default: ''
+          in: query
+          name: request_id
+          required: false
+          type: string
+      responses:
+        '200':
+          description: Successfull request
+        default:
+          description: Request failed
+  '/clouds/{cloud}/machines/{machine}/plugins/{plugin}':
+    post:
+      tags:
+        - metrics
+      description: Deploy a plugin on the specific machine.
+      summary: Deploy a plugin on a machine.
+      operationId: deploy_plugin
+      parameters:
+        - in: path
+          name: cloud
+          required: true
+          type: string
+        - in: path
+          name: machine
+          required: true
+          type: string
+        - in: path
+          name: plugin
+          required: true
+          type: string
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/Plugin'
+      responses:
+        '200':
+          description: Successfull request
+        default:
+          description: Request failed
+    delete:
+      tags:
+        - metrics
+      description: Undeploy a plugin on the specific machine.
+      summary: Undeploy a plugin on a machine.
+      operationId: undeploy_plugin
+      parameters:
+        - in: path
+          name: cloud
+          required: true
+          type: string
+        - in: path
+          name: machine
+          required: true
+          type: string
+        - in: path
+          name: plugin
+          required: true
+          type: string
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/undeployPlugin'
+      responses:
+        '200':
+          description: Successfull request
+        default:
+          description: Request failed
+  '/clouds/{cloud}/machines/{machine}/tags':
+    get:
+      tags:
+        - tags
+      description: List tags for specified resource_type
+      summary: List tags of a machine
+      operationId: list_machine_tags
+      parameters:
+        - name: cloud
+          in: path
+          required: true
+          type: string
+        - name: machine
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Successfull request
+          schema:
+            type: array
+            items:
+              type: object
+        default:
+          description: Request failed
+    post:
+      tags:
+        - tags
+      description: 'Set tags for a machine, given the cloud and machine id.'
+      summary: Set tags on a machine
+      operationId: set_machine_tags
+      parameters:
+        - in: path
+          name: cloud
+          required: true
+          type: string
+        - in: path
+          name: machine
+          required: true
+          type: string
+        - in: body
+          name: body
+          required: true
+          schema:
+            properties:
+              tags:
+                type: array
+                items:
+                  type: object
+      responses:
+        '200':
+          description: List of tags
+          schema:
+            type: array
+            items:
+              type: object
+        default:
+          description: Request failed
+  '/clouds/{cloud}/machines/{machine}/tags/{tag}':
+    delete:
+      tags:
+        - tags
+      summary: Delete a tag
+      description: Delete tag in the db for specified resource_type
+      operationId: delete_machine_tag
+      parameters:
+        - in: path
+          name: tag
+          required: true
+          type: string
+        - in: path
+          name: cloud
+          required: true
+          type: string
+        - in: path
+          name: machine
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Successfull request
+        default:
+          description: Request failed
+    put:
+      tags:
+        - tags
+      summary: Set a tag
+      description: Set a tag in the db for specified resource_type
+      operationId: set_machine_tag
+      parameters:
+        - in: path
+          name: tag
+          required: true
+          type: string
+        - in: path
+          name: cloud
+          required: true
+          type: string
+        - in: path
+          name: machine
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              value:
+                type: string
+      responses:
+        '200':
+          description: Successfull request
+        default:
+          description: Request failed
+  '/clouds/{cloud}/networks':
+    get:
+      tags:
+        - networks
+      description: |-
+        List networks from each cloud.
+        Currently NephoScale and Openstack networks are supported. For other providers this returns an empty list.
+      summary: List networks of a cloud
+      operationId: list_networks
+      parameters:
+        - name: cloud
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Successfull request
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Network'
+        default:
+          description: Request failed
+    post:
+      tags:
+        - networks
+      description: "Creates a new network. If subnet dict is specified, after creating the network it will use the new network's id to create a subnet"
+      summary: Create network on a cloud
+      operationId: create_network
+      parameters:
+        - name: cloud
+          in: path
+          required: true
+          type: string
+        - in: body
+          name: body
+          description: Network object
+          required: false
+          schema:
+            $ref: '#/definitions/newNetwork'
+      responses:
+        '200':
+          description: Successfull request
+        default:
+          description: Request failed
+  '/clouds/{cloud}/networks/{network}':
+    delete:
+      tags:
+        - networks
+      description: Delete a network
+      summary: Delete a network
+      operationId: delete_network
+      parameters:
+        - name: cloud
+          in: path
+          required: true
+          type: string
+        - name: network
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Successfull request
+        default:
+          description: Request failed
+    post:
+      tags:
+        - networks
+      description: Associate ip with the specific network and machine
+      summary: Associate ip
+      operationId: associate_ip
+      parameters:
+        - name: cloud
+          in: path
+          required: true
+          type: string
+        - name: network
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/associateMachine'
+      responses:
+        '200':
+          description: Successfull request
+        default:
+          description: Request failed
+  '/clouds/{cloud}/sizes':
+    get:
+      tags:
+        - clouds
+      description: List sizes (aka flavors) from each cloud.
+      summary: List sizes of a cloud
+      operationId: list_sizes
+      parameters:
+        - name: cloud
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Successfull request
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Size'
+        default:
+          description: Request failed
+  /keys:
+    get:
+      tags:
+        - keys
+      description: Retrieves a list of all added Keys
+      summary: List keys
+      operationId: list_keys
+      responses:
+        '200':
+          description: Successfull request
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Key'
+        default:
+          description: Request failed
+    put:
+      tags:
+        - keys
+      description: Add key with specific id
+      summary: Add key
+      operationId: add_key
+      parameters:
+        - in: body
+          name: body
+          description: Key object
+          required: true
+          schema:
+            $ref: '#/definitions/newKey'
+      responses:
+        '200':
+          description: Successfull request
+          schema:
+            $ref: '#/definitions/Key'
+        default:
+          description: Request failed
+    post:
+      tags:
+        - keys
+      description: Generate key pair
+      summary: Generate key
+      operationId: generate_keypair
+      responses:
+        '200':
+          description: Successfull request
+        default:
+          description: Request failed
+  '/keys/{key}':
+    delete:
+      tags:
+        - keys
+      description: 'Delete key. When a keypair gets deleted, it takes its asociations with it so just need to remove from the server too. If the default key gets deleted, it sets the next one as default, provided that at least another key exists. It returns the list of all keys after the deletion, excluding the private keys (check also list_keys).'
+      summary: Delete key
+      operationId: delete_key
+      parameters:
+        - name: key
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Successfull request
+        default:
+          description: Request failed
+    post:
+      tags:
+        - keys
+      description: Sets a new default key
+      summary: Set default key
+      operationId: set_default_key
+      parameters:
+        - name: key
+          in: path
+          description: The key id
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Successfull request
+        default:
+          description: Request failed
+    put:
+      tags:
+        - keys
+      description: "Edits a given key's name from old_key -> new_key"
+      summary: Edit a key
+      operationId: edit_key
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              new_id:
+                description: The new Key name (id)
+                type: string
+                required: true
+        - name: key
+          in: path
+          description: ' The old key name (id)'
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Successfull request
+        default:
+          description: Request failed
+  '/keys/{key}/public':
+    get:
+      tags:
+        - keys
+      description: Gets public key from keypair name.
+      summary: Get public key
+      operationId: get_public_key
+      parameters:
+        - name: key
+          in: path
+          description: ' The key id'
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Successfull request
+        default:
+          description: Request failed
+  '/keys/{key}/private':
+    get:
+      tags:
+        - keys
+      description: Gets private key from keypair name.
+      summary: Get private key
+      operationId: get_private_key
+      parameters:
+        - name: key
+          in: path
+          description: ' The key id'
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Successfull request
+        default:
+          description: Request failed
+  '/metrics/{metric}':
+    put:
+      tags:
+        - metrics
+      description: Update a metric configuration
+      summary: Update a metric configuration
+      operationId: update_metric
+      parameters:
+        - name: metric
+          in: path
+          description: ' Metric_id (provided by self.get_stats() )'
+          required: true
+          type: string
+        - name: body
+          in: body
+          schema:
+            $ref: '#/definitions/machineMetric'
+      responses:
+        '200':
+          description: Successfull request
+        default:
+          description: Request failed
+  /monitoring:
+    get:
+      tags:
+        - metrics
+      description: Ask the mist.io service if monitoring is enabled for this machine.
+      summary: Check monitoring
+      operationId: check_monitoring
+      responses:
+        '200':
+          description: Successfull request
+        default:
+          description: Request failed
+  '/clouds/{cloud}/machines/{machine}/monitoring':
+    post:
+      tags:
+        - metrics
+      description: Enable monitorinsg for a machine.
+      operationId: update_monitoring
+      summary: Enable monitoring
+      parameters:
+        - in: path
+          name: cloud
+          required: true
+          type: string
+        - in: path
+          name: machine
+          required: true
+          type: string
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/monitorConf'
+      responses:
+        '200':
+          description: Successfull request
+        default:
+          description: Request failed
+  /providers:
+    get:
+      tags:
+        - clouds
+      description: Return all of our SUPPORTED PROVIDERS
+      summary: List supported providers
+      operationId: list_supported_providers
+      security: {}
+      parameters:
+        - in: header
+          name: api_version
+          type: integer
+          enum:
+            - 1
+            - 2
+      responses:
+        '200':
+          description: Successfull request
+          schema:
+            type: object
+        default:
+          description: Request failed
+  /rules:
+    post:
+      tags:
+        - rules
+      description: Creates or updates a rule.
+      summary: Update rule
+      operationId: update_rule
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/newRule'
+      responses:
+        '200':
+          description: Successfull request
+        default:
+          description: Request failed
+  '/rules/{rule}':
+    delete:
+      tags:
+        - rules
+      description: Deletes a rule.
+      summary: Delete rule
+      operationId: delete_rule
+      parameters:
+        - name: rule
+          in: path
+          description: ' Rule id '
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Successfull request
+        default:
+          description: Request failed
+  /scripts:
+    get:
+      tags:
+        - scripts
+      operationId: list_scripts
+      summary: List user scripts
+      responses:
+        '200':
+          description: Successfull request
+        default:
+          description: Request failed
+    post:
+      tags:
+        - scripts
+      operationId: add_script
+      summary: Add script to user scripts
+      parameters:
+        - name: body
+          in: body
+          schema:
+            $ref: '#/definitions/newScript'
+      responses:
+        '200':
+          description: Successfull request
+        default:
+          description: Request failed
+  '/scripts/{script_id}':
+    get:
+      tags:
+        - scripts
+      summary: Show script details and job history
+      operationId: show_script
+      parameters:
+        - name: script_id
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Successfull request
+        default:
+          description: Request failed
+    delete:
+      tags:
+        - scripts
+      summary: Delete script
+      operationId: delete_script
+      parameters:
+        - name: script_id
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Successfull request
+        default:
+          description: Request failed
+    put:
+      tags:
+        - scripts
+      summary: Edit script
+      operationId: edit_script
+      parameters:
+        - name: script_id
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/updateScript'
+      responses:
+        '200':
+          description: Successfull request
+        default:
+          description: Request failed
+    post:
+      tags:
+        - scripts
+      summary: Start a script job to run the script
+      operationId: run_script
+      parameters:
+        - name: script_id
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/runScript'
+      responses:
+        '200':
+          description: Successfull request
+        default:
+          description: Request failed
+  '/jobs/{job_id}':
+    get:
+      tags:
+        - logs
+      operationId: show_job
+      summary: Show job status
+      parameters:
+        - name: job_id
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Successfull request
+        default:
+          description: Request failed
+  /logs:
+    get:
+      tags:
+        - logs
+      operationId: get_logs
+      summary: Get latest logs
+      responses:
+        '200':
+          description: Successfull request
+        default:
+          description: Request failed
+  '/auth':
+    post:
+      operationId: check_auth
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            properties:
+              email:
+                type: string
+              password:
+                type: string
+      security: {}
+      responses:
+        '200':
+          description: Authorized
+          schema:
+            type: object
+            properties:
+              api_token:
+                type: string
+
+definitions:
+  runScript:
+    required:
+      - cloud_id
+      - machine_id
+    properties:
+      cloud_id:
+        type: string
+      machine_id:
+        type: string
+      params:
+        type: string
+  updateScript:
+    required:
+      - new_name
+    properties:
+      new_name:
+        type: string
+      new_description:
+        type: string
+  newScript:
+    required:
+      - script
+      - location_type
+      - exec_type
+    properties:
+      name:
+        type: string
+      script:
+        type: string
+      location_type:
+        type: string
+      entrypoint:
+        type: string
+      exec_type:
+        type: string
+      description:
+        type: string
+  Cloud:
+    type: object
+    required:
+      - state
+      - title
+      - enabled
+      - provider
+      - id
+      - poll_interval
+    properties:
+      state:
+        type: string
+      title:
+        description: The human readable title of the cloud.
+        type: string
+      enabled:
+        type: boolean
+      apikey:
+        type: string
+      tenant_name:
+        type: string
+      region:
+        type: string
+      provider:
+        description: The id of the cloud provider.
+        type: string
+      poll_interval:
+        type: integer
+        format: int64
+      id:
+        type: string
+        description: Unique identifier representing a specific cloud.
+  newCloud:
+    type: object
+    required:
+      - title
+      - provider
+    properties:
+      title:
+        type: string
+        description: The human readable title of the cloud.
+      provider:
+        type: string
+        enum:
+          - vcloud
+          - bare_metal
+          - docker
+          - libvirt
+          - openstack
+          - vsphere
+          - coreos
+          - ec2
+          - rackspace
+          - nephoscale
+          - digitalocean
+          - softlayer
+          - gce
+          - azure
+          - linode
+          - indonesian_vcloud
+          - hostvirtual
+          - vultr
+        description: The id of the cloud provider.
+      apikey:
+        type: string
+      apisecret:
+        type: string
+      apiurl:
+        type: string
+      tenant_name:
+        type: string
+      machine_user:
+        type: string
+      machine_key:
+        type: string
+      remove_on_error:
+        type: string
+      docker_port:
+        type: string
+      machine_port:
+        type: string
+  Size:
+    type: object
+    required:
+      - id
+      - name
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      ram:
+        type: string
+      driver:
+        type: string
+      bandwidth:
+        type: integer
+      disk:
+        type: string
+  Location:
+    type: object
+    required:
+      - id
+      - name
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      country:
+        type: string
+  Image:
+    type: object
+    required:
+      - id
+      - name
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      extra:
+        type: object
+      star:
+        type: boolean
+  Key:
+    type: object
+    required:
+      - id
+    properties:
+      id:
+        type: string
+      machines:
+        type: array
+        items:
+          type: string
+      isDefault:
+        type: boolean
+  newKey:
+    type: object
+    required:
+      - id
+      - priv
+    properties:
+      id:
+        type: string
+        description: ' The Key name (id)'
+      priv:
+        type: string
+        description: ' The private key'
+  newNetwork:
+    type: object
+    required:
+      - network
+    properties:
+      cloud_id:
+        type: string
+        description: The Cloud ID
+      network:
+        type: string
+      subnet:
+        type: string
+      router:
+        type: string
+  newMachine:
+    type: object
+    required:
+      - key_id
+      - machine_name
+      - location_id
+      - image_id
+      - size_id
+      - cloud_id
+    properties:
+      cloud_id:
+        type: string
+        description: The Cloud ID
+      key_id:
+        type: string
+        description: ' Associate machine with this key_id'
+      machine_name:
+        type: string
+      location_id:
+        type: string
+        description: " Id of the cloud's location to create the machine"
+      image_id:
+        type: string
+        description: ' Id of image to be used with the creation'
+      size_id:
+        type: string
+        description: ' If of the size of the machine'
+      script:
+        type: string
+      image_extra:
+        type: string
+        description: ' Needed only by Linode cloud'
+      disk:
+        type: string
+        description: ' Needed only by Linode cloud'
+      image_name:
+        type: string
+      size_name:
+        type: string
+      location_name:
+        type: string
+      ips:
+        type: string
+      monitoring:
+        type: string
+      networks:
+        type: array
+        items:
+          type: string
+      docker_env:
+        type: array
+        items:
+          type: string
+      docker_command:
+        type: string
+      ssh_port:
+        type: integer
+      script_id:
+        type: string
+      script_params:
+        type: string
+      job_id:
+        type: string
+      docker_port_bindings:
+        type: object
+      docker_exposed_ports:
+        type: object
+      azure_port_bindings:
+        type: string
+      hostname:
+        type: string
+      plugins:
+        type: array
+        items:
+          type: string
+      post_script_id:
+        type: string
+      post_script_params:
+        type: string
+  Network:
+    type: object
+    required:
+      - id
+      - name
+    properties:
+      id:
+        type: integer
+        format: int64
+      name:
+        type: string
+      tag:
+        type: string
+  machineAction:
+    required:
+      - action
+    properties:
+      action:
+        type: string
+        enum:
+          - start
+          - stop
+          - reboot
+          - destroy
+          - resize
+          - rename
+      size:
+        type: string
+        description: The size id of the plan to resize
+      name:
+        type: string
+  probeAction:
+    properties:
+      host:
+        type: string
+      key:
+        type: string
+  associateMachine:
+    required:
+      - ip
+      - machine
+    properties:
+      ip:
+        type: string
+      machine:
+        type: string
+      assign:
+        type: boolean
+        default: true
+  machineMetric:
+    required:
+      - cloud_id
+      - machine_id
+    properties:
+      cloud_id:
+        type: string
+      machine_id:
+        type: string
+      host:
+        type: string
+      plugin_type:
+        type: string
+      name:
+        description: Name of the plugin
+        type: string
+      unit:
+        description: ' Optional. If given the new plugin will be measured according to this unit'
+        type: string
+  machineHostPortUser:
+    properties:
+      ssh_user:
+        type: string
+        description: The ssh user
+      port:
+        type: integer
+        default: 22
+      host:
+        type: string
+  monitorConf:
+    properties:
+      name:
+        description: ' Name of the plugin'
+        type: string
+      dns_name:
+        type: string
+      public_ips:
+        type: array
+        items:
+          type: string
+      no_ssh:
+        type: boolean
+        default: false
+      dry:
+        type: boolean
+        default: false
+      action:
+        type: string
+        enum:
+          - enable
+          - disable
+  Machine:
+    properties:
+      can_start:
+        type: boolean
+      can_destroy:
+        type: boolean
+      can_tag:
+        type: boolean
+      can_reboot:
+        type: boolean
+      can_stop:
+        type: boolean
+      can_rename:
+        type: boolean
+      public_ips:
+        type: array
+        items:
+          type: string
+      private_ips:
+        type: array
+        items:
+          type: string
+      extra:
+        type: object
+      id:
+        type: string
+      size:
+        type: string
+      uuid:
+        type: string
+      imageId:
+        type: string
+      state:
+        type: string
+      name:
+        type: string
+  Plugin:
+    required:
+      - plugin_type
+      - read_function
+      - name
+      - host
+    properties:
+      plugin_type:
+        type: string
+        enum:
+          - python
+        default: python
+      host:
+        type: string
+      value_type:
+        type: string
+        default: gauge
+      read_function:
+        type: string
+      unit:
+        type: string
+      name:
+        type: string
+  undeployPlugin:
+    required:
+      - plugin_type
+      - host
+    properties:
+      plugin_type:
+        type: string
+        enum:
+          - python
+        default: python
+      host:
+        type: string
+  newRule:
+    required:
+      - operator
+      - value
+      - cloudId
+      - machineId
+      - metric
+    properties:
+      operator:
+        type: string
+      value:
+        type: string
+      action:
+        type: string
+        default: alert
+      command:
+        type: string
+      aggregate:
+        type: string
+      reminder_offset:
+        type: integer
+      machineId:
+        type: string
+      cloudId:
+        type: string
+      id:
+        type: string
+        description: Rule id
+      metric:
+        type: string
+securityDefinitions:
+  api_token:
+    type: apiKey
+    name: Authorization
+    in: header
+externalDocs:
+  description: Find out more about Swagger
+  url: 'http://docs.mist.io'

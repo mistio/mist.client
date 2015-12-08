@@ -19,7 +19,7 @@ def list_providers(client, pretty):
         print x
     else:
         for provider in providers:
-            if provider['regions']:
+            if provider.get('regions'):
                 for region in provider['regions']:
                     print "%-30s %-20s %-20s %-20s" % \
                           (provider['title'], provider['provider'], region['location'], region['id'])

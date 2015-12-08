@@ -1,436 +1,472 @@
 import json
+import os
+import requests
+import yaml
 
-from mistclient.helpers import RequestsHandler
-from mistclient.model import Backend, Key, Script
-
-
-class MistClient(object):
-    """
-    The base class that initiates a new client that connects with mist.io service.
-    """
-    def __init__(self, mist_uri="https://mist.io", email=None, password=None, verify=True):
-        """
-        Initialize the mist.client. In case email and password are given, it will try to authenticate with mist.io
-        and keep the api_token that is returned to be used with the later requests.
+action_order = ["$filter", "$search", "$items", "$foreach"]
 
 
-        :param mist_uri: By default it is 'https://mist.io'. Can be changed if there's a different installation of mist.io
-        :param email: Email to authenticate with mist.io. May be left 'None' if there's a standalone installation of mist.io that does not require authentication.
-        :param password: Password to authenticate with mist.io. May be left 'None' if there's a standalone installation of mist.io that does not require authentication.
-        """
-        self.uri = mist_uri
-        self.email = email
-        self.password = password
-        self.api_token = None
-        self.user_details = None
-        self.verify = verify
+class Entities():
+    pass
 
-        self._backends = None
-        self._machines = None
-        self._keys = None
-        self._scripts = None
 
-        if self.email and self.password:
-            self.__authenticate()
+class Swagger(object):
 
-    def __authenticate(self):
-        """
-        Sends a json payload with the email and password in order to get the authentication api_token to be used with
-        the rest of the requests
-        """
-        payload = {
-            'email': self.email,
-            'password': self.password
-        }
+    def __init__(self, swagger):
+        self.basePath = swagger["basePath"]
+        self.host = swagger["host"]
+        self.scheme = swagger.get("schemes", ["http"])[0]
+        self.uri = self.scheme + "://" + swagger["host"]
+        if swagger["basePath"] != "/":
+            self.uri += swagger["basePath"]
+        self.securityHeaders = []
+        self.paths = paths = swagger["paths"]
+        self.definitions = swagger.get("definitions", {})
+        if swagger.get("securityDefinitions"):
+            for sec in swagger["securityDefinitions"]:
+                if swagger["securityDefinitions"][sec]["type"] == "apiKey":
+                    if swagger["securityDefinitions"][sec]["in"] == "header":
+                        name = swagger["securityDefinitions"][sec]["name"]
+                        self.securityHeaders.append(name)
 
-        data = json.dumps(payload)
-        req = self.request(self.uri+'/auth', data=data)
-        response = req.post().json()
-        token = response.get('mist_api_token', None)
-        self.api_token = "mist_1 %s:%s" % (self.email, token)
-        self.user_details = response
+        for path in paths:
+            for method in paths[path]:
+                opid = paths[path][method]["operationId"]
+                setattr(self, opid, ApiRequest(self.uri + path, method,
+                                               paths[path][method],
+                                               self.definitions,
+                                               self.securityHeaders))
 
-    def request(self, *args, **kwargs):
-        """
-        The main purpose of this is to be a wrapper-like function to pass the api_token and all the other params to the
-        requests that are being made
 
-        :returns: An instance of mist.client.helpers.RequestsHandler
-        """
-        return RequestsHandler(*args, api_token=self.api_token, verify=self.verify, **kwargs)
+class ApiRequest(object):
 
-    @property
-    def supported_providers(self):
-        """
-        Request a list of all available providers
+    def __init__(self, path, method, data, definitions, security=None):
 
-        :returns: A list of all available providers (e.g. {'provider': 'ec2_ap_northeast', 'title': 'EC2 AP NORTHEAST'})
-        """
-        req = self.request(self.uri+'/providers', api_version=2)
-        providers = req.get().json()
-        supported_providers = providers['supported_providers']
-        return supported_providers
+        if security is None:
+            security = []
 
-    def _list_backends(self):
-        """
-        Request a list of all added backends.
-
-        Populates self._backends dict with mist.client.model.Backend instances
-        """
-        req = self.request(self.uri+'/backends')
-        backends = req.get().json()
-        if backends:
-            for backend in backends:
-                self._backends[backend['id']] = Backend(backend, self)
+        self.path = path
+        self.method = method
+        self.data = data
+        self.header_params = []
+        self.path_params = []
+        self.query_params = []
+        self.body_params = []
+        self.required_params = []
+        self.parameters = []
+        self.id = data["operationId"]
+        if data.get("parameters"):
+            for param in data["parameters"]:
+                name = param["name"]
+                place = param["in"]
+                if place == "header":
+                    self.parameters.append(name)
+                    if param.get("required"):
+                        self.required_params.append(name)
+                    self.header_params.append(name)
+                if place == "query":
+                    self.parameters.append(name)
+                    if param.get("required"):
+                        self.required_params.append(name)
+                    self.query_params.append(name)
+                if place == "path":
+                    self.parameters.append(name)
+                    self.required_params.append(name)
+                    self.path_params.append(name)
+                if place == "body":
+                    if param["schema"].get("$ref"):
+                        body_params = definitions[
+                            param["schema"]["$ref"].split("/")[2]]
+                    else:
+                        body_params = param["schema"]
+                    required = body_params.get("required", [])
+                    for p in body_params["properties"]:
+                        self.parameters.append(name)
+                        if p in required:
+                            self.required_params.append(p)
+                        self.body_params.append(p)
+        if data.get("security") == {}:
+            pass
         else:
-            self._backends = {}
+            self.header_params.extend(security)
+            self.parameters.extend(security)
+            self.required_params.extend(security)
 
-    def backends(self, id=None, name=None, provider=None, search=None):
-        """
-        Property-like function to call the _list_backends function in order to populate self._backends dict
+    def __call__(self, *args, **kwargs):
+        headers = {}
+        data = {}
+        query = {}
+        for p in self.required_params:
+            if not kwargs.get(p):
+                raise Exception("Parameter {0} missing".format(p))
+        for h in self.header_params:
+            if kwargs.get(h):
+                headers[h] = kwargs[h]
+        for d in self.body_params:
+            if kwargs.get(d):
+                data[d] = kwargs[d]
+        for q in self.query_params:
+            if kwargs.get(q):
+                query[q] = kwargs[q]
 
-        :returns: A list of Backend instances.
-        """
-        if self._backends is None:
-            self._backends = {}
-            self._list_backends()
-
-        if id:
-            return [self._backends[backend_id] for backend_id in self._backends.keys()
-                    if id == self._backends[backend_id].id]
-        elif name:
-            return [self._backends[backend_id] for backend_id in self._backends.keys()
-                    if name == self._backends[backend_id].title]
-        elif provider:
-            return [self._backends[backend_id] for backend_id in self._backends.keys()
-                    if provider == self._backends[backend_id].provider]
-        elif search:
-            return [self._backends[backend_id] for backend_id in self._backends.keys()
-                    if search in self._backends[backend_id].title
-                    or search in self._backends[backend_id].id
-                    or search in self._backends[backend_id].provider]
+        uri = self.path.format(*args, **kwargs)
+        print self.method, uri, query, headers, data
+        response = requests.request(
+            self.method, uri, params=query, headers=headers,
+            data=json.dumps(data), verify=False)
+        if response.ok:
+            try:
+                return response.json()
+            except:
+                return {"response": response.content}
         else:
-            return [self._backends[backend_id] for backend_id in self._backends.keys()]
+            raise Exception(response.content)
 
-    def update_backends(self):
-        """
-        Update added backends' info and re-populate the self._backends dict.
 
-        This one is used whenever a new backend is added, renamed etc etc or whenever you want to update the list
-        of added backends.
+class Helpers(object):
 
-        :returns: A list of Backend instances.
-        """
-        self._backends = {}
-        self._list_backends()
-        return self._backends
+    def _get_config(self,):
+        pass
 
-    def add_backend(self, title, provider, **kwargs):
-        payload = {}
-        if provider == "ec2":
-            payload = self._add_backend_ec2(**kwargs)
-        elif provider == "rackspace":
-            payload = self._add_backend_rackspace(**kwargs)
-        elif provider == "nephoscale":
-            payload = self._add_backend_nephoscale(**kwargs)
-        elif provider == "softlayer":
-            payload = self._add_backend_softlayer(**kwargs)
-        elif provider == "digitalocean":
-            payload = self._add_backend_digitalocean(**kwargs)
-        elif provider == "gce":
-            payload = self._add_backend_gce(**kwargs)
-        elif provider == "azure":
-            payload = self._add_backend_azure(**kwargs)
-        elif provider == "linode":
-            payload = self._add_backend_linode(**kwargs)
-        elif provider == "bare_metal":
-            payload = self._add_backend_bare_metal(**kwargs)
-        elif provider in ['vcloud', 'indonesian_vcloud']:
-            payload = self._add_backend_vcloud(**kwargs)
-        elif provider == "docker":
-            payload = self._add_backend_docker(**kwargs)
-        elif provider == "libvirt":
-            payload = self._add_backend_libvirt(**kwargs)
-        elif provider == "hpcloud":
-            payload = self._add_backend_hp(**kwargs)
-        elif provider == "openstack":
-            payload = self._add_backend_openstack(**kwargs)
-
-        payload['title'] = title
-        payload['provider'] = provider
-        req = self.request(self.uri+'/backends', data=json.dumps(payload), api_version=2)
-        response = req.post()
-        self.update_backends()
-        return
-
-    def _add_backend_rackspace(self, **kwargs):
-        payload = {
-            'username': kwargs.get('username', ''),
-            'api_key': kwargs.get('api_key', ''),
-            'region': kwargs.get('region', '')
+    def _type(self, param_name, param_type, **kwargs):
+        types = {
+            str: "string",
+            int: "integer",
+            bool: "boolean",
+            unicode: "string"
         }
-        return payload
+        param = kwargs.get(param_name)
+        if param:
+            if types.get(type(param)) == param_type:
+                return kwargs
+            else:
+                problem = "Parameter {0} should be of type {1}".format(
+                    param_name,
+                    param_type)
+                raise Exception(problem)
+        return kwargs
 
-    def _add_backend_ec2(self, **kwargs):
-        payload = {
-            'api_key': kwargs.get('api_key', ''),
-            'api_secret': kwargs.get('api_secret', ''),
-            'region': kwargs.get('region', '')
-        }
-        return payload
+    def _file(self, param_name, input_name, **kwargs):
+        file_path = kwargs.get(input_name)
+        if file_path:
+            if not os.path.isfile(file_path):
+                raise Exception(
+                    file_path, "is not a file or could not be found in the\
+                                given path")
 
-    def _add_backend_nephoscale(self, **kwargs):
-        payload = {
-            'username': kwargs.get('username', ''),
-            'password': kwargs.get('password', '')
-        }
-        return payload
+            with open(file_path) as f:
+                opened_file = f.read()
 
-    def _add_backend_softlayer(self, **kwargs):
-        payload = {
-            'username': kwargs.get('username', ''),
-            'api_key': kwargs.get('api_key', '')
-        }
-        return payload
+            kwargs.pop(input_name)
+            kwargs[param_name] = opened_file
+        return kwargs
 
-    def _add_backend_digitalocean(self, **kwargs):
-        payload = {
-            'token': kwargs.get('token', '')
-        }
-        return payload
+    def _ref(self, param_name, input_name, **kwargs):
+        if input_name == "$body":
+            kwargs[param_name] = kwargs
+            return kwargs
 
-    def _add_backend_gce(self, **kwargs):
-        payload = {
-            'email': kwargs.get('email', ''),
-            'private_key': kwargs.get('private_key', ''),
-            'project_id': kwargs.get('project_id', '')
-        }
-        return payload
+        input_value = kwargs.get(input_name)
 
-    def _add_backend_azure(self, **kwargs):
-        payload = {
-            'subscription_id': kwargs.get('subscription_id', ''),
-            'certificate': kwargs.get('certificate', '')
-        }
-        return payload
+        if input_value:
+            kwargs[param_name] = input_value
+            kwargs.pop(input_name)
+            return kwargs
+        return kwargs
 
-    def _add_backend_linode(self, **kwargs):
-        payload = {
-            'api_key': kwargs.get('api_key', '')
-        }
-        return payload
+    def _ref_first(self, param_name, input_name, **kwargs):
+        input_value = kwargs.get(input_name)
+        if input_value and isinstance(input_value, list):
+            kwargs[param_name] = input_value[0]
+            kwargs.pop(input_name)
+            return kwargs
+        return kwargs
 
-    def _add_backend_bare_metal(self, **kwargs):
-        payload = {
-            'machine_ip': kwargs.get('machine_ip', ''),
-            'machine_key': kwargs.get('machine_key', ''),
-            'machine_user': kwargs.get('machine_user', 'root'),
-            'machine_port': kwargs.get('machine_port', 22)
-        }
-        return payload
+    def _default(self, param_name, default_value, **kwargs):
+        input_value = kwargs.get(param_name)
+        if not input_value:
+            kwargs[param_name] = default_value
+            return kwargs
+        return kwargs
 
-    def _add_backend_vcloud(self, **kwargs):
-        payload = {
-            'username': kwargs.get('username', ''),
-            'password': kwargs.get('password', ''),
-            'organization': kwargs.get('organization', ''),
-            'host': kwargs.get('host', '')
-        }
-        return payload
+    def _exists(self, param_name, exists, **kwargs):
+        param = kwargs.get(param_name, False)
+        if exists and param:
+            return True
+        if not exists and not param:
+            return True
+        return False
 
-    def _add_backend_docker(self, **kwargs):
-        payload = {
-            'docker_port': int(kwargs.get('docker_port', 4243)),
-            'docker_host': kwargs.get('docker_host', ''),
-            'auth_user': kwargs.get('auth_user', ''),
-            'auth_password': kwargs.get('auth_password', ''),
-            'key_file': kwargs.get('key_file', ''),
-            'cert_file': kwargs.get('cert_file', '')
-        }
-        return payload
-
-    def _add_backend_libvirt(self, **kwargs):
-        payload = {
-            'machine_hostname': kwargs.get('machine_hostname', ''),
-            'machine_user': kwargs.get('machine_user', 'root'),
-            'machine_key': kwargs.get('machine_key', '')
-        }
-        return payload
-
-    def _add_backend_hp(self, **kwargs):
-        payload = {
-            'username': kwargs.get('username', ''),
-            'password': kwargs.get('password', ''),
-            'tenant_name': kwargs.get('tenant_name', ''),
-            'region': kwargs.get('region', '')
-        }
-        return payload
-
-    def _add_backend_openstack(self, **kwargs):
-        payload = {
-            'username': kwargs.get('username', ''),
-            'password': kwargs.get('password', ''),
-            'auth_url': kwargs.get('auth_url', ''),
-            'tenant_name': kwargs.get('tenant_name', ''),
-            'region': kwargs.get('region', ''),
-            'compute_endpoint': kwargs.get('compute_endpoint', '')
-        }
-        return payload
-
-    def _list_keys(self):
-        """
-        Retrieves a list of all added Keys and populates the self._keys dict with Key instances
-
-        :returns: A list of Keys instances
-        """
-        req = self.request(self.uri+'/keys')
-        keys = req.get().json()
-        if keys:
-            self._keys = {}
-            for key in keys:
-                self._keys[key['id']] = Key(key, self)
+    def _set(self, input_name, property_name, **kwargs):
+        if kwargs.get("$response"):
+            kwargs = kwargs["$response"]
+        if input_name == "$body":
+            setattr(self, property_name, kwargs)
         else:
-            self._keys = {}
+            setattr(self, property_name, kwargs.get(input_name))
+        return True
 
-    def keys(self, id=None, search=None):
-        """
-        Property-like function to call the _list_keys function in order to populate self._keys dict
+    def _in(self, param_name, enum, **kwargs):
+        param = kwargs.get(param_name)
+        if param and param in enum:
+            return True
+        return False
 
-        :returns: A list of Key instances
-        """
-        if self._keys is None:
-            self._keys = {}
-            self._list_keys()
+    def _eq(self, param_name, value, **kwargs):
+        param = kwargs.get(param_name)
+        if param and param == value:
+            return True
+        return False
 
-        if id:
-            return [self._keys[key_id] for key_id in self._keys.keys()
-                    if id == self._keys[key_id].id]
-        elif search:
-            return [self._keys[key_id] for key_id in self._keys.keys()
-                    if search in self._keys[key_id].id]
+    def _required(self, param_name, value, **kwargs):
+        if kwargs.get(param_name):
+            return kwargs
+        problem = "Parameter {0} is required".format(param_name)
+        raise Exception(problem)
+
+    def _get_valid_case(self, cases, **kwargs):
+        for case in cases:
+            if self._check_case(case["case"], **kwargs):
+                return case
+        valid_cases = json.dumps(
+            cases, sort_keys=True, indent=4, separators=(',', ': '))
+        problem = "Every `case` in `init` was found invalid."
+        problem += "Valid cases are: {0}".format(valid_cases)
+        raise Exception(problem)
+
+    def _init(self, _case, **kwargs):
+        action = _case.get("action", None)
+        for attr in self._attributes:
+            if hasattr(self, attr):
+                kwargs[attr] = getattr(self, attr)
+        response_schema = _case.get("response", {})
+        if isinstance(action, basestring):
+            funcact = getattr(self._spec, action)
+            response = funcact(**kwargs)
+            for param_name in response_schema:
+                schema = response_schema[param_name]
+                if isinstance(response, (list, basestring)):
+                    response = {"$response": response}
+                for action in schema:
+                    if not self._run(action, param_name, schema[action],
+                                     **response):
+                        problem = "Action {0} with parameters {1},{2} failed to\
+                                   execute!".format(action, param_name,
+                                                    schema[action])
+                        raise Exception(problem)
+            return True
+        elif isinstance(action, list):
+            pass
+        elif isinstance(action, dict):
+            pass
         else:
-            return [self._keys[key_id] for key_id in self._keys.keys()]
+            return True
 
-    def update_keys(self):
-        """
-        Update added keys' info and re-populate the self._keys dict.
+    def _set_from_config(self, _property_name, _config_key, **kwargs):
+        if self._config.get(_config_key):
+            setattr(self, _property_name, self._config[_config_key])
+            return True
+        return False
 
-        This one is used whenever a new key is added, renamed etc etc or whenever you want to update the list
-        of added keys.
+    def _filter(self, _keys, _response, **kwargs):
+        for key in _keys:
+            query = kwargs.get(key)
+            if query:
+                return [item for item in _response if item.get(key) == query]
+        return _response
 
-        :returns: A list of Key instances.
-        """
-        self._keys = {}
-        self._list_keys()
-        return self._keys
+    def _search(self, _search_query, _response, **kwargs):
 
-    def generate_key(self):
-        """
-        Ask mist.io to randomly generate a private ssh-key to be used with the creation of a new Key
+        value = kwargs.get(_search_query)
+        if not value:
+            return _response
+        answer = []
+        for item in _response:
+            if isinstance(item, basestring):
+                item = _response[item]
+            stritem = json.dumps(item)
+            if value in stritem:
+                answer.append(item)
+        return answer
 
-        :returns: A string of a randomly generated ssh private key
-        """
-        req = self.request(self.uri+"/keys")
-        private_key = req.post().json()
-        return private_key['priv']
+    def _items(self, _items, _response, **kwargs):
+        answer = []
+        for action in _items:
+            for item in _response:
+                item = self._run(action, _items[action], item, **kwargs)
+                answer.append(item)
+        return answer
 
-    def add_key(self, key_name, private):
-        """
-        Add a new key to mist.io
+    def _entity(self, _item, _data, **kwargs):
+        ent = getattr(Entities, _item)
+        for attr in ent._attributes:
+            if not _data.get(attr):
+                if hasattr(self, attr):
+                    _data[attr] = getattr(self, attr)
+                elif kwargs.get(attr):
+                    _data[attr] = kwargs[attr]
 
-        :param key_name: Name of the new key (it will be used as the key's id as well).
-        :param private: Private ssh-key in string format (see also generate_key() ).
+        return ent(**_data)
 
-        :returns: An updated list of added keys.
-        """
-        payload = {
-            'id': key_name,
-            'priv': private
-        }
+    def _foreach(self, _items, _response, **kwargs):
+        answer = []
+        for action in _items:
+            for item in _response:
+                item = self._run(action, _items[action], item, **kwargs)
+                answer.extend(item)
+        return answer
 
-        data = json.dumps(payload)
+    def _method(self, _action, _data, **kwargs):
+        method = getattr(_data, _action)
+        return method(**kwargs)
 
-        req = self.request(self.uri+'/keys', data=data)
-        req.put()
-        self.update_keys()
+    def _check_case(self, _case, **kwargs):
+        case = _case.get('$if')
 
-    def _list_scripts(self):
-        """
-        """
-        req = self.request(self.uri+'/scripts')
-        scripts = req.get().json()
-        if scripts:
-            self._scripts = {}
-            for script in scripts:
-                self._scripts[script['script_id']] = Script(script, self)
+        if case:
+            for param in case:
+                for check in case[param]:
+                    valid = self._run(check, param, case[
+                                      param][check], **kwargs)
+                    if not valid:
+                        return False
+            return True
         else:
-            self._scripts = {}
+            return True
 
-    def scripts(self, id=None, search=None):
-        """
-        """
-        if self._scripts is None:
-            self._scripts = {}
-            self._list_scripts()
+    def _run(self, _helper, _parent, _value, **kwargs):
+        if _helper.startswith("$"):
+            return getattr(self, _helper.replace("$", "_"))(_parent, _value,
+                                                            **kwargs)
 
-        return [self._scripts[script_id] for script_id in self._scripts.keys()]
 
-    def _list_machines(self):
-        self._machines = []
-        for backend in self.backends():
-            machines = backend.machines()
-            for machine in machines:
-                self._machines.append(machine)
+class Client(object):
 
-    def machines(self, id=None, name=None, search=None):
-        if self._machines is None:
-            self._list_machines()
-
-        if id:
-            return [machine for machine in self._machines if machine.id == id]
-        elif name:
-            return [machine for machine in self._machines if machine.name == name]
-        elif search:
-            return [machine for machine in self._machines
-                    if search in machine.id or search in machine.name]
+    def __init__(self, url, basepath="api", modelname="model"):
+        modelurl = "{0}/{1}/{2}.yaml".format(url, basepath, modelname)
+        response = requests.get(modelurl)
+        self.model = yaml.load(response.content)
+        self.root = self.model.get("root")
+        api_spec = self.model.get("api-spec")
+        specurl = "{0}/{1}/{2}.yaml".format(url, basepath, api_spec)
+        response = requests.get(specurl)
+        self.spec = Swagger(yaml.load(response.content))
+        if self.model.get("config_path"):
+            home_path = os.getenv("HOME")
+            save_path = self.model["config_path"]
+            self.__config_path = os.path.join(home_path, "." + save_path)
+            if os.path.isfile(self.__config_path):
+                with open(self.__config_path) as f:
+                    self.__config = yaml.load(f.read())
+            else:
+                self.__config = {}
+                self.__config_path = ""
         else:
-            return self._machines
+            self.__config = {}
+            self.__config_path = ""
 
-    def get_job(self, job_id):
-        req = self.request(self.uri + '/jobs/' + job_id)
-        response = req.get()
-        return response.json()
+    def __call__(self, entity=None):
+        if entity is None:
+            entity = self.root
+            Entity = self.model["entities"][entity]
+        else:
+            Entity = self.model["entities"][entity]
+        parameters = Entity.get("parameters", {})
+        init_cases = Entity.get("init")
+        properties = Entity.get("_properties")
+        attributes = Entity.get("attributes", [])
+        prepare_steps = Entity.get("prepare")
+        methods = Entity.get("methods", {})
+        config = self.__config
+        config_path = self.__config_path
+        spec = self.spec
+        tempent = {}
+        tempent["_parameters"] = parameters
+        tempent["_attributes"] = attributes
+        tempent["_config"] = config
+        tempent["_config_path"] = config_path
+        tempent["_spec"] = spec
+        tempent["_init_cases"] = init_cases
+        tempent["_prepare_steps"] = prepare_steps
+        cls = type(entity, (Helpers, object), tempent)
 
-    def get_scripts(self,**_):
-        req = self.request(self.uri+'/scripts')
-        response = req.get()
-        return response.json()
+        def init(self, entity=Entity, **kwargs):
+            parameters = self._parameters
+            for param_name in parameters:
+                for action in parameters[param_name]:
+                    value = parameters[param_name][action]
+                    kwargs = self._run(action, param_name, value, **kwargs)
+            for p in attributes:
+                value = kwargs.get(p)
+                if value:
+                    setattr(self, p, value)
+            if self._init_cases:
+                case = self._get_valid_case(init_cases, **kwargs)
+                self._init(case["case"], **kwargs)
+            if self._prepare_steps:
+                for step in self._prepare_steps:
+                    if self._check_case(step["step"]):
+                        self._init(step["step"], **kwargs)
 
-    def add_script(self,**kwargs):
-        payload = {
-            'name':kwargs.get('name',''),
-            'description': kwargs.get('description',''),
-            'script': kwargs.get('script',''),
-            'location_type': kwargs.get('location_type',''),
-            'exec_type': kwargs.get('exec_type','')
-        }
-        
-        req = self.request(self.uri+'/scripts', data=json.dumps(payload), api_version=2)
-        response = req.post()
-        return response.json()
+        setattr(cls, "__init__", init)
+        if properties:
+            setattr(cls, "_properties", properties)
+
+            def _getattr_(self, name):
+                try:
+                    return object.__getattribute__(self, name)
+                except:
+                    if self._properties.get(name):
+                        self._init(self._properties[name])
+                        del self._properties[name]
+                    return object.__getattribute__(self, name)
+
+            setattr(cls, "__getattribute__", _getattr_)
+        for method_name in methods:
+            method = methods[method_name]
+
+            def decorated_method(self, _method=method, _name=method_name,
+                                 *args, **kwargs):
+                method = _method
+                action = method.get("action")
+                parameters = method.get("parameters", {})
+                switch_cases = method.get("switch")
+                response_schema = method.get("response", {})
+                for attr in self._attributes:
+                    kwargs[attr] = getattr(self, attr)
+                for param_name in parameters:
+                    for act in parameters[param_name]:
+                        value = parameters[param_name][act]
+                        kwargs = self._run(act, param_name, value, **kwargs)
+                if switch_cases:
+                    case = self._get_valid_case(switch_cases, **kwargs)
+                    if case.get("action"):
+                        self._init(case, **kwargs)
+                funcact = getattr(self._spec, action)
+                response = funcact(**kwargs)
+                for act in action_order:
+                    if act in response_schema:
+                        response = self._run(act, response_schema[
+                                             act], response, **kwargs)
+
+                for act in response_schema:
+                    if not act.startswith("$"):
+                        for act2 in response_schema[act]:
+                            self.run(act2, act, response[
+                                     act][act2], **response)
+                return response
+            decorated_method.__name__ = method_name
+            decorated_method.func_name = method_name
+            setattr(cls, method_name, decorated_method)
+        if not entity == self.root:
+            return cls
+        for ent in self.model["entities"]:
+            if ent != self.root:
+                entcls = Client.__call__(self, ent)
+                setattr(Entities, ent, entcls)
+
+        return cls
 
 
-    def run_script(self, backend_id, machine_id, script_id, script_params="", fire_and_forget=True):
-        if not fire_and_forget:
-            raise NotImplementedError()
-
-        payload = {
-            'backend_id': backend_id,
-            'machine_id': machine_id,
-            'params': script_params,
-        }
-
-        data = json.dumps(payload)
-        req = self.request(self.uri+"/scripts/"+script_id, data=data)
-        re = req.post()
-        return re.json()
+newcls = Client("http://localhost:8000")
+MistClient = newcls()

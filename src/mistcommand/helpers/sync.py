@@ -6,7 +6,7 @@ from yaml import load
 from yaml.scanner import ScannerError
 
 from mistclient import MistClient
-from mistclient.helpers import machine_from_id, backend_from_id
+from mistclient.helpers import machine_from_id, cloud_from_id
 
 
 def load_dbyaml(path):
@@ -33,51 +33,51 @@ def init_client():
     print
     try:
         client = MistClient(email=email, password=password)
-        client.backends
+        client.clouds
         return client
     except Exception as e:
         print e
         sys.exit(1)
 
 
-def add_backend(client, backend):
-    title = backend.get('title')
-    provider = backend.get('provider')
-    key = backend.get('apikey', "")
-    secret = backend.get('apisecret', "")
-    tenant_name = backend.get('tenant_name', "")
-    region = backend.get('region', "")
-    apiurl = backend.get('apiurl', "")
-    compute_endpoint = backend.get('compute_endpoint', None)
-    machine_ip = backend.get('machine_ip', None)
-    machine_key = backend.get('machine_key', None)
-    machine_user = backend.get('machine_user', None)
-    machine_port = backend.get('machine_port', None)
-    client.add_backend(title, provider, key, secret, tenant_name=tenant_name, region=region, apiurl=apiurl,
+def add_cloud(client, cloud):
+    title = cloud.get('title')
+    provider = cloud.get('provider')
+    key = cloud.get('apikey', "")
+    secret = cloud.get('apisecret', "")
+    tenant_name = cloud.get('tenant_name', "")
+    region = cloud.get('region', "")
+    apiurl = cloud.get('apiurl', "")
+    compute_endpoint = cloud.get('compute_endpoint', None)
+    machine_ip = cloud.get('machine_ip', None)
+    machine_key = cloud.get('machine_key', None)
+    machine_user = cloud.get('machine_user', None)
+    machine_port = cloud.get('machine_port', None)
+    client.add_cloud(title, provider, key, secret, tenant_name=tenant_name, region=region, apiurl=apiurl,
                        machine_ip=machine_ip, machine_key=machine_key, machine_user=machine_user,
                        compute_endpoint=compute_endpoint, machine_port=machine_port)
 
 
-def add_bare_metal_backend(client, backend, keys):
+def add_bare_metal_cloud(client, cloud, keys):
     """
     Black magic is happening here. All of this wil change when we sanitize our API, however, this works until then
     """
-    title = backend.get('title')
-    provider = backend.get('provider')
-    key = backend.get('apikey', "")
-    secret = backend.get('apisecret', "")
-    tenant_name = backend.get('tenant_name', "")
-    region = backend.get('region', "")
-    apiurl = backend.get('apiurl', "")
-    compute_endpoint = backend.get('compute_endpoint', None)
-    machine_ip = backend.get('machine_ip', None)
-    machine_key = backend.get('machine_key', None)
-    machine_user = backend.get('machine_user', None)
-    machine_port = backend.get('machine_port', None)
+    title = cloud.get('title')
+    provider = cloud.get('provider')
+    key = cloud.get('apikey', "")
+    secret = cloud.get('apisecret', "")
+    tenant_name = cloud.get('tenant_name', "")
+    region = cloud.get('region', "")
+    apiurl = cloud.get('apiurl', "")
+    compute_endpoint = cloud.get('compute_endpoint', None)
+    machine_ip = cloud.get('machine_ip', None)
+    machine_key = cloud.get('machine_key', None)
+    machine_user = cloud.get('machine_user', None)
+    machine_port = cloud.get('machine_port', None)
 
     if provider == "bare_metal":
-        machine_ids = backend['machines'].keys()
-        bare_machine = backend['machines'][machine_ids[0]]
+        machine_ids = cloud['machines'].keys()
+        bare_machine = cloud['machines'][machine_ids[0]]
         machine_hostname = bare_machine.get('dns_name', None)
         if not machine_hostname:
             machine_hostname = bare_machine['public_ips'][0]
@@ -85,7 +85,7 @@ def add_bare_metal_backend(client, backend, keys):
         if not machine_ip:
             machine_ip = machine_hostname
         key = machine_hostname
-        machine_name = backend['machines'][machine_ids[0]]['name']
+        machine_name = cloud['machines'][machine_ids[0]]['name']
         machine_id = machine_ids[0]
 
         keypairs = keys.keys()
@@ -100,25 +100,25 @@ def add_bare_metal_backend(client, backend, keys):
             else:
                 pass
 
-    client.add_backend(title, provider, key, secret, tenant_name=tenant_name, region=region, apiurl=apiurl,
+    client.add_cloud(title, provider, key, secret, tenant_name=tenant_name, region=region, apiurl=apiurl,
                        machine_ip=machine_ip, machine_key=machine_key, machine_user=machine_user,
                        compute_endpoint=compute_endpoint, machine_port=machine_port)
 
 
-def sync_backends(user_dict, client):
-    added_backends = user_dict['backends']
-    backends = client.backends
+def sync_clouds(user_dict, client):
+    added_clouds = user_dict['clouds']
+    clouds = client.clouds
 
-    print ">>>Syncing backends"
-    for key in added_backends:
-        if key in backends.keys():
-            print "Found %s" % added_backends[key]['title']
+    print ">>>Syncing clouds"
+    for key in added_clouds:
+        if key in clouds.keys():
+            print "Found %s" % added_clouds[key]['title']
         else:
-            print "Adding backend %s" % added_backends[key]['title']
-            if added_backends[key]['provider'] == "bare_metal":
-                add_bare_metal_backend(client, added_backends[key], user_dict['keypairs'])
+            print "Adding cloud %s" % added_clouds[key]['title']
+            if added_clouds[key]['provider'] == "bare_metal":
+                add_bare_metal_cloud(client, added_clouds[key], user_dict['keypairs'])
             else:
-                add_backend(client, added_backends[key])
+                add_cloud(client, added_clouds[key])
     print
 
 
@@ -159,20 +159,20 @@ def associate_keys(user_dict, client):
         if machines:
             try:
                 for machine in machines:
-                    backend_id = machine[0]
+                    cloud_id = machine[0]
                     machine_id = machine[1]
                     ssh_user = machine[3]
                     ssh_port = machine[-1]
                     key = client.keys[key]
-                    backend = backend_from_id(client, backend_id)
-                    backend.update_machines()
-                    mach = machine_from_id(backend, machine_id)
+                    cloud = cloud_from_id(client, cloud_id)
+                    cloud.update_machines()
+                    mach = machine_from_id(cloud, machine_id)
                     public_ips = mach.info.get('public_ips', None)
                     if public_ips:
                         host = public_ips[0]
                     else:
                         host = ""
-                    key.associate_to_machine(backend_id=backend_id, machine_id=machine_id, host=host, ssh_port=ssh_port,
+                    key.associate_to_machine(cloud_id=cloud_id, machine_id=machine_id, host=host, ssh_port=ssh_port,
                                              ssh_user=ssh_user)
 
                     print "associated machine %s" % machine_id
@@ -187,5 +187,5 @@ def sync(path):
     user_dict = load_dbyaml(path)
     client = init_client()
     sync_keys(user_dict, client)
-    sync_backends(user_dict, client)
+    sync_clouds(user_dict, client)
     associate_keys(user_dict, client)

@@ -1,12 +1,12 @@
 import sys
 
 from prettytable import PrettyTable
-from mistcommand.helpers.backends import return_backend
+from mistcommand.helpers.clouds import return_cloud
 from mistcommand.helpers.login import authenticate
 
 
-def list_locations(backend, pretty):
-    locations = backend.locations
+def list_locations(cloud, pretty):
+    locations = cloud.locations
 
     if pretty:
         x = PrettyTable(["Name", "ID"])
@@ -23,7 +23,7 @@ def location_action(args):
 
     if args.action == 'list-locations':
         client = authenticate()
-        backend = return_backend(client, args)
+        cloud = return_cloud(client, args)
         pretty = args.pretty
 
-        list_locations(backend, pretty)
+        list_locations(cloud, pretty)

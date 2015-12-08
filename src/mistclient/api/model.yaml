@@ -1,0 +1,474 @@
+api-spec: mist-api
+root: MistClient
+config_path: "mist_conf"
+
+entities:
+    MistClient:
+      attributes:
+        - Authorization
+      parameters:
+        uri:
+          $default: "https://mist.io"
+        email:
+          $type: string
+        password:
+          $ref: psw
+          $type: string
+        Authorization:
+          $ref: api_token
+          $type: string
+        save_config:
+          $type: boolean
+          $default: False
+      init:
+        - case:
+            $if:
+              save_config:
+                $eq: True
+              Authorization:
+                $set_from_config: Authorization
+        - case:
+            $if:
+              email:
+                $exists: True
+              password:
+                $exists: True
+            action: check_auth
+            response:
+              token:
+                $set: Authorization
+              $body:
+                $set: user_details
+                # $ask_to_save: Authorization
+        - case:
+            $if:
+              api_token:
+                $exists: True
+            action:
+              api_token:
+                $set: _Authorization
+      _properties:
+        supported_providers:
+          action: list_supported_providers
+          response:
+            supported_providers:
+              $set: supported_providers
+      methods:
+        clouds:
+          action: list_clouds
+          parameters:
+            query:
+              $type: string
+            name:
+              $type: string
+            id:
+              $type: string
+            provider:
+              $type: string
+          response:
+            $filter:
+              - name
+              - id
+              - provider
+            $search: query
+            $items:
+              $entity: Cloud
+        machines:
+          action: list_clouds
+          response:
+            $items:
+              $entity: Cloud
+            $foreach:
+              $method: machines
+        add_key:
+          action: add_key
+          parameters:
+            id:
+              $type: string
+              $ref: key_name
+            priv:
+              $type: string
+              $ref: private
+        generate_key:
+          action: generate_keypair
+        keys:
+          action: list_keys
+          response:
+            $items:
+              $entity: Key
+        scripts:
+          action: list_scripts
+          parameters:
+            id:
+              $type: string
+            search:
+              $type: string
+          response:
+            $filter:
+              - id
+            $search: search
+        add_script:
+          action: add_script
+        run_script:
+          action: run_script
+        add_cloud:
+          action: add_cloud
+          switch:
+            - case:
+                $if:
+                  provider:
+                    $eq: ec2
+                  apikey:
+                    $exists: True
+                  apisecret:
+                    $exists: True
+                  region:
+                    $exists: True
+            - case:
+                $if:
+                  provider:
+                    $eq: rackspace
+                  username:
+                    $exists: True
+                  apikey:
+                    $exists: True
+                  region:
+                    $exists: True
+            - case:
+                $if:
+                  provider:
+                    $eq: nephoscale
+                  username:
+                    $exists: True
+                  password:
+                    $exists: True
+            - case:
+                $if:
+                  provider:
+                    $eq: softlayer
+                  username:
+                    $exists: True
+                  apikey:
+                    $exists: True
+            - case:
+                $if:
+                  provider:
+                    $eq: digitalocean
+                  token:
+                    $exists: True
+            - case:
+                $if:
+                  provider:
+                    $eq: gce
+                  email:
+                    $exists: True
+                  private_key:
+                    $exists: True
+                  project_id:
+                    $exists: True
+            - case:
+                $if:
+                  provider:
+                    $eq: azure
+                  subscription_id:
+                    $exists: True
+                  certificate:
+                    $exists: True
+            - case:
+                $if:
+                  provider:
+                    $eq: linode
+                  apikey:
+                    $exists: True
+            - case:
+                $if:
+                  provider:
+                    $eq: bare_metal
+                  machine_ip:
+                    $exists: True
+                  machine_key:
+                    $exists: True
+                  machine_user:
+                    $exists: True
+                  machine_port:
+                    $exists: True
+            - case:
+                $if:
+                  provider:
+                    $eq: vcloud
+                  username:
+                    $exists: True
+                  password:
+                    $exists: True
+                  organization:
+                    $exists: True
+                  host:
+                    $exists: True
+            - case:
+                $if:
+                  provider:
+                    $eq: docker
+                  docker_port:
+                    $exists: True
+                  docker_host:
+                    $exists: True
+                  auth_user:
+                    $exists: True
+                  auth_password:
+                    $exists: True
+                  key_file:
+                    $exists: True
+                  cert_file:
+                    $exists: True
+            - case:
+                $if:
+                  provider:
+                    $eq: libvirt
+                  machine_hostname:
+                    $exists: True
+                  machine_user:
+                    $exists: True
+                  machine_key:
+                    $exists: True
+            - case:
+                $if:
+                  provider:
+                    $eq: openstack
+                  username:
+                    $exists: True
+                  password:
+                    $exists: True
+                  auth_url:
+                    $exists: True
+                  tenant_name:
+                    $exists: True
+                  region:
+                    $exists: True
+                  compute_endpoint:
+                    $exists: True
+          parameters:
+            provider:
+              $type: string
+            title:
+              $type: string
+            region:
+              $type: string
+            username:
+              $type: string
+            api_key:
+              $type: string
+          response:
+            $entity: Cloud
+    Key:
+      attributes:
+        - Authorization
+        - key
+        - isDefault
+        - machines
+      parameters:
+        key:
+          $type: string
+          $ref: id
+      _properties:
+        private:
+          action: get_private_key
+          response:
+            $body:
+              $set: private
+        public:
+          action: get_public_key
+          response:
+            $body:
+              $set: public
+      methods:
+        rename:
+          action: edit_key
+          parameters:
+            new_id:
+              $type: string
+            key:
+              $type: string
+        set_default:
+          action: set_default_key
+        delete:
+          action: delete_key
+        associate_to_machine:
+          action: associate_key
+          parameters:
+            machine:
+              $type: string
+            cloud:
+              $type: string
+    Cloud:
+      attributes:
+        - Authorization
+        - cloud
+        - title
+        - provider
+        - info
+      parameters:
+        cloud:
+          $ref: id
+        Authorization:
+          $type: string
+        info:
+          $ref: $body
+      _properties:
+        sizes:
+          action: list_sizes
+          response:
+            $body:
+              $set: sizes
+        locations:
+          action: list_locations
+          response:
+            $body:
+              $set: locations
+        images:
+          action: list_images
+          response:
+            $body:
+              $set: images
+        networks:
+          action: list_networks
+          response:
+            $body:
+              $set: networks
+
+      methods:
+        rename:
+          action: rename_cloud
+          parameters:
+            new_name:
+              $type: string
+        delete:
+          action: delete_cloud
+        enable:
+          action: toggle_cloud
+          parameters:
+            new_state:
+              $default: "1"
+        disable:
+          action: toggle_cloud
+          parameters:
+            new_state:
+              $default: "0"
+        search_image:
+          action: list_images
+          parameters:
+            search_term:
+              $type: string
+          response:
+            $search: search_term
+        machines:
+          action: list_machines
+          parameters:
+            id:
+              $type: string
+            name:
+              $type: string
+            search:
+              $type: string
+          response:
+            $filter:
+              - id
+              - name
+            $search: search
+            $items:
+              $entity: Machine
+        create_machine:
+          action: create_machine
+    Machine:
+      attributes:
+        - Authorization
+        - cloud
+        - machine
+        - public_ips
+        - info
+        - name
+      parameters:
+        machine:
+          $ref: id
+        info:
+          $ref: $body
+      _properties:
+         available_metrics:
+            action: find_metrics
+            response:
+              $body:
+                $set: available_metrics
+      methods:
+        reboot:
+          action: machine_actions
+          parameters:
+            action: reboot
+        start:
+          action: machine_actions
+          parameters:
+            action: start
+        stop:
+          action: machine_actions
+          parameters:
+            action: stop
+        destroy:
+          action: machine_actions
+          parameters:
+            action: destroy
+        probe:
+          action: probe
+          parameters:
+            host:
+              $ref_first: public_ips
+        associate_key:
+          action: associate_key
+        enable_monitoring:
+          action: update_monitoring        
+          parameters:
+            action:
+              $default: enable
+            no_ssh:
+              $default: False
+        disable_monitoring:
+          action: update_monitoring        
+          parameters:
+            action:
+              $default: disable
+            no_ssh:
+              $default: False
+        get_stats:
+          action: get_stats
+          parameters:
+            start:
+              $type: integer
+            stop:
+              $type: integer
+            step:
+              $default: 10
+            v:
+              $default: 2
+        add_metric:
+          action: assoc_metric
+          parameters:
+            metric_id:
+              $required: True
+        remove_metric:
+          action: disassoc_metric
+          parameters:
+            metric_id:
+              $required: True
+        add_python_plugin:
+          action: deploy_plugin
+          parameters:
+            plugin:
+              $ref: name
+            host:
+              $ref_first: public_ips
+            read_function:
+              $file: python_file
+        tag:
+          action: set_machine_tag
+          parameters:
+            tag:
+              $type: string
+            value:
+              $type: string
