@@ -1,7 +1,7 @@
 import json
 
 from mistclient.helpers import RequestsHandler
-from mistclient.model import Backend, Key, Script
+from mistclient.model import Cloud, Key, Script
 
 
 class MistClient(object):
@@ -25,7 +25,7 @@ class MistClient(object):
         self.user_details = None
         self.verify = verify
 
-        self._backends = None
+        self._clouds = None
         self._machines = None
         self._keys = None
         self._scripts = None
@@ -71,99 +71,99 @@ class MistClient(object):
         supported_providers = providers['supported_providers']
         return supported_providers
 
-    def _list_backends(self):
+    def _list_clouds(self):
         """
-        Request a list of all added backends.
+        Request a list of all added clouds.
 
-        Populates self._backends dict with mist.client.model.Backend instances
+        Populates self._clouds dict with mist.client.model.Cloud instances
         """
-        req = self.request(self.uri+'/backends')
-        backends = req.get().json()
-        if backends:
-            for backend in backends:
-                self._backends[backend['id']] = Backend(backend, self)
+        req = self.request(self.uri+'/clouds')
+        clouds = req.get().json()
+        if clouds:
+            for cloud in clouds:
+                self._clouds[cloud['id']] = Cloud(cloud, self)
         else:
-            self._backends = {}
+            self._clouds = {}
 
-    def backends(self, id=None, name=None, provider=None, search=None):
+    def clouds(self, id=None, name=None, provider=None, search=None):
         """
-        Property-like function to call the _list_backends function in order to populate self._backends dict
+        Property-like function to call the _list_clouds function in order to populate self._clouds dict
 
-        :returns: A list of Backend instances.
+        :returns: A list of Cloud instances.
         """
-        if self._backends is None:
-            self._backends = {}
-            self._list_backends()
+        if self._clouds is None:
+            self._clouds = {}
+            self._list_clouds()
 
         if id:
-            return [self._backends[backend_id] for backend_id in self._backends.keys()
-                    if id == self._backends[backend_id].id]
+            return [self._clouds[cloud_id] for cloud_id in self._clouds.keys()
+                    if id == self._clouds[cloud_id].id]
         elif name:
-            return [self._backends[backend_id] for backend_id in self._backends.keys()
-                    if name == self._backends[backend_id].title]
+            return [self._clouds[cloud_id] for cloud_id in self._clouds.keys()
+                    if name == self._clouds[cloud_id].title]
         elif provider:
-            return [self._backends[backend_id] for backend_id in self._backends.keys()
-                    if provider == self._backends[backend_id].provider]
+            return [self._clouds[cloud_id] for cloud_id in self._clouds.keys()
+                    if provider == self._clouds[cloud_id].provider]
         elif search:
-            return [self._backends[backend_id] for backend_id in self._backends.keys()
-                    if search in self._backends[backend_id].title
-                    or search in self._backends[backend_id].id
-                    or search in self._backends[backend_id].provider]
+            return [self._clouds[cloud_id] for cloud_id in self._clouds.keys()
+                    if search in self._clouds[cloud_id].title
+                    or search in self._clouds[cloud_id].id
+                    or search in self._clouds[cloud_id].provider]
         else:
-            return [self._backends[backend_id] for backend_id in self._backends.keys()]
+            return [self._clouds[cloud_id] for cloud_id in self._clouds.keys()]
 
-    def update_backends(self):
+    def update_clouds(self):
         """
-        Update added backends' info and re-populate the self._backends dict.
+        Update added clouds' info and re-populate the self._clouds dict.
 
-        This one is used whenever a new backend is added, renamed etc etc or whenever you want to update the list
-        of added backends.
+        This one is used whenever a new cloud is added, renamed etc etc or whenever you want to update the list
+        of added clouds.
 
-        :returns: A list of Backend instances.
+        :returns: A list of Cloud instances.
         """
-        self._backends = {}
-        self._list_backends()
-        return self._backends
+        self._clouds = {}
+        self._list_clouds()
+        return self._clouds
 
-    def add_backend(self, title, provider, **kwargs):
+    def add_cloud(self, title, provider, **kwargs):
         payload = {}
         if provider == "ec2":
-            payload = self._add_backend_ec2(**kwargs)
+            payload = self._add_cloud_ec2(**kwargs)
         elif provider == "rackspace":
-            payload = self._add_backend_rackspace(**kwargs)
+            payload = self._add_cloud_rackspace(**kwargs)
         elif provider == "nephoscale":
-            payload = self._add_backend_nephoscale(**kwargs)
+            payload = self._add_cloud_nephoscale(**kwargs)
         elif provider == "softlayer":
-            payload = self._add_backend_softlayer(**kwargs)
+            payload = self._add_cloud_softlayer(**kwargs)
         elif provider == "digitalocean":
-            payload = self._add_backend_digitalocean(**kwargs)
+            payload = self._add_cloud_digitalocean(**kwargs)
         elif provider == "gce":
-            payload = self._add_backend_gce(**kwargs)
+            payload = self._add_cloud_gce(**kwargs)
         elif provider == "azure":
-            payload = self._add_backend_azure(**kwargs)
+            payload = self._add_cloud_azure(**kwargs)
         elif provider == "linode":
-            payload = self._add_backend_linode(**kwargs)
+            payload = self._add_cloud_linode(**kwargs)
         elif provider == "bare_metal":
-            payload = self._add_backend_bare_metal(**kwargs)
+            payload = self._add_cloud_bare_metal(**kwargs)
         elif provider in ['vcloud', 'indonesian_vcloud']:
-            payload = self._add_backend_vcloud(**kwargs)
+            payload = self._add_cloud_vcloud(**kwargs)
         elif provider == "docker":
-            payload = self._add_backend_docker(**kwargs)
+            payload = self._add_cloud_docker(**kwargs)
         elif provider == "libvirt":
-            payload = self._add_backend_libvirt(**kwargs)
+            payload = self._add_cloud_libvirt(**kwargs)
         elif provider == "hpcloud":
-            payload = self._add_backend_hp(**kwargs)
+            payload = self._add_cloud_hp(**kwargs)
         elif provider == "openstack":
-            payload = self._add_backend_openstack(**kwargs)
+            payload = self._add_cloud_openstack(**kwargs)
 
         payload['title'] = title
         payload['provider'] = provider
-        req = self.request(self.uri+'/backends', data=json.dumps(payload), api_version=2)
+        req = self.request(self.uri+'/clouds', data=json.dumps(payload), api_version=2)
         response = req.post()
-        self.update_backends()
+        self.update_clouds()
         return
 
-    def _add_backend_rackspace(self, **kwargs):
+    def _add_cloud_rackspace(self, **kwargs):
         payload = {
             'username': kwargs.get('username', ''),
             'api_key': kwargs.get('api_key', ''),
@@ -171,7 +171,7 @@ class MistClient(object):
         }
         return payload
 
-    def _add_backend_ec2(self, **kwargs):
+    def _add_cloud_ec2(self, **kwargs):
         payload = {
             'api_key': kwargs.get('api_key', ''),
             'api_secret': kwargs.get('api_secret', ''),
@@ -179,27 +179,27 @@ class MistClient(object):
         }
         return payload
 
-    def _add_backend_nephoscale(self, **kwargs):
+    def _add_cloud_nephoscale(self, **kwargs):
         payload = {
             'username': kwargs.get('username', ''),
             'password': kwargs.get('password', '')
         }
         return payload
 
-    def _add_backend_softlayer(self, **kwargs):
+    def _add_cloud_softlayer(self, **kwargs):
         payload = {
             'username': kwargs.get('username', ''),
             'api_key': kwargs.get('api_key', '')
         }
         return payload
 
-    def _add_backend_digitalocean(self, **kwargs):
+    def _add_cloud_digitalocean(self, **kwargs):
         payload = {
             'token': kwargs.get('token', '')
         }
         return payload
 
-    def _add_backend_gce(self, **kwargs):
+    def _add_cloud_gce(self, **kwargs):
         payload = {
             'email': kwargs.get('email', ''),
             'private_key': kwargs.get('private_key', ''),
@@ -207,20 +207,20 @@ class MistClient(object):
         }
         return payload
 
-    def _add_backend_azure(self, **kwargs):
+    def _add_cloud_azure(self, **kwargs):
         payload = {
             'subscription_id': kwargs.get('subscription_id', ''),
             'certificate': kwargs.get('certificate', '')
         }
         return payload
 
-    def _add_backend_linode(self, **kwargs):
+    def _add_cloud_linode(self, **kwargs):
         payload = {
             'api_key': kwargs.get('api_key', '')
         }
         return payload
 
-    def _add_backend_bare_metal(self, **kwargs):
+    def _add_cloud_bare_metal(self, **kwargs):
         payload = {
             'machine_ip': kwargs.get('machine_ip', ''),
             'machine_key': kwargs.get('machine_key', ''),
@@ -229,7 +229,7 @@ class MistClient(object):
         }
         return payload
 
-    def _add_backend_vcloud(self, **kwargs):
+    def _add_cloud_vcloud(self, **kwargs):
         payload = {
             'username': kwargs.get('username', ''),
             'password': kwargs.get('password', ''),
@@ -238,7 +238,7 @@ class MistClient(object):
         }
         return payload
 
-    def _add_backend_docker(self, **kwargs):
+    def _add_cloud_docker(self, **kwargs):
         payload = {
             'docker_port': int(kwargs.get('docker_port', 4243)),
             'docker_host': kwargs.get('docker_host', ''),
@@ -249,7 +249,7 @@ class MistClient(object):
         }
         return payload
 
-    def _add_backend_libvirt(self, **kwargs):
+    def _add_cloud_libvirt(self, **kwargs):
         payload = {
             'machine_hostname': kwargs.get('machine_hostname', ''),
             'machine_user': kwargs.get('machine_user', 'root'),
@@ -257,7 +257,7 @@ class MistClient(object):
         }
         return payload
 
-    def _add_backend_hp(self, **kwargs):
+    def _add_cloud_hp(self, **kwargs):
         payload = {
             'username': kwargs.get('username', ''),
             'password': kwargs.get('password', ''),
@@ -266,7 +266,7 @@ class MistClient(object):
         }
         return payload
 
-    def _add_backend_openstack(self, **kwargs):
+    def _add_cloud_openstack(self, **kwargs):
         payload = {
             'username': kwargs.get('username', ''),
             'password': kwargs.get('password', ''),
@@ -377,8 +377,8 @@ class MistClient(object):
 
     def _list_machines(self):
         self._machines = []
-        for backend in self.backends():
-            machines = backend.machines()
+        for cloud in self.clouds():
+            machines = cloud.machines()
             for machine in machines:
                 self._machines.append(machine)
 
@@ -420,12 +420,12 @@ class MistClient(object):
         return response.json()
 
 
-    def run_script(self, backend_id, machine_id, script_id, script_params="", fire_and_forget=True):
+    def run_script(self, cloud_id, machine_id, script_id, script_params="", fire_and_forget=True):
         if not fire_and_forget:
             raise NotImplementedError()
 
         payload = {
-            'backend_id': backend_id,
+            'cloud_id': cloud_id,
             'machine_id': machine_id,
             'params': script_params,
         }

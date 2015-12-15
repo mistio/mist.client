@@ -2,7 +2,7 @@ import sys
 
 from prettytable import PrettyTable
 from mistcommand.helpers.login import authenticate
-from mistcommand.helpers.backends import return_backend
+from mistcommand.helpers.clouds import return_cloud
 
 
 def choose_machines_by_tag(client, tag):
@@ -17,9 +17,9 @@ def choose_machines_by_tag(client, tag):
     return chosen_machines
 
 
-def list_machines(client, backend, pretty):
-    x = PrettyTable(["Name", "ID", "State", "Public Ips", "Backend Title", "Tags"])
-    if not backend:
+def list_machines(client, cloud, pretty):
+    x = PrettyTable(["Name", "ID", "State", "Public Ips", "Cloud Title", "Tags"])
+    if not cloud:
         machines = client.machines()
         for machine in machines:
             try:
@@ -31,13 +31,13 @@ def list_machines(client, backend, pretty):
             tags = ",".join(machine_tags)
 
             if pretty:
-                x.add_row([machine.name, machine.id, machine.info['state'], ips, machine.backend.title, tags])
+                x.add_row([machine.name, machine.id, machine.info['state'], ips, machine.cloud.title, tags])
             else:
                 print "%-25s %-60s %-10s %-20s %-30s %-20s" % (machine.name, machine.id, machine.info['state'], ips,
-                                                               machine.backend.title, tags)
+                                                               machine.cloud.title, tags)
 
     else:
-        machines = backend.machines()
+        machines = cloud.machines()
         for machine in machines:
             try:
                 public_ips = machine.info['public_ips']
@@ -47,17 +47,17 @@ def list_machines(client, backend, pretty):
             machine_tags = machine.info.get('tags', [])
             tags = ",".join(machine_tags)
             if pretty:
-                x.add_row([machine.name, machine.id, machine.info['state'], ips, backend.title, tags])
+                x.add_row([machine.name, machine.id, machine.info['state'], ips, cloud.title, tags])
             else:
                 print "%-25s %-60s %-10s %-20s %-30s %-20s" % (machine.name, machine.id, machine.info['state'], ips,
-                                                               machine.backend.title, tags)
+                                                               machine.cloud.title, tags)
 
     if pretty:
         print x
 
 
 def display_machine(machine):
-    x = PrettyTable(["Name", "ID", "State", "Public Ips", "Backend Title", "Tags"])
+    x = PrettyTable(["Name", "ID", "State", "Public Ips", "Cloud Title", "Tags"])
 
     try:
         public_ips = machine.info['public_ips']
@@ -68,7 +68,7 @@ def display_machine(machine):
     machine_tags = machine.info.get('tags', [])
     tags = ",".join(machine_tags)
 
-    x.add_row([machine.name, machine.id, machine.info['state'], ips, machine.backend.title, tags])
+    x.add_row([machine.name, machine.id, machine.info['state'], ips, machine.cloud.title, tags])
     print x
 
 
@@ -125,7 +125,7 @@ def return_machine(client, args):
     return machine
 
 
-def create_machine(client, backend, args):
+def create_machine(client, cloud, args):
     keys = client.keys(id=args.key_id)
     key = keys[0] if keys else None
 
@@ -141,7 +141,7 @@ def create_machine(client, backend, args):
     if args.network_id:
         networks.append(args.network_id)
 
-    backend.create_machine(name=name, key=key, image_id=image_id, size_id=size_id, location_id=location_id,
+    cloud.create_machine(name=name, key=key, image_id=image_id, size_id=size_id, location_id=location_id,
                            networks=networks, script_id=args.script_id, script_params=args.script_params, monitoring=args.monitoring)
 
 
@@ -150,14 +150,14 @@ def machine_action(args):
     client = authenticate()
 
     if args.action == 'list-machines':
-        if args.backend or args.backend_id or args.backend_name:
-            backend = return_backend(client, args)
+        if args.cloud or args.cloud_id or args.cloud_name:
+            cloud = return_cloud(client, args)
         else:
-            backend = None
+            cloud = None
 
         pretty = args.pretty
 
-        list_machines(client, backend, pretty)
+        list_machines(client, cloud, pretty)
 
     elif args.action == 'describe-machine':
         machine = choose_machine(client, args)
@@ -165,8 +165,8 @@ def machine_action(args):
         display_machine(machine)
 
     elif args.action == 'create-machine':
-        backend = return_backend(client, args)
-        create_machine(client, backend, args)
+        cloud = return_cloud(client, args)
+        create_machine(client, cloud, args)
         print "Created machine %s" % args.machine_name
 
     elif args.action in ['start', 'stop', 'reboot', 'destroy', 'probe']:
@@ -190,5 +190,5 @@ def machine_action(args):
             machine.tag(tag=args.new_tag)
             print "Add tag %s to machine %s" % (args.new_tag, machine.name)
         else:
-            print "Cannot tag machine on provider %s" % machine.backend.title
+            print "Cannot tag machine on provider %s" % machine.cloud.title
             sys.exit(0)

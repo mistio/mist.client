@@ -8,23 +8,23 @@ from mistclient.helpers import RequestsHandler
 from prettytable import PrettyTable
 
 
-class Backend(object):
+class Cloud(object):
     """
-    A backend instance.
+    A cloud instance.
     """
-    def __init__(self, backend, mist_client):
+    def __init__(self, cloud, mist_client):
         """
 
-        :param backend: Dict that is returned from the API, with all the available info.
-        :param mist_client: The MistClient instance that initiated the creation of this Backend instance.
-        :returns: A Backend object.
+        :param cloud: Dict that is returned from the API, with all the available info.
+        :param mist_client: The MistClient instance that initiated the creation of this Cloud instance.
+        :returns: A Cloud object.
         """
         self.mist_client = mist_client
-        self.info = backend
-        self.title = backend['title']
-        self.id = backend['id']
-        self.enabled = backend['enabled']
-        self.provider = backend['provider']
+        self.info = cloud
+        self.title = cloud['title']
+        self.id = cloud['id']
+        self.enabled = cloud['enabled']
+        self.provider = cloud['provider']
         self.api_token = self.mist_client.api_token
 
         self._machines = None
@@ -47,59 +47,59 @@ class Backend(object):
 
     def delete(self):
         """
-        Delete the backend from the list of added backends in mist.io service.
+        Delete the cloud from the list of added clouds in mist.io service.
 
-        :returns: A list of mist.clients' updated backends.
+        :returns: A list of mist.clients' updated clouds.
         """
-        req = self.request(self.mist_client.uri + '/backends/' + self.id)
+        req = self.request(self.mist_client.uri + '/clouds/' + self.id)
         req.delete()
-        self.mist_client.update_backends()
+        self.mist_client.update_clouds()
 
     def rename(self, new_name):
         """
-        Rename the backend.
+        Rename the cloud.
 
-        :param new_name: New name for the backend to be renamed to.
-        :returns: A list of mist.clients' updated backends.
+        :param new_name: New name for the cloud to be renamed to.
+        :returns: A list of mist.clients' updated clouds.
         """
         payload = {
             'new_name': new_name
         }
         data = json.dumps(payload)
-        req = self.request(self.mist_client.uri + '/backends/' + self.id, data=data)
+        req = self.request(self.mist_client.uri + '/clouds/' + self.id, data=data)
         req.put()
         self.title = new_name
-        self.mist_client.update_backends()
+        self.mist_client.update_clouds()
 
     def enable(self):
         """
-        Enable the Backend.
+        Enable the Cloud.
 
-        :returns:  A list of mist.clients' updated backends.
+        :returns:  A list of mist.clients' updated clouds.
         """
         payload = {
             "new_state": "1"
         }
         data = json.dumps(payload)
-        req = self.request(self.mist_client.uri+'/backends/'+self.id, data=data)
+        req = self.request(self.mist_client.uri+'/clouds/'+self.id, data=data)
         req.post()
         self.enabled = True
-        self.mist_client.update_backends()
+        self.mist_client.update_clouds()
 
     def disable(self):
         """
-        Disable the Backend.
+        Disable the Cloud.
 
-        :returns:  A list of mist.clients' updated backends.
+        :returns:  A list of mist.clients' updated clouds.
         """
         payload = {
             "new_state": "0"
         }
         data = json.dumps(payload)
-        req = self.request(self.mist_client.uri+'/backends/'+self.id, data=data)
+        req = self.request(self.mist_client.uri+'/clouds/'+self.id, data=data)
         req.post()
         self.enabled = False
-        self.mist_client.update_backends()
+        self.mist_client.update_clouds()
 
     @property
     def sizes(self):
@@ -108,7 +108,7 @@ class Backend(object):
 
         :returns: A list of available machine sizes.
         """
-        req = self.request(self.mist_client.uri+'/backends/'+self.id+'/sizes')
+        req = self.request(self.mist_client.uri+'/clouds/'+self.id+'/sizes')
         sizes = req.get().json()
         return sizes
 
@@ -119,7 +119,7 @@ class Backend(object):
 
         :returns: A list of available locations.
         """
-        req = self.request(self.mist_client.uri+'/backends/'+self.id+'/locations')
+        req = self.request(self.mist_client.uri+'/clouds/'+self.id+'/locations')
         locations = req.get().json()
         return locations
 
@@ -131,7 +131,7 @@ class Backend(object):
         :returns: A list of available networks associated to a provider.
         """
         if self.provider in ['openstack', 'nephoscale']:
-            req = self.request(self.mist_client.uri+'/backends/'+self.id+'/networks')
+            req = self.request(self.mist_client.uri+'/clouds/'+self.id+'/networks')
             networks = req.get().json()
             return networks
         else:
@@ -144,7 +144,7 @@ class Backend(object):
 
         :returns: A list of all available images.
         """
-        req = self.request(self.mist_client.uri+'/backends/'+self.id+'/images')
+        req = self.request(self.mist_client.uri+'/clouds/'+self.id+'/images')
         images = req.get().json()
         return images
 
@@ -160,7 +160,7 @@ class Backend(object):
         }
         data = json.dumps(payload)
 
-        req = self.request(self.mist_client.uri+'/backends/'+self.id+'/images', data=data)
+        req = self.request(self.mist_client.uri+'/clouds/'+self.id+'/images', data=data)
         images = req.get().json()
         return images
 
@@ -170,7 +170,7 @@ class Backend(object):
 
         Populates self._machines dict with mist.client.model.Machine instances
         """
-        req = self.request(self.mist_client.uri+'/backends/'+self.id+'/machines')
+        req = self.request(self.mist_client.uri+'/clouds/'+self.id+'/machines')
         machines = req.get().json()
 
         if machines:
@@ -222,15 +222,15 @@ class Backend(object):
                        timeout=6000, script_id="", script_params="", verbose=False,
                        associate_floating_ip=False):
         """
-        Create a new machine on the given backend
+        Create a new machine on the given cloud
 
         :param name: Name of the machine
         :param key: Key Object to associate with the machine
         :param image_id: Id of image to be used with the creation
-        :param location_id: Id of the backend's location to create the machine
+        :param location_id: Id of the cloud's location to create the machine
         :param size_id: If of the size of the machine
-        :param image_extra: Needed only by Linode backend
-        :param disk: Needed only by Linode backend
+        :param image_extra: Needed only by Linode cloud
+        :param disk: Needed only by Linode cloud
         :returns: An update list of added machines
         """
         payload = {
@@ -258,7 +258,7 @@ class Backend(object):
         if script_params:
             payload['script_params'] = script_params
         data = json.dumps(payload)
-        req = self.request(self.mist_client.uri+'/backends/'+self.id+'/machines', data=data)
+        req = self.request(self.mist_client.uri+'/clouds/'+self.id+'/machines', data=data)
         result = req.post()
         self.update_machines()
 
@@ -343,15 +343,15 @@ class Machine(object):
     """
     A machine instance
     """
-    def __init__(self, machine, backend):
+    def __init__(self, machine, cloud):
         """
 
         :param machine: Dict with all available info for the machine
-        :param backend: The Backend instance which initiates the new machine
+        :param cloud: The Cloud instance which initiates the new machine
         :returns: A machine instance
         """
-        self.backend = backend
-        self.mist_client = backend.mist_client
+        self.cloud = cloud
+        self.mist_client = cloud.mist_client
         self.info = machine
         self.api_token = self.mist_client.api_token
         self.name = machine['name']
@@ -384,9 +384,9 @@ class Machine(object):
             'action': action
         }
         data = json.dumps(payload)
-        req = self.request(self.mist_client.uri+'/backends/'+self.backend.id+'/machines/'+self.id, data=data)
+        req = self.request(self.mist_client.uri+'/clouds/'+self.cloud.id+'/machines/'+self.id, data=data)
         req.post()
-        self.backend.update_machines()
+        self.cloud.update_machines()
 
     def reboot(self):
         """
@@ -429,7 +429,7 @@ class Machine(object):
             'ssh_user': ssh_user
         }
         data = json.dumps(payload)
-        req = self.request(self.mist_client.uri+"/backends/"+self.backend.id+"/machines/"+self.id+"/probe", data=data)
+        req = self.request(self.mist_client.uri+"/clouds/"+self.cloud.id+"/machines/"+self.id+"/probe", data=data)
         probe_info = req.post().json()
         self.probed = True
         return probe_info
@@ -441,7 +441,7 @@ class Machine(object):
             'ssh_port': ssh_port
         }
         data = json.dumps(payload)
-        req = self.request(self.mist_client.uri+"/backends/"+self.backend.id+"/machines/"+self.id+"/keys/"+key_id,
+        req = self.request(self.mist_client.uri+"/clouds/"+self.cloud.id+"/machines/"+self.id+"/keys/"+key_id,
                            data=data)
         req.put()
         self.mist_client.update_keys()
@@ -462,7 +462,7 @@ class Machine(object):
 
         data = json.dumps(payload)
 
-        req = self.request(self.mist_client.uri+"/backends/"+self.backend.id+"/machines/"+self.id+"/monitoring",
+        req = self.request(self.mist_client.uri+"/clouds/"+self.cloud.id+"/machines/"+self.id+"/monitoring",
                            data=data)
         req.post()
 
@@ -495,7 +495,7 @@ class Machine(object):
         }
 
         data = json.dumps(payload)
-        req = self.request(self.mist_client.uri+"/backends/"+self.backend.id+"/machines/"+self.id+"/stats", data=data)
+        req = self.request(self.mist_client.uri+"/clouds/"+self.cloud.id+"/machines/"+self.id+"/stats", data=data)
         stats = req.get().json()
         return stats
 
@@ -506,7 +506,7 @@ class Machine(object):
 
         :returns: A list of dicts, each of which is a metric that you can add to a monitored machine
         """
-        req = self.request(self.mist_client.uri+"/backends/"+self.backend.id+"/machines/"+self.id+"/metrics")
+        req = self.request(self.mist_client.uri+"/clouds/"+self.cloud.id+"/machines/"+self.id+"/metrics")
         metrics = req.get().json()
         return metrics
 
@@ -520,7 +520,7 @@ class Machine(object):
             'metric_id': metric_id
         }
         data = json.dumps(payload)
-        req = self.request(self.mist_client.uri+"/backends/"+self.backend.id+"/machines/"+self.id+"/metrics", data=data)
+        req = self.request(self.mist_client.uri+"/clouds/"+self.cloud.id+"/machines/"+self.id+"/metrics", data=data)
         req.put()
 
     def remove_metric(self, metric_id):
@@ -535,7 +535,7 @@ class Machine(object):
 
         data = json.dumps(payload)
 
-        req = self.request(self.mist_client.uri+"/backends/"+self.backend.id+"/machines/"+self.id+"/metrics", data=data)
+        req = self.request(self.mist_client.uri+"/clouds/"+self.cloud.id+"/machines/"+self.id+"/metrics", data=data)
         req.delete()
 
     def add_python_plugin(self, name, python_file, value_type="gauge", unit=None):
@@ -584,7 +584,7 @@ class Machine(object):
         if plugin_id[0] == "_":
             plugin_id = plugin_id[1:]
 
-        req = self.request(self.mist_client.uri+"/backends/"+self.backend.id+"/machines/"+self.id+"/plugins/"+plugin_id,
+        req = self.request(self.mist_client.uri+"/clouds/"+self.cloud.id+"/machines/"+self.id+"/plugins/"+plugin_id,
                            data=data)
         req.post()
 
@@ -593,10 +593,10 @@ class Machine(object):
             'tag': tag
         }
         data = json.dumps(payload)
-        req = self.request(self.mist_client.uri+"/backends/"+self.backend.id+"/machines/"+self.id+"/metadata",
+        req = self.request(self.mist_client.uri+"/clouds/"+self.cloud.id+"/machines/"+self.id+"/metadata",
                            data=data)
         req.post()
-        self.backend.update_machines()
+        self.cloud.update_machines()
 
 
 class Key(object):
@@ -690,14 +690,14 @@ class Key(object):
         req.delete()
         self.mist_client.update_keys()
 
-    def associate_to_machine(self, backend_id, machine_id, host=None, ssh_user=None, ssh_port=22):
+    def associate_to_machine(self, cloud_id, machine_id, host=None, ssh_user=None, ssh_port=22):
         payload = {
             'ssh_user': ssh_user,
             'host': host,
             'ssh_port': ssh_port
         }
         data = json.dumps(payload)
-        req = self.request(self.mist_client.uri+"/backends/"+backend_id+"/machines/"+machine_id+"/keys/"+self.id,
+        req = self.request(self.mist_client.uri+"/clouds/"+cloud_id+"/machines/"+machine_id+"/keys/"+self.id,
                            data=data)
         req.put()
         self.mist_client.update_keys()

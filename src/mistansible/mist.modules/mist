@@ -7,8 +7,8 @@ DOCUMENTATION = '''
 module: mist
 short_description: Provision, monitor and manage machines with the mist.io service
 description:
-  - Manage machines in all of your added backends
-  - You can add/remove multiple backends from multiple providers through mist.io service.
+  - Manage machines in all of your added clouds
+  - You can add/remove multiple clouds from multiple providers through mist.io service.
   - I(mist_email) and I(mist_password) can be skipped if I(~/.mist) config file is present.
   - See documentation for config file U(http://mistclient.readthedocs.org/en/latest/cmd/cmd.html)
 options:
@@ -34,9 +34,9 @@ options:
     description:
       - The name you want the machine to have
     required: false
-  backend:
+  cloud:
     description:
-      - Can be either the backend's id or name
+      - Can be either the cloud's id or name
     required: true
   image_id:
     description:
@@ -112,7 +112,7 @@ EXAMPLES = '''
   mist:
     mist_email: your@email.com
     mist_password: yourpassword
-    backend: EC2
+    cloud: EC2
     state: present
     name: MyMachine
     key: myKey
@@ -124,7 +124,7 @@ EXAMPLES = '''
   mist:
     mist_email: your@email.com
     mist_password: yourpassword
-    backend: EC2
+    cloud: EC2
     state: present
     name: MyMachine
     key: myKey
@@ -138,7 +138,7 @@ EXAMPLES = '''
   mist:
     mist_email: your@email.com
     mist_password: yourpassword
-    backend: EC2
+    cloud: EC2
     name: dbServer
   register: machine
 
@@ -146,7 +146,7 @@ EXAMPLES = '''
   mist:
     mist_email: your@email.com
     mist_password: yourpassword
-    backend: EC2
+    cloud: EC2
     name: dbServer
     state: present
     key: newKey
@@ -165,26 +165,26 @@ def determine_action(state):
         return "addremove"
 
 
-def choose_backend(module, client):
-    backend_name = module.params.get('backend')
-    backends = client.backends(search=backend_name)
-    if not backends:
-        module.fail_json(msg="You have to provide a valid backend id or title")
-    backend = backends[0]
+def choose_cloud(module, client):
+    cloud_name = module.params.get('cloud')
+    clouds = client.clouds(search=cloud_name)
+    if not clouds:
+        module.fail_json(msg="You have to provide a valid cloud id or title")
+    cloud = clouds[0]
 
-    return backend
+    return cloud
 
 
 def list_machines(module, client):
-    backend = choose_backend(module, client)
+    cloud = choose_cloud(module, client)
     machine_name = module.params.get('name')
 
     if not machine_name:
-        machines = backend.machines()
+        machines = cloud.machines()
         result = [{'name': machine.name, 'id': machine.id} for machine in machines]
         module.exit_json(changed=False, machines=result)
     else:
-        machine = backend.machines(search=machine_name)
+        machine = cloud.machines(search=machine_name)
         if not machine:
             module.fail_json(msg="Machine not found")
 
@@ -218,12 +218,12 @@ def handle_metrics(module, machine):
 
 
 def machine_action(module, client):
-    backend = choose_backend(module, client)
+    cloud = choose_cloud(module, client)
     machine_name = module.params.get('name')
     if not machine_name:
         module.fail_json(msg="You have to provide a name for the machine")
 
-    machine_state, machine = check_state(backend, machine_name)
+    machine_state, machine = check_state(cloud, machine_name)
 
     desired_state = module.params.get('state')
 
@@ -250,8 +250,8 @@ def machine_action(module, client):
                     if stats:
                         break
                 except:
-                    backend.update_machines()
-                    machine = backend.search_machine(machine_name)
+                    cloud.update_machines()
+                    machine = cloud.search_machine(machine_name)
 
         info = machine.info
         network_interfaces = info['extra'].get('network_interfaces', None)
@@ -264,7 +264,7 @@ def machine_action(module, client):
     elif machine_state == "absent" and desired_state == "absent":
         module.exit_json(changed=False)
     elif machine_state == "absent" and desired_state == "present":
-        machine = create_machine(module, client, backend)
+        machine = create_machine(module, client, cloud)
 
         info = machine.info
         network_interfaces = info['extra'].get('network_interfaces', None)
@@ -274,9 +274,9 @@ def machine_action(module, client):
         module.exit_json(changed=True, info=info)
 
 
-def check_state(backend, machine_name):
+def check_state(cloud, machine_name):
     state = "absent"
-    machine = backend.machines(search=machine_name)
+    machine = cloud.machines(search=machine_name)
     if machine:
         machine = machine[0]
         state = "present"
@@ -284,7 +284,7 @@ def check_state(backend, machine_name):
     return state, machine
 
 
-def create_machine(module, client, backend):
+def create_machine(module, client, cloud):
     key_name = module.params.get('key')
     key = client.keys(search=key_name)
     if key:
@@ -299,25 +299,25 @@ def create_machine(module, client, backend):
     image_extra = module.params.get('image_extra')
     disk = module.params.get('disk')
 
-    backend.create_machine(machine_name, key, image_id, location_id, size_id, image_extra, disk)
-    backend.update_machines()
+    cloud.create_machine(machine_name, key, image_id, location_id, size_id, image_extra, disk)
+    cloud.update_machines()
 
     wait = module.params.get('wait')
     wait_time = module.params.get('wait_time')
     monitoring = module.params.get('monitoring')
     wait_for_stats = module.params.get('wait_for_stats')
 
-    if backend.provider == "nephoscale":
+    if cloud.provider == "nephoscale":
         start_time = time.time()
         while time.time() < start_time + wait_time:
             time.sleep(15)
-            machine = backend.search_machine(machine_name)
+            machine = cloud.search_machine(machine_name)
             if machine:
                 break
             else:
-                backend.update_machines()
+                cloud.update_machines()
     else:
-        machine = backend.search_machine(machine_name)
+        machine = cloud.search_machine(machine_name)
 
     if wait or monitoring:
         start_time = time.time()
@@ -327,12 +327,12 @@ def create_machine(module, client, backend):
                 probe_info = machine.probe()
                 uptime = probe_info.get('uptime', None)
                 if uptime:
-                    backend.update_machines()
-                    machine = backend.search_machine(machine_name)
+                    cloud.update_machines()
+                    machine = cloud.search_machine(machine_name)
                     break
             except:
-                backend.update_machines()
-                machine = backend.search_machine(machine_name)
+                cloud.update_machines()
+                machine = cloud.search_machine(machine_name)
 
     if monitoring:
         machine.enable_monitoring()
@@ -346,8 +346,8 @@ def create_machine(module, client, backend):
                 if stats:
                     break
             except:
-                backend.update_machines()
-                machine = backend.search_machine(machine_name)
+                cloud.update_machines()
+                machine = cloud.search_machine(machine_name)
 
     if monitoring and wait_for_stats:
         handle_metrics(module, machine)
@@ -360,7 +360,7 @@ def main():
             mist_uri=dict(default='https://mist.io', type='str'),
             mist_email=dict(required=False, type='str'),
             mist_password=dict(required=False, type='str'),
-            backend=dict(required=True, type='str'),
+            cloud=dict(required=True, type='str'),
             state=dict(required=False, type='str', choices=['present', 'absent']),
             image_id=dict(required=False, type='str'),
             size_id=dict(required=False, type='str'),

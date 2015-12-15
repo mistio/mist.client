@@ -63,8 +63,8 @@ class RequestsHandler(object):
         return self.response(resp)
 
 
-def machine_from_id(backend, id):
-    machines = backend.machines
+def machine_from_id(cloud, id):
+    machines = cloud.machines
     for key in machines.keys():
         machine = machines[key]
         if id == machine.id:
@@ -72,10 +72,10 @@ def machine_from_id(backend, id):
     return None
 
 
-def backend_from_id(client, id):
-    backends = client.backends
-    for key in backends.keys():
-        backend = backends[key]
-        if id == backend.id:
-            return backend
+def cloud_from_id(client, id):
+    clouds = client.clouds
+    for key in clouds.keys():
+        cloud = clouds[key]
+        if id == cloud.id:
+            return cloud
     return

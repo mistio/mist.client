@@ -9,7 +9,7 @@ from ansible.runner import Runner
 from ansible.inventory import Inventory
 
 from mistcommand.helpers.login import user_info
-from mistcommand.helpers.backends import backend_action
+from mistcommand.helpers.clouds import cloud_action
 from mistcommand.helpers.providers import provider_action
 from mistcommand.helpers.keys import key_action
 from mistcommand.helpers.machines import machine_action
@@ -43,54 +43,54 @@ def main():
     )
 
     # ---------------BACKEND ACTIONS------------------
-    p_list_backends = subparsers.add_parser(
-        'list-backends',
-        description="List all of your added backends"
+    p_list_clouds = subparsers.add_parser(
+        'list-clouds',
+        description="List all of your added clouds"
     )
 
-    p_list_backends.add_argument(
+    p_list_clouds.add_argument(
         '--pretty', action='store_true', default=False,
         help="Print in a table format"
     )
 
-    p_rename_backend = subparsers.add_parser(
-        'rename-backend',
-        description="Rename a specified backend"
+    p_rename_cloud = subparsers.add_parser(
+        'rename-cloud',
+        description="Rename a specified cloud"
     )
 
-    p_rename_backend.add_argument(
+    p_rename_cloud.add_argument(
         '--new-name', required=True,
         help="New name for the key"
     )
 
-    p_delete_backend = subparsers.add_parser(
-        'delete-backend',
-        description="Delete the specified backend"
+    p_delete_cloud = subparsers.add_parser(
+        'delete-cloud',
+        description="Delete the specified cloud"
     )
 
-    p_describe_backend = subparsers.add_parser(
-        'describe-backend',
-        description="Show information about a specified backend"
+    p_describe_cloud = subparsers.add_parser(
+        'describe-cloud',
+        description="Show information about a specified cloud"
     )
 
-    for parser in [p_rename_backend, p_delete_backend, p_describe_backend]:
+    for parser in [p_rename_cloud, p_delete_cloud, p_describe_cloud]:
         group = parser.add_mutually_exclusive_group(required=True)
         group.add_argument(
             '--id',
-            help="Id of the specified backend"
+            help="Id of the specified cloud"
         )
         group.add_argument(
             '--name',
-            help="Name of the specified backend"
+            help="Name of the specified cloud"
         )
         group.add_argument(
-            'backend', nargs="?",
-            help="Name or id of the backend you want to specify"
+            'cloud', nargs="?",
+            help="Name or id of the cloud you want to specify"
         )
 
-    p_add_backend = subparsers.add_parser(
-        'add-backend',
-        help="Add a new backend"
+    p_add_cloud = subparsers.add_parser(
+        'add-cloud',
+        help="Add a new cloud"
     )
 
     provider_choices = [
@@ -113,18 +113,18 @@ def main():
         'vultr',
         'vsphere',
     ]
-    p_add_backend.add_argument(
+    p_add_cloud.add_argument(
         '--provider', required=True, choices=provider_choices,
-        help="The provider id for the new backend, e.g. ec2_ap_northeast. You can"
+        help="The provider id for the new cloud, e.g. ec2_ap_northeast. You can"
              " list supported-providers to see all available provider ids"
     )
 
-    p_add_backend.add_argument(
+    p_add_cloud.add_argument(
         '--name', required=True,
-        help="Name for the new backend"
+        help="Name for the new cloud"
     )
 
-    ec2_group = p_add_backend.add_argument_group('EC2')
+    ec2_group = p_add_cloud.add_argument_group('EC2')
     ec2_regions = [
         'ec2_ap_northeast',
         'ec2_ap_southeast',
@@ -139,7 +139,7 @@ def main():
 
     ec2_group.add_argument(
         '--ec2-region', choices=ec2_regions,
-        help="Region for the EC2 backend"
+        help="Region for the EC2 cloud"
     )
     ec2_group.add_argument(
         '--ec2-api-key',
@@ -150,7 +150,7 @@ def main():
         help="The ec2 API secret"
     )
 
-    rackspace_group = p_add_backend.add_argument_group('Rackspace')
+    rackspace_group = p_add_cloud.add_argument_group('Rackspace')
     rackspace_regions = [
         'dfw',
         'ord',
@@ -163,7 +163,7 @@ def main():
     ]
     rackspace_group.add_argument(
         '--rackspace-region', choices=rackspace_regions,
-        help="Region for the Rackspace backend"
+        help="Region for the Rackspace cloud"
     )
     rackspace_group.add_argument(
         '--rackspace-username',
@@ -174,7 +174,7 @@ def main():
         help="API Key for Rackspace"
     )
 
-    nephoscale_group = p_add_backend.add_argument_group('NephoScale')
+    nephoscale_group = p_add_cloud.add_argument_group('NephoScale')
     nephoscale_group.add_argument(
         '--nepho-username',
         help="Username for NephoScale"
@@ -184,26 +184,26 @@ def main():
         help="Password for nephoscale"
     )
 
-    digital_group = p_add_backend.add_argument_group('DigitalOcean')
+    digital_group = p_add_cloud.add_argument_group('DigitalOcean')
     digital_group.add_argument(
         '--digi-token',
-        help="Token for the DigitalOcean backend"
+        help="Token for the DigitalOcean cloud"
     )
 
-    linode_group = p_add_backend.add_argument_group("Linode")
+    linode_group = p_add_cloud.add_argument_group("Linode")
     linode_group.add_argument(
         '--linode-api-key',
-        help="API Key for the Linode backend"
+        help="API Key for the Linode cloud"
     )
 
-    openstack_group = p_add_backend.add_argument_group("Openstack")
+    openstack_group = p_add_cloud.add_argument_group("Openstack")
     openstack_group.add_argument(
         '--openstack-username',
-        help="Username for the Openstack backend"
+        help="Username for the Openstack cloud"
     )
     openstack_group.add_argument(
         '--openstack-password',
-        help="Password for the Openstack backend"
+        help="Password for the Openstack cloud"
     )
     openstack_group.add_argument(
         '--openstack-auth-url',
@@ -218,17 +218,17 @@ def main():
         help="OPTIONAL. Normally you do not have to explicitly set a region"
     )
 
-    softlayer_group = p_add_backend.add_argument_group("SoftLayer")
+    softlayer_group = p_add_cloud.add_argument_group("SoftLayer")
     softlayer_group.add_argument(
         '--softlayer-username',
-        help="Username for the softlayer backend"
+        help="Username for the softlayer cloud"
     )
     softlayer_group.add_argument(
         '--softlayer-api-key',
-        help="API Key for the SoftLayer backend"
+        help="API Key for the SoftLayer cloud"
     )
 
-    hp_group = p_add_backend.add_argument_group("HP")
+    hp_group = p_add_cloud.add_argument_group("HP")
     hp_regions = [
         'region-a.geo-1',
         'region-b.geo-1'
@@ -236,22 +236,22 @@ def main():
 
     hp_group.add_argument(
         '--hp-region', choices=hp_regions,
-        help="Region for the HP Cloud Backend"
+        help="Region for the HP Cloud Cloud"
     )
     hp_group.add_argument(
         '--hp-username',
-        help="Username for the HP backend"
+        help="Username for the HP cloud"
     )
     hp_group.add_argument(
         '--hp-password',
-        help="Passord for the HP backend"
+        help="Passord for the HP cloud"
     )
     hp_group.add_argument(
         '--hp-tenant',
-        help="Tenant name for the HP backend"
+        help="Tenant name for the HP cloud"
     )
 
-    docker_group = p_add_backend.add_argument_group("Docker")
+    docker_group = p_add_cloud.add_argument_group("Docker")
     docker_group.add_argument(
         '--docker-host',
         help="Ip of the Docker host"
@@ -276,7 +276,7 @@ def main():
         '--docker-cert-file',
         help="OPTIONAL. Path of your cert file used for TLS"
     )
-    bare_group = p_add_backend.add_argument_group("Bare Metal Server")
+    bare_group = p_add_cloud.add_argument_group("Bare Metal Server")
     bare_group.add_argument(
         '--bare-hostname',
         help="Hostname of the machine"
@@ -294,7 +294,7 @@ def main():
         help="The id of the ssh key that is associated with the machine"
     )
 
-    azure_group = p_add_backend.add_argument_group("Azure")
+    azure_group = p_add_cloud.add_argument_group("Azure")
     azure_group.add_argument(
         '--azure-sub-id',
         help="Subscription ID of azure account "
@@ -304,39 +304,39 @@ def main():
         help="Path of azure cert file"
     )
 
-    vcloud_group = p_add_backend.add_argument_group("vCloud")
+    vcloud_group = p_add_cloud.add_argument_group("vCloud")
     vcloud_group.add_argument(
         '--vcloud-username',
-        help="Username for vCloud backend"
+        help="Username for vCloud cloud"
     )
     vcloud_group.add_argument(
         '--vcloud-password',
-        help="Password for vCloud backend"
+        help="Password for vCloud cloud"
     )
     vcloud_group.add_argument(
         '--vcloud-host',
-        help="Host for vCloud backend"
+        help="Host for vCloud cloud"
     )
     vcloud_group.add_argument(
         '--vcloud-organization',
         help="Your organization's name - the one you are registered to vCloud with"
     )
 
-    indonesian_group = p_add_backend.add_argument_group("Indonesian vCloud")
+    indonesian_group = p_add_cloud.add_argument_group("Indonesian vCloud")
     indonesian_group.add_argument(
         '--indonesian-username',
-        help="Username for vCloud backend"
+        help="Username for vCloud cloud"
     )
     indonesian_group.add_argument(
         '--indonesian-password',
-        help="Password for vCloud backend"
+        help="Password for vCloud cloud"
     )
     indonesian_group.add_argument(
         '--indonesian-organization',
         help="Your organization's name - the one you are registered to vCloud with"
     )
 
-    libvirt_group = p_add_backend.add_argument_group("KVM via libvirt")
+    libvirt_group = p_add_cloud.add_argument_group("KVM via libvirt")
     libvirt_group.add_argument(
         '--libvirt-hostname',
         help="The hostname of your libvirt machine"
@@ -349,7 +349,7 @@ def main():
         '--libvirt-key',
         help="The SSH Key name that you have added to Mist.io and is associated with your libvirt machine"
     )
-    gce_group = p_add_backend.add_argument_group("GCE")
+    gce_group = p_add_cloud.add_argument_group("GCE")
     gce_group.add_argument(
         '--gce-email',
         help="Email of your Google Compute Engine account"
@@ -428,7 +428,7 @@ def main():
     # ----------------IMAGES/SIZES/LOCATIONS/NETWORKS------------------
     p_list_images = subparsers.add_parser(
         'list-images',
-        description="List images for a specified backend"
+        description="List images for a specified cloud"
     )
 
     p_list_images.add_argument(
@@ -443,7 +443,7 @@ def main():
 
     p_list_sizes = subparsers.add_parser(
         'list-sizes',
-        description="List sizes for a specified backend"
+        description="List sizes for a specified cloud"
     )
 
     p_list_sizes.add_argument(
@@ -453,7 +453,7 @@ def main():
 
     p_list_locations = subparsers.add_parser(
         'list-locations',
-        description="List images for a specified backend"
+        description="List images for a specified cloud"
     )
 
     p_list_locations.add_argument(
@@ -484,36 +484,36 @@ def main():
     for parser in [p_list_images, p_list_sizes, p_list_locations, p_list_networks]:
         group = parser.add_mutually_exclusive_group(required=True)
         group.add_argument(
-            '--backend',
-            help="This can be either a backend's name or id"
+            '--cloud',
+            help="This can be either a cloud's name or id"
         )
         group.add_argument(
-            '--backend-id',
-            help="Specify a backend's id"
+            '--cloud-id',
+            help="Specify a cloud's id"
         )
         group.add_argument(
-            '--backend-name',
-            help="Sepcify a backend's name"
+            '--cloud-name',
+            help="Sepcify a cloud's name"
         )
 
     # --------------MACHINE ACTIONS-------------------------
     p_list_machines = subparsers.add_parser(
         'list-machines',
-        description="List all machines or on a specific backend"
+        description="List all machines or on a specific cloud"
     )
 
     group = p_list_machines.add_mutually_exclusive_group()
     group.add_argument(
-        '--backend',
-        help="This can be either a backend's name or id"
+        '--cloud',
+        help="This can be either a cloud's name or id"
     )
     group.add_argument(
-        '--backend-id',
-        help="Specify a backend's id"
+        '--cloud-id',
+        help="Specify a cloud's id"
     )
     group.add_argument(
-        '--backend-name',
-        help="Sepcify a backend's name"
+        '--cloud-name',
+        help="Sepcify a cloud's name"
     )
 
     p_list_machines.add_argument(
@@ -594,16 +594,16 @@ def main():
 
     group = p_create_machine.add_mutually_exclusive_group(required=True)
     group.add_argument(
-        '--backend',
-        help="This can be either a backend's name or id"
+        '--cloud',
+        help="This can be either a cloud's name or id"
     )
     group.add_argument(
-        '--backend-id',
-        help="Specify a backend's id"
+        '--cloud-id',
+        help="Specify a cloud's id"
     )
     group.add_argument(
-        '--backend-name',
-        help="Sepcify a backend's name"
+        '--cloud-name',
+        help="Sepcify a cloud's name"
     )
 
     p_create_machine.add_argument(
@@ -616,15 +616,15 @@ def main():
     )
     p_create_machine.add_argument(
         '--image-id', required=True,
-        help="Id of OS Image. You can list images for the given backend to find their ids"
+        help="Id of OS Image. You can list images for the given cloud to find their ids"
     )
     p_create_machine.add_argument(
         '--size-id', required=True,
-        help="Id of machine size. You can list sizes for the given backend to find their ids"
+        help="Id of machine size. You can list sizes for the given cloud to find their ids"
     )
     p_create_machine.add_argument(
         '--location-id', required=True,
-        help="Id of the backend location. You can list locations for the given backend to find their ids"
+        help="Id of the cloud location. You can list locations for the given cloud to find their ids"
     )
 
     p_create_machine.add_argument(
@@ -758,9 +758,9 @@ def main():
         provider_action(args)
     elif args.action in ['list-keys', 'add-key', 'describe-key', 'rename-key', 'delete-key']:
         key_action(args)
-    elif args.action in ['list-backends', 'rename-backend', 'delete-backend', 'describe-backend',
-                         'add-backend']:
-        backend_action(args)
+    elif args.action in ['list-clouds', 'rename-cloud', 'delete-cloud', 'describe-cloud',
+                         'add-cloud']:
+        cloud_action(args)
     elif args.action == 'list-images':
         image_action(args)
     elif args.action == 'list-sizes':

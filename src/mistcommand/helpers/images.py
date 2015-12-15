@@ -2,19 +2,19 @@ import sys
 
 from prettytable import PrettyTable
 from mistcommand.helpers.login import authenticate
-from mistcommand.helpers.backends import return_backend
+from mistcommand.helpers.clouds import return_cloud
 
 
-def list_images(backend, search_term, pretty):
+def list_images(cloud, search_term, pretty):
     if not search_term:
         images = []
-        for image in backend.images:
+        for image in cloud.images:
             if image['star']:
                 images.append(image)
     elif search_term == "all":
-        images = backend.images
+        images = cloud.images
     else:
-        images = backend.search_image(search_term)
+        images = cloud.search_image(search_term)
 
     if pretty:
         x = PrettyTable(["Name", "ID"])
@@ -31,8 +31,8 @@ def image_action(args):
 
     if args.action == 'list-images':
         client = authenticate()
-        backend = return_backend(client, args)
+        cloud = return_cloud(client, args)
         search_term = args.search
         pretty = args.pretty
 
-        list_images(backend, search_term, pretty)
+        list_images(cloud, search_term, pretty)

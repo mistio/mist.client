@@ -4,12 +4,12 @@ from ansible.module_utils.basic import *
 
 DOCUMENTATION = '''
 ---
-module: mist_backends
-short_description: Manage backends in the mist.io service
+module: mist_clouds
+short_description: Manage clouds in the mist.io service
 description:
-  - Manage multi-cloud backends through mist.io service.
-  - You can add/remove multiple backends from multiple providers through mist.io service.
-  - Before you can provision, monitor etc machines through mist.io, you have to first add a backend to the mist.io service.
+  - Manage multi-cloud clouds through mist.io service.
+  - You can add/remove multiple clouds from multiple providers through mist.io service.
+  - Before you can provision, monitor etc machines through mist.io, you have to first add a cloud to the mist.io service.
   - Mist.io supports
   - EC2,
   - Rackspace,
@@ -43,16 +43,16 @@ options:
     required: false
   state:
     description:
-      - If provided it will instruct the module to trigger backend actions, otherwise it will only list information
+      - If provided it will instruct the module to trigger cloud actions, otherwise it will only list information
     choices: ["present", "absent"]
     required: false
   title:
     description:
-      - The title you want the backend to have
+      - The title you want the cloud to have
     required: false
   provider:
     description:
-      - Provider id for the backend you want to add to mist.io. You can see all the providers ids using the M(mist_providers) module.
+      - Provider id for the cloud you want to add to mist.io. You can see all the providers ids using the M(mist_providers) module.
     required: false
 author: "Mist.io Inc"
 version_added: "1.7.1"
@@ -60,8 +60,8 @@ version_added: "1.7.1"
 '''
 
 EXAMPLES = '''
-- name: Add EC2 backend
-  mist_backends:
+- name: Add EC2 cloud
+  mist_clouds:
     title: MyEC2
     provider: ec2
     api_key: kjhf98y9lkj0909kj90edffwwf432fd
@@ -69,8 +69,8 @@ EXAMPLES = '''
     region: ec2_ap_northeast
     state: present
 
-- name: Add Rackspace backend
-  mist_backends:
+- name: Add Rackspace cloud
+  mist_clouds:
     title: MyRackspace
     provider: rackspace
     region: dfw
@@ -78,31 +78,31 @@ EXAMPLES = '''
     api_key: sadlkjnjkhbi0HBCG
     state: present
 
-- name: Add Nephoscale backend
-  mist_backends:
+- name: Add Nephoscale cloud
+  mist_clouds:
     title: MyNepho
     provider: nephoscale
     username: nepho_user
     password: nepho_pass
     state: present
 
-- name: Add SoftLayer backend
-  mist_backends:
+- name: Add SoftLayer cloud
+  mist_clouds:
     title: MySoftLayer
     provider: softlayer
     username: SL09890
     api_key: kjhdskjhad987987098sdlkhjlajslkj
     state: present
 
-- name: Add Digital Ocena backend
-  mist_backends:
+- name: Add Digital Ocena cloud
+  mist_clouds:
     title: MyDigi
     provider: digitalocean
     token: oiulksdjkjhd0987098lkahkjdhkj....
     state: present
 
-- name: Add Google Compute Engine backend
-  mist_backends:
+- name: Add Google Compute Engine cloud
+  mist_clouds:
     title: GCE
     provider: gce
     email: my.gce.email@gce
@@ -110,23 +110,23 @@ EXAMPLES = '''
     private_key: /path/to/locally/stored/private_key
     state: present
 
-- name: Add Azure backend
-  mist_backends:
+- name: Add Azure cloud
+  mist_clouds:
     title: AZURE
     provider: azure
     subscription_id: lkjafh-08jhkl-09kljlj...
     certificate: /path/to/locally/saved/certificate
     state: present
 
-- name: Add Linode backend
-  mist_backends:
+- name: Add Linode cloud
+  mist_clouds:
     title: MyLinode
     provider: linode
     api_key: dlkjdljkd0989yKGFgjgc86798ohkl
     state: present
 
 - name: Add Bare Metal (or any server with ssh access)
-  mist_backends:
+  mist_clouds:
     title: MyOtherServer
     provider: bare_metal
     machine_ip: 190.20.10.45
@@ -135,8 +135,8 @@ EXAMPLES = '''
     machine_port: 22
     state: present
 
-- name: Add vCloud backend
-  mist_backends:
+- name: Add vCloud cloud
+  mist_clouds:
     title: MyVCLOUD
     provider: vcloud
     username: vuser
@@ -145,8 +145,8 @@ EXAMPLES = '''
     host: compute.idcloudonline.com
     state: present
 
-- name: Add Indonesian vCloud backend
-  mist_backends:
+- name: Add Indonesian vCloud cloud
+  mist_clouds:
     title: IndoVCLOUD
     provider: indonesian_vcloud
     username: vuser
@@ -154,8 +154,8 @@ EXAMPLES = '''
     organization: Mist.io
     state: present
 
-- name: Add KVM(libvirt) backend
-  mist_backends:
+- name: Add KVM(libvirt) cloud
+  mist_clouds:
     title: MyKVM
     provider: libvirt
     machine_hostname: 190.198.23.0
@@ -163,8 +163,8 @@ EXAMPLES = '''
     machine_key: name_of_key_added_to_mist.io
     state: present
 
-- name: Add HP Cloud backend
-  mist_backends:
+- name: Add HP Cloud cloud
+  mist_clouds:
     title: MyHP
     provider: hpcloud
     region: region-a.geo-1
@@ -173,8 +173,8 @@ EXAMPLES = '''
     tenant_name: my_tenant
     state: present
 
-- name: Add Openstack backend
-  mist_backends:
+- name: Add Openstack cloud
+  mist_clouds:
     title: MyOPENSTACK
     provider: openstack
     username: user
@@ -184,8 +184,8 @@ EXAMPLES = '''
     region: my_region_if_exists
     state: present
 
-- name: Add Docker backend
-  mist_backends:
+- name: Add Docker cloud
+  mist_clouds:
     title: MyDOCKER
     provider: docker
     docker_host: 190.189.1.2
@@ -195,12 +195,12 @@ EXAMPLES = '''
     key_file: path to key file if I have TLS setup
     cert_file: path to cert file if I have TLS setup
 
-- name: List information about DigitalOcean backend
-  mist_backends:
+- name: List information about DigitalOcean cloud
+  mist_clouds:
     mist_email: your@email.com
     mist_password: yourpassword
-    backend: DigitalOcean
-  register: backend
+    cloud: DigitalOcean
+  register: cloud
 '''
 
 
@@ -211,62 +211,62 @@ def determine_action(state):
         return "addremove"
 
 
-def list_backends(module, client):
-    backends = client.backends()
+def list_clouds(module, client):
+    clouds = client.clouds()
     title = module.params.get('title')
 
     if not title:
-        result = [backend.title for backend in backends]
-        module.exit_json(changed=False, backends=result)
+        result = [cloud.title for cloud in clouds]
+        module.exit_json(changed=False, clouds=result)
     else:
-        backends = client.backends(search=title)
-        if backends:
-            module.exit_json(changed=False, info=backends[0].info)
+        clouds = client.clouds(search=title)
+        if clouds:
+            module.exit_json(changed=False, info=clouds[0].info)
         else:
             module.exit_json(changed=False, info="Not Found")
 
 
-def backend_action(module, client):
+def cloud_action(module, client):
     provider = module.params.get('provider')
     title = module.params.get('title')
     desired_state = module.params.get('state')
 
-    backend_state, chosen_backend = check_state(client, provider, title)
+    cloud_state, chosen_cloud = check_state(client, provider, title)
 
-    if backend_state == 'present' and desired_state == 'present':
-        module.exit_json(changed=False, info=chosen_backend.info)
-    elif backend_state == 'present' and desired_state == 'absent':
-        chosen_backend.delete()
+    if cloud_state == 'present' and desired_state == 'present':
+        module.exit_json(changed=False, info=chosen_cloud.info)
+    elif cloud_state == 'present' and desired_state == 'absent':
+        chosen_cloud.delete()
         module.exit_json(changed=True)
-    elif backend_state == 'absent' and desired_state == 'absent':
+    elif cloud_state == 'absent' and desired_state == 'absent':
         module.exit_json(changed=False)
-    elif backend_state == 'absent' and desired_state == 'present':
-        chosen_backend = add_backend(module, client)
-        module.exit_json(changed=True, info=chosen_backend.info)
+    elif cloud_state == 'absent' and desired_state == 'present':
+        chosen_cloud = add_cloud(module, client)
+        module.exit_json(changed=True, info=chosen_cloud.info)
     module.exit_json(changed=False, info="paparia")
 
 
 def check_state(client, provider, title):
-    backend_state = 'absent'
-    chosen_backend = None
+    cloud_state = 'absent'
+    chosen_cloud = None
 
-    backends = [backend.title for backend in client.backends()]
-    if title in backends:
-        backend_state = 'present'
-        chosen_backend = client.backends(search=title)[0]
+    clouds = [cloud.title for cloud in client.clouds()]
+    if title in clouds:
+        cloud_state = 'present'
+        chosen_cloud = client.clouds(search=title)[0]
 
-    return backend_state, chosen_backend
+    return cloud_state, chosen_cloud
 
 
-def remove_backend(provider, client):
-    for key in client.backends:
-        backend = client.backends[key]
-        if backend.info['provider'] == provider:
-            backend.delete()
+def remove_cloud(provider, client):
+    for key in client.clouds:
+        cloud = client.clouds[key]
+        if cloud.info['provider'] == provider:
+            cloud.delete()
             return
 
 
-def add_backend(module, client):
+def add_cloud(module, client):
     title = module.params.get('title')
     provider = module.params.get('provider')
 
@@ -274,51 +274,51 @@ def add_backend(module, client):
         api_key = module.params.get('api_key')
         api_secret = module.params.get('api_secret')
         region = module.params.get('region')
-        client.add_backend(title, provider, api_key=api_key,
+        client.add_cloud(title, provider, api_key=api_key,
                            api_secret=api_secret, region=region)
     elif provider == "rackspace":
         username = module.params.get('username')
         api_key = module.params.get('api_key')
         region = module.params.get('region')
-        client.add_backend(title, provider, username=username,
+        client.add_cloud(title, provider, username=username,
                            api_key=api_key, region=region)
     elif provider == "nephoscale":
         username = module.params.get('username')
         password = module.params.get('password')
-        client.add_backend(title, provider, username=username,
+        client.add_cloud(title, provider, username=username,
                            password=password)
     elif provider == "softlayer":
         username = module.params.get('username')
         api_key = module.params.get('api_key')
-        client.add_backend(title, provider, username=username,
+        client.add_cloud(title, provider, username=username,
                            api_key=api_key)
     elif provider == "digitalocean":
         token = module.params.get('token')
-        client.add_backend(title, provider, token=token)
+        client.add_cloud(title, provider, token=token)
     elif provider == "gce":
         email = module.params.get('email')
         private_key_path = module.params.get('private_key')
         with open(private_key_path, 'r') as f:
             private_key = f.read()
         project_id = module.params.get('project_id')
-        client.add_backend(title, provider, email=email,
+        client.add_cloud(title, provider, email=email,
                            private_key=private_key, project_id=project_id)
     elif provider == "azure":
         subscription_id = module.params.get('subscription_id')
         certificate_path = module.params.get('certificate')
         with open(certificate_path, 'r') as f:
             certificate = f.read()
-        client.add_backend(title, provider, subscription_id=subscription_id,
+        client.add_cloud(title, provider, subscription_id=subscription_id,
                            certificate=certificate)
     elif provider == "linode":
         api_key = module.params.get('api_key')
-        client.add_backend(title, provider, api_key=api_key)
+        client.add_cloud(title, provider, api_key=api_key)
     elif provider == "bare_metal":
         machine_ip = module.params.get('machine_ip')
         machine_key = module.params.get('machine_key')
         machine_user = module.params.get('machine_user')
         machine_port = module.params.get('machine_port')
-        client.add_backend(title, provider, machine_ip=machine_ip,
+        client.add_cloud(title, provider, machine_ip=machine_ip,
                            machine_key=machine_key, machine_user=machine_user,
                            machine_port=int(machine_port))
     elif provider in ['vcloud', 'indonesian_vcloud']:
@@ -326,20 +326,20 @@ def add_backend(module, client):
         password = module.params.get('password')
         organization = module.params.get('organization')
         host = module.params.get('host')
-        client.add_backend(title, provider, username=username,
+        client.add_cloud(title, provider, username=username,
                            password=password, organization=organization, host=host)
     elif provider == "libvirt":
         machine_hostname = module.params.get('machine_hostname')
         machine_user = module.params.get('machine_user')
         machine_key = module.params.get('machine_key')
-        client.add_backend(title, provider, machine_hostname=machine_hostname,
+        client.add_cloud(title, provider, machine_hostname=machine_hostname,
                            machine_user=machine_user, machine_key=machine_key)
     elif provider == "hpcloud":
         username = module.params.get('username')
         password = module.params.get('password')
         tenant_name = module.params.get('tenant_name')
         region = module.params.get('region')
-        client.add_backend(title, provider, username=username,
+        client.add_cloud(title, provider, username=username,
                            password=password, tenant_name=tenant_name, region=region)
     elif provider == "openstack":
         username = module.params.get('username')
@@ -348,7 +348,7 @@ def add_backend(module, client):
         tenant_name = module.params.get('tenant_name')
         region = module.params.get('region')
         compute_endpoint = module.params.get('compute_endpoint')
-        client.add_backend(title, provider, username=username, password=password,
+        client.add_cloud(title, provider, username=username, password=password,
                            auth_url=auth_url, tenant_name=tenant_name, region=region,
                            compute_endpoint=compute_endpoint)
     elif provider == "docker":
@@ -368,13 +368,13 @@ def add_backend(module, client):
                 cert_file = f.read()
         else:
             cert_file = None
-        client.add_backend(title, provider, docker_host=docker_host, docker_port=docker_port,
+        client.add_cloud(title, provider, docker_host=docker_host, docker_port=docker_port,
                            auth_user=auth_user, auth_password=auth_password, key_file=key_file,
                            cert_file=cert_file)
 
-    client.update_backends()
-    backend = client.backends(search=title)[0]
-    return backend
+    client.update_clouds()
+    cloud = client.clouds(search=title)[0]
+    return cloud
 
 
 def main():
@@ -416,13 +416,13 @@ def main():
 
     client = authenticate(module)
 
-    #Determine which action to run (e.g. list backends, add backend etc)
+    #Determine which action to run (e.g. list clouds, add cloud etc)
     state = module.params.get('state')
     action = determine_action(state)
 
     if action == "list":
-        list_backends(module, client)
+        list_clouds(module, client)
     else:
-        backend_action(module, client)
+        cloud_action(module, client)
 
 main()

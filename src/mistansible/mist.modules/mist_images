@@ -4,9 +4,9 @@ from ansible.module_utils.basic import *
 
 DOCUMENTATION = '''
 module: mist_images
-short_description: Lists all available OS images for a backend
+short_description: Lists all available OS images for a cloud
 description:
-  - Returns a list of all available OS images that the given backend supports.
+  - Returns a list of all available OS images that the given cloud supports.
   - I(mist_email) and I(mist_password) can be skipped if I(~/.mist) config file is present.
   - See documentation for config file U(http://mistclient.readthedocs.org/en/latest/cmd/cmd.html).
 options:
@@ -23,13 +23,13 @@ options:
     description:
       - Url of the mist.io service. By default https://mist.io. But if you have a custom installation of mist.io you can provide the url here
     required: false
-  backend:
+  cloud:
     description:
-      - Can be either backend's id or name
+      - Can be either cloud's id or name
     required: true
   search:
     description:
-      - If not provided will return a list with default OS Images for the given backend
+      - If not provided will return a list with default OS Images for the given cloud
       - If I(all) is provided, will return ALL available OS images
       - If I(other search term) then it will search for specific images
     required: true
@@ -39,41 +39,41 @@ version_added: "1.7.1"
 '''
 
 EXAMPLES = '''
-- name: List default images for NephoScale backend
+- name: List default images for NephoScale cloud
   mist_images:
     mist_email: your@email.com
     mist_password: yourpassword
-    backend: NephoScale
+    cloud: NephoScale
   register: images
 
-- name: Search for gentoo images in backend with id i984JHdkjhKj
+- name: Search for gentoo images in cloud with id i984JHdkjhKj
   mist_images:
     mist_email: your@email.com
     mist_password: yourpassword
-    backend: i984JHdkjhKj
+    cloud: i984JHdkjhKj
     search: gentoo
   register: images
 '''
 
 
 def list_images(module, client):
-    backend_name = module.params.get('backend')
-    backends = client.backends(search=backend_name)
-    if not backends:
-        module.fail_json(msg="You have to provide a valid backend id or title")
-    backend = backends[0]
+    cloud_name = module.params.get('cloud')
+    clouds = client.clouds(search=cloud_name)
+    if not clouds:
+        module.fail_json(msg="You have to provide a valid cloud id or title")
+    cloud = clouds[0]
 
     search = module.params.get('search')
 
     if not search:
         images = []
-        for image in backend.images:
+        for image in cloud.images:
             if image['star']:
                 images.append(image)
     elif search == "all":
-        images = backend.images
+        images = cloud.images
     else:
-        images = backend.search_image(search)
+        images = cloud.search_image(search)
 
     return [{'name': image['name'], 'id': image['id']} for image in images]
 
@@ -84,7 +84,7 @@ def main():
             mist_uri=dict(default='https://mist.io', type='str'),
             mist_email=dict(required=False, type='str'),
             mist_password=dict(required=False, type='str'),
-            backend=dict(required=True, type='str'),
+            cloud=dict(required=True, type='str'),
             search=dict(required=False, type='str')
         )
     )

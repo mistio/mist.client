@@ -4,9 +4,9 @@ from ansible.module_utils.basic import *
 
 DOCUMENTATION = '''
 module: mist_sizes
-short_description: Lists all available machine sizes for a backend
+short_description: Lists all available machine sizes for a cloud
 description:
-  - Returns a list of all available machine sizes for a given backend
+  - Returns a list of all available machine sizes for a given cloud
   - I(mist_email) and I(mist_password) can be skipped if I(~/.mist) config file is present.
   - See documentation for config file U(http://mistclient.readthedocs.org/en/latest/cmd/cmd.html)
 options:
@@ -23,9 +23,9 @@ options:
     description:
       - Url of the mist.io service. By default https://mist.io. But if you have a custom installation of mist.io you can provide the url here
     required: false
-  backend:
+  cloud:
     description:
-      - Can be either backend's id or name
+      - Can be either cloud's id or name
     required: true
 author: "Mist.io Inc"
 version_added: "1.7.1"
@@ -33,24 +33,24 @@ version_added: "1.7.1"
 '''
 
 EXAMPLES = '''
-- name: List sizes for a backend
+- name: List sizes for a cloud
   mist_sizes:
     mist_email: your@email.com
     mist_password: yourpassword
-    backend: DigitalOcean
+    cloud: DigitalOcean
   register: sizes
 
 '''
 
 
 def list_sizes(module, client):
-    backend_name = module.params.get('backend')
-    backends = client.backends(search=backend_name)
-    if not backends:
-        module.fail_json(msg="You have to provide a valid backend id or title")
-    backend = backends[0]
+    cloud_name = module.params.get('cloud')
+    clouds = client.clouds(search=cloud_name)
+    if not clouds:
+        module.fail_json(msg="You have to provide a valid cloud id or title")
+    cloud = clouds[0]
 
-    sizes = backend.sizes
+    sizes = cloud.sizes
     return [{'name': size['name'], 'id':size['id']} for size in sizes]
 
 
@@ -60,7 +60,7 @@ def main():
             mist_uri=dict(default='https://mist.io', type='str'),
             mist_email=dict(required=False, type='str'),
             mist_password=dict(required=False, type='str'),
-            backend=dict(required=True, type='str'),
+            cloud=dict(required=True, type='str'),
         )
     )
 

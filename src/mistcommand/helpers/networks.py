@@ -1,16 +1,16 @@
 import sys
 
 from prettytable import PrettyTable
-from mistcommand.helpers.backends import return_backend
+from mistcommand.helpers.clouds import return_cloud
 from mistcommand.helpers.login import authenticate
 
 
-def list_networks(backend, pretty):
-    if backend.provider not in ['openstack']:
-        print "Network action not supported yet for %s provider" % backend.provider
+def list_networks(cloud, pretty):
+    if cloud.provider not in ['openstack']:
+        print "Network action not supported yet for %s provider" % cloud.provider
         sys.exit(0)
 
-    networks = backend.networks
+    networks = cloud.networks
 
     all_nets = []
     all_nets += networks['public']
@@ -23,7 +23,7 @@ def list_networks(backend, pretty):
 def network_action(args):
     if args.action == 'list-networks':
         client = authenticate()
-        backend = return_backend(client, args)
+        cloud = return_cloud(client, args)
         pretty = args.pretty
 
-        list_networks(backend, pretty)
+        list_networks(cloud, pretty)
