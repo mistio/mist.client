@@ -8,7 +8,8 @@ class MistClient(object):
     """
     The base class that initiates a new client that connects with mist.io service.
     """
-    def __init__(self, mist_uri="https://mist.io", email=None, password=None, verify=True):
+
+    def __init__(self, mist_uri="https://mist.io", email=None, password=None, verify=True, api_token=None):
         """
         Initialize the mist.client. In case email and password are given, it will try to authenticate with mist.io
         and keep the api_token that is returned to be used with the later requests.
@@ -21,7 +22,7 @@ class MistClient(object):
         self.uri = mist_uri
         self.email = email
         self.password = password
-        self.api_token = None
+        self.api_token = api_token
         self.user_details = None
         self.verify = verify
 
@@ -38,35 +39,43 @@ class MistClient(object):
         Sends a json payload with the email and password in order to get the authentication api_token to be used with
         the rest of the requests
         """
+        if self.api_token:
+            return
         payload = {
             'email': self.email,
             'password': self.password
         }
 
         data = json.dumps(payload)
-        req = self.request(self.uri+'/auth', data=data)
+        req = self.request(self.uri + '/auth', data=data)
         response = req.post().json()
         token = response.get('mist_api_token', None)
-        self.api_token = "mist_1 %s:%s" % (self.email, token)
+        if token:
+            # backwards compatibility with old Authentication system
+            self.api_token = "mist_1 %s:%s" % (self.email, token)
+        else:
+            self.api_token = response.get('token', None)
         self.user_details = response
 
     def request(self, *args, **kwargs):
         """
-        The main purpose of this is to be a wrapper-like function to pass the api_token and all the other params to the
-        requests that are being made
+        The main purpose of this is to be a wrapper-like function to pass the
+        api_token and all the other params to the requests that are being made
 
         :returns: An instance of mist.client.helpers.RequestsHandler
         """
-        return RequestsHandler(*args, api_token=self.api_token, verify=self.verify, **kwargs)
+        return RequestsHandler(*args, api_token=self.api_token,
+                               verify=self.verify, **kwargs)
 
     @property
     def supported_providers(self):
         """
         Request a list of all available providers
 
-        :returns: A list of all available providers (e.g. {'provider': 'ec2_ap_northeast', 'title': 'EC2 AP NORTHEAST'})
+        :returns: A list of all available providers (e.g. {'provider':
+        'ec2_ap_northeast', 'title': 'EC2 AP NORTHEAST'})
         """
-        req = self.request(self.uri+'/providers', api_version=2)
+        req = self.request(self.uri + '/providers', api_version=2)
         providers = req.get().json()
         supported_providers = providers['supported_providers']
         return supported_providers
@@ -77,7 +86,7 @@ class MistClient(object):
 
         Populates self._clouds dict with mist.client.model.Cloud instances
         """
-        req = self.request(self.uri+'/clouds')
+        req = self.request(self.uri + '/clouds')
         clouds = req.get().json()
         if clouds:
             for cloud in clouds:
@@ -158,7 +167,8 @@ class MistClient(object):
 
         payload['title'] = title
         payload['provider'] = provider
-        req = self.request(self.uri+'/clouds', data=json.dumps(payload), api_version=2)
+        req = self.request(self.uri + '/clouds',
+                           data=json.dumps(payload), api_version=2)
         response = req.post()
         self.update_clouds()
         return
@@ -283,7 +293,7 @@ class MistClient(object):
 
         :returns: A list of Keys instances
         """
-        req = self.request(self.uri+'/keys')
+        req = self.request(self.uri + '/keys')
         keys = req.get().json()
         if keys:
             self._keys = {}
@@ -330,7 +340,7 @@ class MistClient(object):
 
         :returns: A string of a randomly generated ssh private key
         """
-        req = self.request(self.uri+"/keys")
+        req = self.request(self.uri + "/keys")
         private_key = req.post().json()
         return private_key['priv']
 
@@ -350,14 +360,14 @@ class MistClient(object):
 
         data = json.dumps(payload)
 
-        req = self.request(self.uri+'/keys', data=data)
+        req = self.request(self.uri + '/keys', data=data)
         req.put()
         self.update_keys()
 
     def _list_scripts(self):
         """
         """
-        req = self.request(self.uri+'/scripts')
+        req = self.request(self.uri + '/scripts')
         scripts = req.get().json()
         if scripts:
             self._scripts = {}
@@ -401,24 +411,24 @@ class MistClient(object):
         response = req.get()
         return response.json()
 
-    def get_scripts(self,**_):
-        req = self.request(self.uri+'/scripts')
+    def get_scripts(self, **_):
+        req = self.request(self.uri + '/scripts')
         response = req.get()
         return response.json()
 
-    def add_script(self,**kwargs):
+    def add_script(self, **kwargs):
         payload = {
-            'name':kwargs.get('name',''),
-            'description': kwargs.get('description',''),
-            'script': kwargs.get('script',''),
-            'location_type': kwargs.get('location_type',''),
-            'exec_type': kwargs.get('exec_type','')
+            'name': kwargs.get('name', ''),
+            'description': kwargs.get('description', ''),
+            'script': kwargs.get('script', ''),
+            'location_type': kwargs.get('location_type', ''),
+            'exec_type': kwargs.get('exec_type', '')
         }
-        
-        req = self.request(self.uri+'/scripts', data=json.dumps(payload), api_version=2)
+
+        req = self.request(self.uri + '/scripts',
+                           data=json.dumps(payload), api_version=2)
         response = req.post()
         return response.json()
-
 
     def run_script(self, cloud_id, machine_id, script_id, script_params="", fire_and_forget=True):
         if not fire_and_forget:
@@ -431,6 +441,36 @@ class MistClient(object):
         }
 
         data = json.dumps(payload)
-        req = self.request(self.uri+"/scripts/"+script_id, data=data)
+        req = self.request(self.uri + "/scripts/" + script_id, data=data)
+        re = req.post()
+        return re.json()
+
+    def get_templates(self, **_):
+        req = self.request(self.uri + '/templates')
+        response = req.get()
+        return response.json()
+
+    def add_template(self, **kwargs):
+        payload = {
+            'name': kwargs.get('name', ''),
+            'description': kwargs.get('description', ''),
+            'template': kwargs.get('template', ''),
+            'location_type': kwargs.get('location_type', ''),
+            'exec_type': kwargs.get('exec_type', '')
+        }
+
+        req = self.request(self.uri + '/templates',
+                           data=json.dumps(payload), api_version=2)
+        response = req.post()
+        return response.json()
+
+    def create_stack(self, template_id, inputs=""):
+
+        payload = {
+            'inputs': inputs,
+        }
+
+        data = json.dumps(payload)
+        req = self.request(self.uri + "/templates/" + template_id, data=data)
         re = req.post()
         return re.json()
