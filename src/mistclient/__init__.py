@@ -96,8 +96,9 @@ class ApiRequest(object):
         headers = {}
         data = {}
         query = {}
+        print kwargs.keys()
         for p in self.required_params:
-            if not kwargs.get(p):
+            if kwargs.get(p) == None:
                 raise Exception("Parameter {0} missing".format(p))
         for h in self.header_params:
             if kwargs.get(h):
@@ -168,7 +169,7 @@ class Helpers(object):
 
         input_value = kwargs.get(input_name)
 
-        if input_value:
+        if input_value != None:
             kwargs[param_name] = input_value
             kwargs.pop(input_name)
             return kwargs
@@ -342,15 +343,36 @@ class Helpers(object):
 
 class Client(object):
 
-    def __init__(self, url, basepath="api", modelname="model"):
-        modelurl = "{0}/{1}/{2}.yaml".format(url, basepath, modelname)
-        response = requests.get(modelurl)
-        self.model = yaml.load(response.content)
+    def __init__(self, url="", basepath="api", modelname="model"):
+        if url:
+            modelurl = "{0}/{1}/{2}.yaml".format(url, basepath, modelname)
+            response = requests.get(modelurl)
+            self.model = yaml.load(response.content)
+        else:
+            path = os.path.realpath(__file__)
+            path = os.path.dirname(path)
+            path = os.path.join(path, basepath, modelname + ".yaml")
+            print path
+            if os.path.isfile(path):
+                f = open(path)
+                self.model = yaml.load(f.read())
+            else:
+                raise Exception("Model file not found in {0}".format(path))
         self.root = self.model.get("root")
         api_spec = self.model.get("api-spec")
-        specurl = "{0}/{1}/{2}.yaml".format(url, basepath, api_spec)
-        response = requests.get(specurl)
-        self.spec = Swagger(yaml.load(response.content))
+        if url:
+            specurl = "{0}/{1}/{2}.yaml".format(url, basepath, api_spec)
+            response = requests.get(specurl)
+            self.spec = Swagger(yaml.load(response.content))
+        else:
+            path = os.path.realpath(__file__)
+            path = os.path.dirname(path)
+            path = os.path.join(path, basepath, api_spec + ".yaml")
+            if os.path.isfile(path):
+                f = open(path)
+                self.spec = Swagger(yaml.load(f.read()))
+            else:
+                raise Exception("Swagger spec file not found in {0}".format(path))
         if self.model.get("config_path"):
             home_path = os.getenv("HOME")
             save_path = self.model["config_path"]
@@ -468,5 +490,5 @@ class Client(object):
         return cls
 
 
-newcls = Client("http://localhost:8000")
+newcls = Client()
 MistClient = newcls()

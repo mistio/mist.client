@@ -378,6 +378,13 @@ entities:
               $entity: Machine
         create_machine:
           action: create_machine
+          parameters:
+            size:
+              $ref: size_id
+            image:
+              $ref: image_id
+            location:
+              $ref: location_id
     Machine:
       attributes:
         - Authorization
@@ -422,14 +429,14 @@ entities:
         associate_key:
           action: associate_key
         enable_monitoring:
-          action: update_monitoring        
+          action: update_monitoring
           parameters:
             action:
               $default: enable
             no_ssh:
               $default: False
         disable_monitoring:
-          action: update_monitoring        
+          action: update_monitoring
           parameters:
             action:
               $default: disable

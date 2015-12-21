@@ -1,10 +1,10 @@
 produces:
   - application/json
 schemes:
-  - https
+  - http
 swagger: '2.0'
 basePath: /
-host: 'null.mist.io'
+host: '172.17.4.99:30080'
 info:
   description: Manage your clouds
   title: '{{title}}'
@@ -1416,28 +1416,30 @@ definitions:
   newMachine:
     type: object
     required:
-      - key_id
-      - machine_name
-      - location_id
-      - image_id
-      - size_id
-      - cloud_id
+      - key
+      - name
+      - location
+      - image
+      - size
+      - cloud
     properties:
-      cloud_id:
+      async:
+        type: boolean
+      cloud:
         type: string
         description: The Cloud ID
-      key_id:
+      key:
         type: string
         description: ' Associate machine with this key_id'
-      machine_name:
+      name:
         type: string
-      location_id:
+      location:
         type: string
         description: " Id of the cloud's location to create the machine"
-      image_id:
+      image:
         type: string
         description: ' Id of image to be used with the creation'
-      size_id:
+      size:
         type: string
         description: ' If of the size of the machine'
       script:
