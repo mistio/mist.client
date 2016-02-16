@@ -10,7 +10,7 @@ requires = [
     'argcomplete',
     'pyyaml',
     'prettytable',
-    'ansible'
+    'ansible==1.9.3'
 ]
 
 
@@ -20,7 +20,7 @@ def readme():
 
 setup(
     name='mist',
-    version='1.5',
+    version='1.7',
     description='Python client for mist.io',
     long_description=readme(),
     classifiers=[
