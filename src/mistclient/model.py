@@ -170,8 +170,12 @@ class Cloud(object):
 
         Populates self._machines dict with mist.client.model.Machine instances
         """
-        req = self.request(self.mist_client.uri+'/clouds/'+self.id+'/machines')
-        machines = req.get().json()
+        try:
+            req = self.request(self.mist_client.uri+'/clouds/'+self.id+'/machines')
+            machines = req.get().json()
+        except:
+            # Eg invalid cloud credentials
+            machines = {}
 
         if machines:
             for machine in machines:

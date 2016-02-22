@@ -28,7 +28,10 @@ def list_machines(client, cloud, pretty):
             except:
                 ips = ""
             machine_tags = machine.info.get('tags', [])
-            tags = ",".join(machine_tags)
+            try:
+                tags = machine_tags
+            except:
+                tags = []
 
             if pretty:
                 x.add_row([machine.name, machine.id, machine.info['state'], ips, machine.cloud.title, tags])
@@ -171,8 +174,14 @@ def machine_action(args):
 
     elif args.action in ['start', 'stop', 'reboot', 'destroy', 'probe']:
         machine = choose_machine(client, args)
-
-        machine_take_action(machine, args.action)
+        if not machine:
+            print "Cannot find machine"
+            sys.exit(0)
+        try:
+            machine_take_action(machine, args.action)
+        except:
+            print "Failed to execute %s action on %s " % (args.action, machine)
+            sys.exit(0)
     elif args.action == 'enable-monitoring':
         machine = choose_machine(client, args)
         machine.enable_monitoring()
