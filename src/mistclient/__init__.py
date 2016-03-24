@@ -422,7 +422,8 @@ class MistClient(object):
             'description': kwargs.get('description', ''),
             'script': kwargs.get('script', ''),
             'location_type': kwargs.get('location_type', ''),
-            'exec_type': kwargs.get('exec_type', '')
+            'exec_type': kwargs.get('exec_type', ''),
+            'entrypoint': kwargs.get('entrypoint')
         }
 
         req = self.request(self.uri + '/scripts',
@@ -430,7 +431,8 @@ class MistClient(object):
         response = req.post()
         return response.json()
 
-    def run_script(self, cloud_id, machine_id, script_id, script_params="", fire_and_forget=True):
+    def run_script(self, cloud_id, machine_id, script_id, script_params="",
+                   env=None, su=False, fire_and_forget=True):
         if not fire_and_forget:
             raise NotImplementedError()
 
@@ -438,6 +440,8 @@ class MistClient(object):
             'cloud_id': cloud_id,
             'machine_id': machine_id,
             'params': script_params,
+            'env': env,
+            'su': su
         }
 
         data = json.dumps(payload)
