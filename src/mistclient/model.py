@@ -137,6 +137,17 @@ class Cloud(object):
         else:
             print "Network actions not supported yet for %s provider" % self.provider
 
+    def create_network(self, network, router=None, subnet=None):
+        payload = {
+          "network": network,
+          "router": router,
+          "subnet": subnet
+        }
+        data = json.dumps(payload)
+        req = self.request(self.mist_client.uri+'/clouds/'+self.id+'/networks',
+                           data=data)
+        req.post()
+
     @property
     def images(self):
         """
@@ -332,12 +343,14 @@ class Cloud(object):
                             error = log.get('error', None)
                             if error:
                                 print " - ", error
+                        raise Exception("Create machine failed. Check the logs.")
                     elif verbose and not error:
                         print "Finished without errors!"
                     return job
 
                 elif time() - started_at > timeout:
                     print "Timed out!"
+                    raise Exception("Create machine timed out. Check the logs.")
                     return job
 
                 sleep(5)
@@ -376,6 +389,14 @@ class Machine(object):
         :returns: An instance of RequestsHandler
         """
         return RequestsHandler(*args, api_token=self.api_token, **kwargs)
+
+    def run_script(self, script_id, params="", su=False, fire_and_forget=True):
+        script_job = self.mist_client.run_script(script_id=script_id, cloud_id=self.cloud.id,
+                                   machine_id=self.id,
+                                   script_params=script_params,
+                                   su=su)
+
+        return script_job
 
     def _machine_actions(self, action):
         """
