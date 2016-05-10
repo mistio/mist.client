@@ -334,6 +334,10 @@ class MistClient(object):
         self._list_keys()
         return self._keys
 
+    def _generate_and_add_key(self, key_name):
+        priv = self.generate_key()
+        self.add_key(key_name, priv)
+
     def generate_key(self):
         """
         Ask mist.io to randomly generate a private ssh-key to be used with the creation of a new Key
@@ -433,9 +437,6 @@ class MistClient(object):
 
     def run_script(self, cloud_id, machine_id, script_id, script_params="",
                    env=None, su=False, fire_and_forget=True):
-        if not fire_and_forget:
-            raise NotImplementedError()
-
         payload = {
             'cloud_id': cloud_id,
             'machine_id': machine_id,
@@ -447,7 +448,27 @@ class MistClient(object):
         data = json.dumps(payload)
         req = self.request(self.uri + "/scripts/" + script_id, data=data)
         re = req.post()
-        return re.json()
+        re = re.json()
+        if not fire_and_forget:
+            job_id = re["job_id"]
+            while True:
+                job = self.client.get_job(job_id)
+                if job["error"]:
+                    raise Exception("Failed to run script")
+                if job["finished_at"]:
+                    break
+                sleep(10)
+        return re
+
+    def add_and_run_script(self, cloud_id, machine_id,
+                           script_params="", env=None, su=False,
+                           fire_and_forget=True, **kwargs):
+
+        script = self.add_script(**kwargs)
+
+        self.run_script(self, cloud_id, machine_id, script["script_id"],
+                        script_params="", env=None, su=False,
+                        fire_and_forget=True)
 
     def get_templates(self, **_):
         req = self.request(self.uri + '/templates')
