@@ -235,7 +235,7 @@ class Cloud(object):
                        ips=[], networks=[], location_name="", async=False,
                        docker_command="", quantity=1, persist=False, fire_and_forget=True,
                        timeout=6000, script_id="", script_params="", verbose=False,
-                       associate_floating_ip=False):
+                       associate_floating_ip=False, provider=""):
         """
         Create a new machine on the given cloud
 
@@ -248,9 +248,15 @@ class Cloud(object):
         :param disk: Needed only by Linode cloud
         :returns: An update list of added machines
         """
+        if isinstance(key, str):
+            key_id = key
+        else:
+            key_id = key.id
+
         payload = {
             'name': name,
-            'key': key.id,
+            'provider': provider,
+            'key': key_id,
             'image': image_id,
             'location': location_id,
             'size': size_id,
