@@ -19,6 +19,8 @@ class MistClient(object):
         :param email: Email to authenticate with mist.io. May be left 'None' if there's a standalone installation of mist.io that does not require authentication.
         :param password: Password to authenticate with mist.io. May be left 'None' if there's a standalone installation of mist.io that does not require authentication.
         """
+        if not mist_uri.endswith("/"):
+            mist_uri = mist_uri + "/"
         self.uri = mist_uri + "api/v1"
         self.email = email
         self.password = password
