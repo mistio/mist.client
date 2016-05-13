@@ -196,12 +196,12 @@ def machine_action(args):
         machine = choose_machine(client, args)
         if machine.info['can_tag']:
             if args.action == 'add-tag':
-                machine.tag(tag=args.new_tag, action=args.action)
-                print "Added tag %s to machine %s" % (args.new_tag,
-                                                      machine.name)
+                machine.add_tag(key=args.key, value=args.value)
+                print "Added tag %s=%s to machine %s" % (args.key, args.value,
+                                                         machine.name)
             elif args.action == 'remove-tag':
-                machine.tag(tag=args.old_tag, action=args.action)
-                print "Removed tag %s from machine %s" % (args.old_tag,
+                machine.del_tag(key=args.key, value=args.value)
+                print "Removed tag %s=%s from machine %s" % (args.key, args.value,
                                                           machine.name)
             else:
                 "Unknown action to be performed on machine tags"

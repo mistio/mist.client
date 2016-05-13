@@ -553,23 +553,32 @@ def main():
 
     p_add_tag = subparsers.add_parser(
         'add-tag',
-        description="Tag a machine. Provide a NEW_TAG in "
-                    "the form of {tag_key}={tag_value}"
+        description="Tag a machine"
     )
 
     p_add_tag.add_argument(
-        '--new-tag', required=True,
-        help="Add this tag to the machine"
+        '--key', required=True,
+        help="Specifies the key of the tag to be added to the machine"
+    )
+
+    p_add_tag.add_argument(
+        '--value', required=True,
+        help="Specifies the value of the tag to be added to the machine"
     )
 
     p_remove_tag = subparsers.add_parser(
         'remove-tag',
-        description="Remove an OLD_TAG tag from a machine"
+        description="Remove a tag from a machine"
     )
 
     p_remove_tag.add_argument(
-        '--old-tag', required=True,
-        help="Remove this tag from the specified machine"
+        '--key', required=True,
+        help="Specifies the key of the tag to be removed from a machine"
+    )
+
+    p_remove_tag.add_argument(
+        '--value', required=True,
+        help="Specifies the value of the tag to be removed from a machine"
     )
 
     p_enable_monitoring = subparsers.add_parser(
