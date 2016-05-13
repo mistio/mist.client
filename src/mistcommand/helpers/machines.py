@@ -17,6 +17,17 @@ def choose_machines_by_tag(client, tag):
     return chosen_machines
 
 
+def clean_tags(tags):
+    _tags = []
+    if not tags:
+        return '-'
+    for tag in tags:
+        for key, value in tag.iteritems():
+            tag_pair = '%s=%s' % (key, value)
+            _tags.append(tag_pair)
+    return ', '.join(_tags)
+
+
 def list_machines(client, cloud, pretty):
     x = PrettyTable(["Name", "ID", "State", "Public Ips", "Cloud Title", "Tags"])
     if not cloud:
@@ -27,17 +38,24 @@ def list_machines(client, cloud, pretty):
                 ips = " -- ".join(public_ips)
             except:
                 ips = ""
-            machine_tags = machine.info.get('tags', [])
-            try:
-                tags = machine_tags
-            except:
-                tags = []
+            machine_tags = machine.info.get('tags', '')
+            machine_tags = clean_tags(machine_tags)
+
+            # try:
+            #     tags = machine_tags
+            # except:
+            #     tags = []
 
             if pretty:
-                x.add_row([machine.name, machine.id, machine.info['state'], ips, machine.cloud.title, tags])
+                x.add_row([machine.name, machine.id, machine.info['state'],
+                           ips, machine.cloud.title, machine_tags])
             else:
-                print "%-25s %-60s %-10s %-20s %-30s %-20s" % (machine.name, machine.id, machine.info['state'], ips,
-                                                               machine.cloud.title, tags)
+                print "%-25s %-60s %-10s %-20s %-30s %-20s" % (machine.name,
+                                                               machine.id,
+                                                               machine.info['state'],
+                                                               ips,
+                                                               machine.cloud.title,
+                                                               machine_tags)
 
     else:
         machines = cloud.machines()
@@ -47,14 +65,20 @@ def list_machines(client, cloud, pretty):
                 ips = " -- ".join(public_ips)
             except:
                 ips = ""
-            machine_tags = machine.info.get('tags', [])
-            tags = ",".join(machine_tags)
-            if pretty:
-                x.add_row([machine.name, machine.id, machine.info['state'], ips, cloud.title, tags])
-            else:
-                print "%-25s %-60s %-10s %-20s %-30s %-20s" % (machine.name, machine.id, machine.info['state'], ips,
-                                                               machine.cloud.title, tags)
+            machine_tags = machine.info.get('tags', '')
+            machine_tags = clean_tags(machine_tags)
+            # tags = ",".join(machine_tags)
 
+            if pretty:
+                x.add_row([machine.name, machine.id, machine.info['state'],
+                           ips, cloud.title, machine_tags])
+            else:
+                print "%-25s %-60s %-10s %-20s %-30s %-20s" % (machine.name,
+                                                               machine.id,
+                                                               machine.info['state'],
+                                                               ips,
+                                                               machine.cloud.title,
+                                                               machine_tags)
     if pretty:
         print x
 
