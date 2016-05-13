@@ -41,6 +41,7 @@ class MistClient(object):
         Sends a json payload with the email and password in order to get the authentication api_token to be used with
         the rest of the requests
         """
+        auth_uri = self.uri.split('/api/v1')[0] + '/auth'
         if self.api_token:
             return
         payload = {
@@ -49,7 +50,7 @@ class MistClient(object):
         }
 
         data = json.dumps(payload)
-        req = self.request(self.uri + '/auth', data=data)
+        req = self.request(auth_uri, data=data)
         response = req.post().json()
         token = response.get('mist_api_token', None)
         if token:
