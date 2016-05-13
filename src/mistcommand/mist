@@ -552,8 +552,9 @@ def main():
     )
 
     p_tag = subparsers.add_parser(
-        'tag',
-        description="Tag a machine"
+        'add-tag',
+        description="Tag a machine. Provide a NEW_TAG in "
+                    "the form of {tag_key}={tag_value}"
     )
 
     p_tag.add_argument(
@@ -758,8 +759,8 @@ def main():
         provider_action(args)
     elif args.action in ['list-keys', 'add-key', 'describe-key', 'rename-key', 'delete-key']:
         key_action(args)
-    elif args.action in ['list-clouds', 'rename-cloud', 'delete-cloud', 'describe-cloud',
-                         'add-cloud']:
+    elif args.action in ['list-clouds', 'rename-cloud', 'delete-cloud',
+                         'describe-cloud', 'add-cloud']:
         cloud_action(args)
     elif args.action == 'list-images':
         image_action(args)
@@ -771,8 +772,10 @@ def main():
         script_action(args)
     elif args.action == 'list-networks':
         network_action(args)
-    elif args.action in ['list-machines', 'describe-machine', 'probe', 'start', 'stop', 'reboot',
-                         'destroy', 'tag', 'create-machine', 'enable-monitoring', 'disable-monitoring']:
+    elif args.action in ['list-machines', 'create-machine', 'describe-machine',
+                         'probe', 'start', 'stop', 'reboot', 'destroy',
+                         'enable-monitoring', 'disable-monitoring',
+                         'add-tag']:
         machine_action(args)
     elif args.action in ['list-metrics', 'add-metric', 'add-custom-metric']:
         metric_action(args)

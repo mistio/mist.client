@@ -192,7 +192,7 @@ def machine_action(args):
         machine.disable_monitoring()
         print "Disabled monitoring to machine %s" % machine.name
 
-    elif args.action == 'tag':
+    elif args.action == 'add-tag':
         machine = choose_machine(client, args)
 
         if machine.info['can_tag']:

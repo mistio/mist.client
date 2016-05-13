@@ -593,12 +593,16 @@ class Machine(object):
         req.post()
 
     def tag(self, tag):
+        # TODO: multiple tags
+        tag_key = tag.split('=')[0]
+        tag_value = tag.split('=')[1]
+        tags = {tag_key: tag_value}
         payload = {
-            'tag': tag
+            'tags': tags
         }
         data = json.dumps(payload)
-        req = self.request(self.mist_client.uri+"/clouds/"+self.cloud.id+"/machines/"+self.id+"/metadata",
-                           data=data)
+        req = self.request(self.mist_client.uri + "/clouds/" + self.cloud.id +
+                           "/machines/" + self.id + "/tags", data=data)
         req.post()
         self.cloud.update_machines()
 
