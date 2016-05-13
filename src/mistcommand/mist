@@ -551,15 +551,25 @@ def main():
         description="Destroy a machine"
     )
 
-    p_tag = subparsers.add_parser(
+    p_add_tag = subparsers.add_parser(
         'add-tag',
         description="Tag a machine. Provide a NEW_TAG in "
                     "the form of {tag_key}={tag_value}"
     )
 
-    p_tag.add_argument(
+    p_add_tag.add_argument(
         '--new-tag', required=True,
         help="Add this tag to the machine"
+    )
+
+    p_remove_tag = subparsers.add_parser(
+        'remove-tag',
+        description="Remove an OLD_TAG tag from a machine"
+    )
+
+    p_remove_tag.add_argument(
+        '--old-tag', required=True,
+        help="Remove this tag from the specified machine"
     )
 
     p_enable_monitoring = subparsers.add_parser(
@@ -572,7 +582,8 @@ def main():
         description="Disable monitoring on a machine"
     )
 
-    for parser in [p_describe_machine, p_probe, p_start, p_stop, p_reboot, p_destroy, p_tag,
+    for parser in [p_describe_machine, p_probe, p_start, p_stop, p_reboot,
+                   p_destroy, p_add_tag, p_remove_tag,
                    p_enable_monitoring, p_disable_monitoring]:
         group = parser.add_mutually_exclusive_group(required=True)
         group.add_argument(
@@ -775,7 +786,7 @@ def main():
     elif args.action in ['list-machines', 'create-machine', 'describe-machine',
                          'probe', 'start', 'stop', 'reboot', 'destroy',
                          'enable-monitoring', 'disable-monitoring',
-                         'add-tag']:
+                         'add-tag', 'remove-tag']:
         machine_action(args)
     elif args.action in ['list-metrics', 'add-metric', 'add-custom-metric']:
         metric_action(args)

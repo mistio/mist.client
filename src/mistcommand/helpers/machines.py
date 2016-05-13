@@ -192,12 +192,20 @@ def machine_action(args):
         machine.disable_monitoring()
         print "Disabled monitoring to machine %s" % machine.name
 
-    elif args.action == 'add-tag':
+    elif args.action in ['add-tag', 'remove-tag']:
         machine = choose_machine(client, args)
-
         if machine.info['can_tag']:
-            machine.tag(tag=args.new_tag)
-            print "Add tag %s to machine %s" % (args.new_tag, machine.name)
+            if args.action == 'add-tag':
+                machine.tag(tag=args.new_tag, action=args.action)
+                print "Added tag %s to machine %s" % (args.new_tag,
+                                                      machine.name)
+            elif args.action == 'remove-tag':
+                machine.tag(tag=args.old_tag, action=args.action)
+                print "Removed tag %s from machine %s" % (args.old_tag,
+                                                          machine.name)
+            else:
+                "Unknown action to be performed on machine tags"
+                sys.exit(0)
         else:
             print "Cannot tag machine on provider %s" % machine.cloud.title
             sys.exit(0)

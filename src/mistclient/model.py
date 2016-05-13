@@ -592,18 +592,29 @@ class Machine(object):
                            data=data)
         req.post()
 
-    def tag(self, tag):
+    def tag(self, tag, action):
         # TODO: multiple tags
         tag_key = tag.split('=')[0]
         tag_value = tag.split('=')[1]
         tags = {tag_key: tag_value}
-        payload = {
-            'tags': tags
-        }
-        data = json.dumps(payload)
-        req = self.request(self.mist_client.uri + "/clouds/" + self.cloud.id +
-                           "/machines/" + self.id + "/tags", data=data)
-        req.post()
+
+        if action == 'add-tag':
+            payload = {
+              'tags': tags
+            }
+            data = json.dumps(payload)
+            req = self.request(self.mist_client.uri + "/clouds/" + self.cloud.id +
+                               "/machines/" + self.id + "/tags", data=data)
+            req.post()
+        elif action == 'remove-tag':
+            payload = {
+                'value': tag_value
+            }
+            data = json.dumps(payload)
+            req = self.request(self.mist_client.uri + "/clouds/" + self.cloud.id +
+                               "/machines/" + self.id + "/tags/" + tag_key,
+                               data=data)
+            req.delete()
         self.cloud.update_machines()
 
 
