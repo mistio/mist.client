@@ -1,5 +1,7 @@
 import json
 
+from time import sleep
+
 from mistclient.helpers import RequestsHandler
 from mistclient.model import Cloud, Key, Script
 
