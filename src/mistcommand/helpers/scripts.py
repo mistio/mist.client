@@ -11,9 +11,14 @@ def list_scripts(client, pretty):
         print "No scripts found, create some first"
         sys.exit(0)
     else:
-        print 'Script Name - Script ID - Script Description'
         for script in scripts:
-            print "%s  %s  %s " % (script.name, script.id, script.description)
+            if pretty:
+                x = PrettyTable(['Script Name', 'Script ID', 'Script Description'])
+                x.add_row([script.name, script.id, script.description])
+                print x
+            else:
+                print "%-15s  %-35s  %-50s " % (script.name, script.id,
+                                                script.description)
 
 
 def script_action(args):
