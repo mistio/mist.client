@@ -420,11 +420,13 @@ class MistClient(object):
         response = req.get()
         return response.json()
 
+    # self.scripts() exists too
     def get_scripts(self, **_):
         req = self.request(self.uri + '/scripts')
         response = req.get()
         return response.json()
 
+    # TODO: move these to Script?
     def add_script(self, **kwargs):
         payload = {
             'name': kwargs.get('name', ''),
@@ -439,6 +441,11 @@ class MistClient(object):
                            data=json.dumps(payload), api_version=2)
         response = req.post()
         return response.json()
+
+    def remove_script(self, script_id):
+        req = self.request(self.uri + '/scripts/' + script_id,  api_version=2)
+        response = req.delete()
+        return response
 
     def run_script(self, cloud_id, machine_id, script_id, script_params="",
                    env=None, su=False, fire_and_forget=True):
@@ -465,13 +472,11 @@ class MistClient(object):
                 sleep(10)
         return re
 
-    def add_and_run_script(self, cloud_id, machine_id,
-                           script_params="", env=None, su=False,
-                           fire_and_forget=True, **kwargs):
+    def add_and_run_script(self, cloud_id, machine_id, script_params="",
+                           env=None, su=False, fire_and_forget=True, **kwargs):
 
         script = self.add_script(**kwargs)
-
-        self.run_script(self, cloud_id, machine_id, script["script_id"],
+        self.run_script(cloud_id, machine_id, script["script_id"],
                         script_params="", env=None, su=False,
                         fire_and_forget=True)
 

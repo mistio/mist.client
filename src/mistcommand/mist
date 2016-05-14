@@ -25,6 +25,7 @@ from mistcommand.helpers.ssh import ssh_action
 from requests.packages import urllib3
 urllib3.disable_warnings()
 
+
 def main():
 
     main_parser = argparse.ArgumentParser(description="Mist.io command line tool")
@@ -319,7 +320,8 @@ def main():
     )
     vcloud_group.add_argument(
         '--vcloud-organization',
-        help="Your organization's name - the one you are registered to vCloud with"
+        help="Your organization's name - "
+             "the one you are registered to vCloud with"
     )
 
     indonesian_group = p_add_cloud.add_argument_group("Indonesian vCloud")
@@ -333,7 +335,8 @@ def main():
     )
     indonesian_group.add_argument(
         '--indonesian-organization',
-        help="Your organization's name - the one you are registered to vCloud with"
+        help="Your organization's name - "
+             "the one you are registered to vCloud with"
     )
 
     libvirt_group = p_add_cloud.add_argument_group("KVM via libvirt")
@@ -347,7 +350,8 @@ def main():
     )
     libvirt_group.add_argument(
         '--libvirt-key',
-        help="The SSH Key name that you have added to Mist.io and is associated with your libvirt machine"
+        help="The SSH Key name that you have added to Mist.io "
+             "and is associated with your libvirt machine"
     )
     gce_group = p_add_cloud.add_argument_group("GCE")
     gce_group.add_argument(
@@ -454,10 +458,108 @@ def main():
             '--machine-name',
             help="Name of the machine"
         )
-        group.add_argument(
-            'machine', nargs="?",
-            help="Id or name of the machine"
-        )
+        # group.add_argument(
+        #     'machine', nargs="?",
+        #     help="Id or name of the machine"
+        # )
+
+    # ----------------SCRIPT ACTIONS------------------
+    p_list_scripts = subparsers.add_parser(
+        'list-scripts',
+        description="List scripts"
+    )
+
+    p_list_scripts.add_argument(
+        '--pretty', action='store_true', default=False,
+        help="Print in a table format"
+    )
+
+    p_add_script = subparsers.add_parser(
+        'add-script',
+        description="Add a script"
+    )
+
+    p_add_script.add_argument(
+        '--name', required=True,
+        help="Name of the script"
+    )
+
+    p_add_script.add_argument(
+        '--description',
+        help="Script description"
+    )
+
+    p_add_script.add_argument(
+        '--location', required=True, choices=['inline', 'url', 'github'],
+        help="Location of script"
+    )
+
+    p_add_script.add_argument(
+        '--type', required=True, choices=['executable', 'ansible',
+                                          'collectd_python_plugin'],
+        help="Script execution type"
+    )
+
+    p_add_script.add_argument(
+        '--entrypoint',
+        help="Entrypoint"
+    )
+
+    p_add_script.add_argument(
+        '--script', required=True,
+        help="Script to be executed. Can be either source code, url, or repo, "
+             "depending on location type"
+    )
+
+    p_add_script.add_argument(
+        '--run', action='store_true', default=False,
+        help="Run the script immediately on the specified machine"
+    )
+
+    add_script_group = p_add_script.add_mutually_exclusive_group()
+    add_script_group.add_argument(
+        '--machine-id',
+        help="Id of the machine"
+    )
+    add_script_group.add_argument(
+        '--machine-name',
+        help="Name of the machine"
+    )
+
+    p_remove_script = subparsers.add_parser(
+        'remove-script',
+        description="Remove a script"
+    )
+
+    p_remove_script.add_argument(
+        '--id', required=True,
+        help="Name of the script to be removed.\n"
+             "You can use list-scripts to retrieve the scripts' IDs"
+    )
+
+    p_run_script = subparsers.add_parser(
+        'run-script',
+        description="Run a script"
+    )
+
+    p_run_script.add_argument(
+        '--id',
+        help="Id of the script to be run"
+    )
+
+    run_script_group = p_run_script.add_mutually_exclusive_group(required=True)
+    run_script_group.add_argument(
+        '--machine-id',
+        help="Id of the machine"
+    )
+    run_script_group.add_argument(
+        '--machine-name',
+        help="Name of the machine"
+    )
+    # script_group.add_argument(
+    #     'machine', nargs="?",
+    #     help="Id or name of the machine"
+    # )
 
     # ----------------IMAGES/SIZES/LOCATIONS/NETWORKS------------------
     p_list_images = subparsers.add_parser(
@@ -495,19 +597,10 @@ def main():
         help="Print in a table format"
     )
 
-    p_list_scripts = subparsers.add_parser(
-        'list-scripts',
-        description="List scripts"
-    )
-
-    p_list_scripts.add_argument(
-        '--pretty', action='store_true', default=False,
-        help="Print in a table format"
-    )
-
     p_list_networks = subparsers.add_parser(
         'list-networks',
-        help="List available networks for specified provider (currently only OPENSTACK support)"
+        help="List available networks for specified provider "
+             "(currently only OPENSTACK support)"
     )
 
     p_list_networks.add_argument(
@@ -630,11 +723,11 @@ def main():
                    p_enable_monitoring, p_disable_monitoring]:
         group = parser.add_mutually_exclusive_group(required=True)
         group.add_argument(
-            '--id',
+            '--machine-id',
             help="Id of the specified machine"
         )
         group.add_argument(
-            '--name',
+            '--machine-name',
             help="Name of the specified machine"
         )
         group.add_argument(
@@ -671,20 +764,24 @@ def main():
     )
     p_create_machine.add_argument(
         '--image-id', required=True,
-        help="Id of OS Image. You can list images for the given cloud to find their ids"
+        help="Id of OS Image. You can list images for the "
+             "given cloud to find their ids"
     )
     p_create_machine.add_argument(
         '--size-id', required=True,
-        help="Id of machine size. You can list sizes for the given cloud to find their ids"
+        help="Id of machine size. You can list sizes for the "
+             "given cloud to find their ids"
     )
     p_create_machine.add_argument(
         '--location-id', required=True,
-        help="Id of the cloud location. You can list locations for the given cloud to find their ids"
+        help="Id of the cloud location. "
+             "You can list locations for the given cloud to find their ids"
     )
 
     p_create_machine.add_argument(
         '--network-id', required=False,
-        help="Currently supported only for Openstack. Required if multiple openstack networks are available"
+        help="Currently supported only for Openstack. "
+             "Required if multiple openstack networks are available"
     )
 
     p_create_machine.add_argument(
@@ -819,7 +916,8 @@ def main():
         size_action(args)
     elif args.action == 'list-locations':
         location_action(args)
-    elif args.action == 'list-scripts':
+    elif args.action in ['list-scripts', 'add-script', 'remove-script',
+                         'run-script']:
         script_action(args)
     elif args.action == 'list-networks':
         network_action(args)
@@ -832,5 +930,6 @@ def main():
         metric_action(args)
     elif args.action == 'user-info':
         user_info()
+
 if __name__ == "__main__":
     main()

@@ -116,14 +116,8 @@ def machine_take_action(machine, action):
 
 
 def choose_machine(client, args):
-    try:
-        machine_id = args.id
-    except:
-        machine_id = args.machine_id
-    try:
-        machine_name = args.name
-    except:
-        machine_name = args.machine_name
+    machine_id = args.machine_id
+    machine_name = args.machine_name
     if machine_id:
         machines = client.machines(id=machine_id)
         machine = machines[0] if machines else None

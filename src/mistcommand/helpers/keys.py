@@ -60,7 +60,7 @@ def key_action(args):
             key.delete()
             print "Deleted %s" % key.id
         else:
-            print "Cound not find key: %s" % args.key
+            print "Could not find key: %s" % args.key
             sys.exit(0)
     elif args.action == 'rename-key':
         key_name = args.key_name if args.key_name else args.key_id
@@ -113,3 +113,4 @@ def key_action(args):
                   "(%s-%s) pair" % (key.id, machine.name)
         else:
             print "Key disassociation failed"
+            sys.exit(1)

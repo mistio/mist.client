@@ -775,7 +775,6 @@ class Script(object):
         self.name = script['name']
         self.description = script['description']
 
-
     def __str__(self):
         return "%s => %s" % (self.__class__.__name__, self.id)
 
