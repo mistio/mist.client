@@ -465,17 +465,17 @@ class Machine(object):
         self.probed = True
         return probe_info
 
-    def associate_key(self, key_id, host=None, ssh_user=None, ssh_port=22):
-        payload = {
-            'ssh_user': ssh_user,
-            'host': host,
-            'ssh_port': ssh_port
-        }
-        data = json.dumps(payload)
-        req = self.request(self.mist_client.uri+"/clouds/"+self.cloud.id+"/machines/"+self.id+"/keys/"+key_id,
-                           data=data)
-        req.put()
-        self.mist_client.update_keys()
+    # def associate_key(self, key_id, host=None, ssh_user=None, ssh_port=22):
+    #     payload = {
+    #         'ssh_user': ssh_user,
+    #         'host': host,
+    #         'ssh_port': ssh_port
+    #     }
+    #     data = json.dumps(payload)
+    #     req = self.request(self.mist_client.uri+"/clouds/"+self.cloud.id+"/machines/"+self.id+"/keys/"+key_id,
+    #                        data=data)
+    #     req.put()
+    #     self.mist_client.update_keys()
 
     def _toggle_monitoring(self, action, no_ssh=False):
         """
@@ -643,6 +643,7 @@ class Machine(object):
         req.delete()
         self.cloud.update_machines()
 
+
 class Key(object):
     """
     A Key instance
@@ -668,8 +669,8 @@ class Key(object):
 
     def request(self, *args, **kwargs):
         """
-        The main purpose of this is to be a wrapper-like function to pass the api_token and all the other params to the
-        requests that are being made
+        The main purpose of this is to be a wrapper-like function to pass the
+        api_token and all the other params to the requests that are being made
 
         :returns: An instance of RequestsHandler
         """
@@ -734,16 +735,29 @@ class Key(object):
         req.delete()
         self.mist_client.update_keys()
 
-    def associate_to_machine(self, cloud_id, machine_id, host=None, ssh_user=None, ssh_port=22):
+    def associate(self, cloud_id, machine_id, host=None,
+                  ssh_user=None, ssh_port=22):
         payload = {
             'ssh_user': ssh_user,
             'host': host,
             'ssh_port': ssh_port
         }
         data = json.dumps(payload)
-        req = self.request(self.mist_client.uri+"/clouds/"+cloud_id+"/machines/"+machine_id+"/keys/"+self.id,
+        req = self.request(self.mist_client.uri + "/clouds/" + cloud_id +
+                           "/machines/" + machine_id + "/keys/" + self.id,
                            data=data)
         req.put()
+        self.mist_client.update_keys()
+
+    def disassociate(self, cloud_id, machine_id, host=None):
+        payload = {
+            'host': host
+        }
+        data = json.dumps(payload)
+        req = self.request(self.mist_client.uri + "/clouds/" + cloud_id +
+                           "/machines/" + machine_id + "/keys/" + self.id,
+                           data=data)
+        req.delete()
         self.mist_client.update_keys()
 
 

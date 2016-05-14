@@ -403,7 +403,6 @@ def main():
         description="Rename key"
     )
 
-
     p_rename_key.add_argument(
         '--new-name', required=True,
         help="New name for the key"
@@ -414,15 +413,50 @@ def main():
         description="Show information about a specified key"
     )
 
+    p_associate_key = subparsers.add_parser(
+        'associate-key',
+        description="Associate a private/public key pair to a machine"
+    )
+
+    p_associate_key.add_argument(
+        '--key', required=True,
+        help="Id or name of the key you want to act on"
+    )
+
+    p_disassociate_key = subparsers.add_parser(
+        'disassociate-key',
+        description="Undo a key-machine association"
+    )
+
+    p_disassociate_key.add_argument(
+        '--key', required=True,
+        help="Id or name of the key you want to act on"
+    )
+
     for parser in [p_delete_key, p_rename_key, p_describe_key]:
         group = parser.add_mutually_exclusive_group(required=True)
         group.add_argument(
             '--key-id',
-            help="Id of the key you want to delete"
+            help="Id of the key you want to act on"
         )
         group.add_argument(
             'key_name', nargs="?",
-            help="Name of the key you want to delete"
+            help="Name of the key you want to act on"
+        )
+
+    for parser in [p_associate_key, p_disassociate_key]:
+        group = parser.add_mutually_exclusive_group(required=True)
+        group.add_argument(
+            '--machine-id',
+            help="Id of the machine"
+        )
+        group.add_argument(
+            '--machine-name',
+            help="Name of the machine"
+        )
+        group.add_argument(
+            'machine', nargs="?",
+            help="Id or name of the machine"
         )
 
     # ----------------IMAGES/SIZES/LOCATIONS/NETWORKS------------------
@@ -473,7 +507,7 @@ def main():
 
     p_list_networks = subparsers.add_parser(
         'list-networks',
-        help="List availablen networks for specified provider (currently only OPENSTACK support)"
+        help="List available networks for specified provider (currently only OPENSTACK support)"
     )
 
     p_list_networks.add_argument(
@@ -493,7 +527,7 @@ def main():
         )
         group.add_argument(
             '--cloud-name',
-            help="Sepcify a cloud's name"
+            help="Specify a cloud's name"
         )
 
     # --------------MACHINE ACTIONS-------------------------
@@ -624,7 +658,7 @@ def main():
     )
     group.add_argument(
         '--cloud-name',
-        help="Sepcify a cloud's name"
+        help="Specify a cloud's name"
     )
 
     p_create_machine.add_argument(
@@ -665,7 +699,6 @@ def main():
 
     p_create_machine.add_argument(
         '--monitoring', action='store_true')
-
 
     # -------------------METRICS ACTIONS-------------------
     p_list_metrics = subparsers.add_parser(
@@ -728,8 +761,6 @@ def main():
             help="Name or id of the machine you want to specify"
         )
 
-
-
     # p_get_stats = subparsers.add_parser(
     #     'get-stats',
     #     description="Get stats from a monitored machine"
@@ -750,8 +781,7 @@ def main():
         help="Run the command in machines that have this tag"
     )
 
-    # MIST SSH
-
+    # ----------------MIST SSH-------------------------
     p_ssh = subparsers.add_parser(
         'ssh',
         description="Open ssh connection and interactive shell to machine"
@@ -777,7 +807,8 @@ def main():
         ssh_action(args)
     elif args.action == 'list-providers':
         provider_action(args)
-    elif args.action in ['list-keys', 'add-key', 'describe-key', 'rename-key', 'delete-key']:
+    elif args.action in ['list-keys', 'add-key', 'delete-key', 'rename-key',
+                         'describe-key', 'associate-key', 'disassociate-key']:
         key_action(args)
     elif args.action in ['list-clouds', 'rename-cloud', 'delete-cloud',
                          'describe-cloud', 'add-cloud']:
