@@ -2,7 +2,7 @@ import json
 
 from time import sleep
 
-from mistclient.helpers import RequestsHandler
+from mistclient.helpers import RequestsHandler, HTMLParser
 from mistclient.model import Cloud, Key, Script
 
 
@@ -60,7 +60,16 @@ class MistClient(object):
             self.api_token = "mist_1 %s:%s" % (self.email, token)
         else:
             self.api_token = response.get('token', None)
-        self.user_details = response
+
+    def user_info(self):
+        """
+        General user info information as returned in /account in our API
+        """
+        account_uri = self.uri.split('/api/v1')[0] + '/account'
+        req = self.request(account_uri)
+        account_info = req.get()
+        user_data = HTMLParser(account_info.content)
+        return user_data
 
     def request(self, *args, **kwargs):
         """

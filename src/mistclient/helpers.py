@@ -1,4 +1,10 @@
 import sys
+import json
+
+import time
+
+from HTMLParser import HTMLParser as _HTMLParser
+from HTMLParser import HTMLParseError
 
 try:
     import requests
@@ -61,6 +67,54 @@ class RequestsHandler(object):
         resp = requests.delete(self.uri, data=self.data, headers=self.headers, timeout=self.timeout,
                                verify=self.verify)
         return self.response(resp)
+
+
+class HTMLParser(_HTMLParser):
+
+    _handle_req = False
+
+    def __init__(self, html_data):
+        _HTMLParser.__init__(self)
+        self.user_info = {}
+        if html_data:
+            self.feed(html_data)
+
+    def handle_starttag(self, tag, attrs):
+        if tag == 'script' and not attrs:
+            self._handle_req = True
+
+    def handle_endtag(self, tag):
+        if tag == 'script' and self._handle_req:
+            self._handle_req = False
+
+    def handle_data(self, data):
+        if self._handle_req:
+            if str(data).startswith(' var '):
+                _data = data.lstrip(' var ').split('=')
+                key, value = _data[0], json.loads(_data[1])
+                if not isinstance(value, basestring) and \
+                        not isinstance(value, list) and \
+                        not isinstance(value, dict):
+                    pass
+                else:
+                    self.user_info[key] = value
+
+    def user_details(self):
+        user = {}
+        for key in ['FIRST_NAME', 'LAST_NAME', 'EMAIL',
+                    'NUMBER_OF_SERVERS', 'COMPANY_NAME']:
+            if key in self.user_info.keys():
+                user[key] = self.user_info[key]
+        return user
+
+    def plan_details(self):
+        current = self.user_info['CURRENT_PLAN']
+        plan = {}
+        for key in ['title', 'started', 'expiration', 'machine_limit']:
+            if key in ['started', 'expiration']:
+                current[key] = time.ctime(current[key])
+            plan[key.upper()] = current[key]
+        return plan
 
 
 def machine_from_id(cloud, id):

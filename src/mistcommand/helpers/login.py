@@ -99,24 +99,17 @@ def authenticate():
 
 
 def user_info():
-
     client = authenticate()
-
-    current_plan = client.user_details.get('current_plan')
-    user_details = client.user_details.get('user_details')
-
-    print "User Details:"
-    x = PrettyTable(user_details.keys())
-    x.add_row(user_details.values())
+    user_info = client.user_info()
+    user = user_info.user_details()
+    plan = user_info.plan_details()
+    print "\nUser Details:"
+    x = PrettyTable(user.keys())
+    x.add_row(user.values())
     print x
     print
-
     print "Current Plan:"
-    x = PrettyTable(current_plan.keys())
-    expiration = current_plan['expiration']
-    current_plan['expiration'] = time.ctime(expiration)
-    started = current_plan['started']
-    current_plan['started'] = time.ctime(started)
-    x.add_row(current_plan.values())
+    x = PrettyTable(plan.keys())
+    x.add_row(plan.values())
     print x
     print
