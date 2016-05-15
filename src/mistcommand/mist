@@ -229,28 +229,28 @@ def main():
         help="API Key for the SoftLayer cloud"
     )
 
-    hp_group = p_add_cloud.add_argument_group("HP")
-    hp_regions = [
-        'region-a.geo-1',
-        'region-b.geo-1'
-    ]
-
-    hp_group.add_argument(
-        '--hp-region', choices=hp_regions,
-        help="Region for the HP Cloud Cloud"
-    )
-    hp_group.add_argument(
-        '--hp-username',
-        help="Username for the HP cloud"
-    )
-    hp_group.add_argument(
-        '--hp-password',
-        help="Passord for the HP cloud"
-    )
-    hp_group.add_argument(
-        '--hp-tenant',
-        help="Tenant name for the HP cloud"
-    )
+    # hp_group = p_add_cloud.add_argument_group("HP")
+    # hp_regions = [
+    #     'region-a.geo-1',
+    #     'region-b.geo-1'
+    # ]
+    #
+    # hp_group.add_argument(
+    #     '--hp-region', choices=hp_regions,
+    #     help="Region for the HP Cloud Cloud"
+    # )
+    # hp_group.add_argument(
+    #     '--hp-username',
+    #     help="Username for the HP cloud"
+    # )
+    # hp_group.add_argument(
+    #     '--hp-password',
+    #     help="Passord for the HP cloud"
+    # )
+    # hp_group.add_argument(
+    #     '--hp-tenant',
+    #     help="Tenant name for the HP cloud"
+    # )
 
     docker_group = p_add_cloud.add_argument_group("Docker")
     docker_group.add_argument(
