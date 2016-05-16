@@ -3,6 +3,8 @@ import json
 
 import time
 
+import mistcommand.helpers.login
+
 from HTMLParser import HTMLParser as _HTMLParser
 from HTMLParser import HTMLParseError
 
@@ -15,16 +17,20 @@ except ImportError:
 
 class RequestsHandler(object):
     """
-    A wrapper-like class to be used with all the requests being made to mist.io service.
+    A wrapper-like class to be used with all the requests being made to
+    mist.io service.
     """
 
-    def __init__(self, mist_uri, data=None, api_token=None, timeout=None, api_version=None, verify=True):
+    def __init__(self, mist_uri, data=None, api_token=None, timeout=None,
+                 api_version=None, verify=True):
         """
 
         :param mist_uri: The uri to make the requests to.
         :param data: Json object with all the params needed by some requests.
-        :param api_token: If api_token is used, then you do not have to provide username and password.
-        :param timeout: Optional. If given the request will fail if it lasts longer than the timeout.
+        :param api_token: If api_token is used, then you do not have to provide
+        username and password.
+        :param timeout: Optional. If given the request will fail if it lasts
+        longer than the timeout.
 
         :returns: A RequestsHandler instance.
         """
@@ -38,34 +44,39 @@ class RequestsHandler(object):
 
     def response(self, resp):
         """
-        For each respone we check if the response status is ok, otherwise raise an error with the the response's
-        content.
+        For each respone we check if the response status is ok, otherwise raise
+        an error with the the response's content.
         :param resp: The response we got after a request.
-        :return: Return the response if response.ok, otherwise raise error with the response.content.
+        :return: Return the response if response.ok, otherwise raise error with
+        the response.content.
         """
         if resp.ok:
             return resp
+        elif str(resp.content).startswith('User not authenticated'):
+            print "API token no longer valid. Renewing ..."
+            mistcommand.helpers.login.authenticate(renew=True)
+            sys.exit(0)
         else:
             raise Exception(resp.content)
 
     def post(self):
-        resp = requests.post(self.uri, data=self.data, headers=self.headers, timeout=self.timeout,
-                             verify=self.verify)
+        resp = requests.post(self.uri, data=self.data, headers=self.headers,
+                             timeout=self.timeout, verify=self.verify)
         return self.response(resp)
 
     def get(self):
-        resp = requests.get(self.uri, data=self.data, headers=self.headers, timeout=self.timeout,
-                            verify=self.verify)
+        resp = requests.get(self.uri, data=self.data, headers=self.headers,
+                            timeout=self.timeout, verify=self.verify)
         return self.response(resp)
 
     def put(self):
-        resp = requests.put(self.uri, data=self.data, headers=self.headers, timeout=self.timeout,
-                            verify=self.verify)
+        resp = requests.put(self.uri, data=self.data, headers=self.headers,
+                            timeout=self.timeout, verify=self.verify)
         return self.response(resp)
 
     def delete(self):
-        resp = requests.delete(self.uri, data=self.data, headers=self.headers, timeout=self.timeout,
-                               verify=self.verify)
+        resp = requests.delete(self.uri, data=self.data, headers=self.headers,
+                               timeout=self.timeout, verify=self.verify)
         return self.response(resp)
 
 

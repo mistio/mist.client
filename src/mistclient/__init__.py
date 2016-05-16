@@ -11,15 +11,21 @@ class MistClient(object):
     The base class that initiates a new client that connects with mist.io service.
     """
 
-    def __init__(self, mist_uri="https://mist.io", email=None, password=None, verify=True, api_token=None):
+    def __init__(self, mist_uri="https://mist.io", email=None, password=None,
+                 api_token=None, verify=True):
         """
-        Initialize the mist.client. In case email and password are given, it will try to authenticate with mist.io
-        and keep the api_token that is returned to be used with the later requests.
+        Initialize the mist.client. In case email and password are given, it
+        will try to authenticate with mist.io and keep the api_token that is
+        returned to be used with the later requests.
 
-
-        :param mist_uri: By default it is 'https://mist.io'. Can be changed if there's a different installation of mist.io
-        :param email: Email to authenticate with mist.io. May be left 'None' if there's a standalone installation of mist.io that does not require authentication.
-        :param password: Password to authenticate with mist.io. May be left 'None' if there's a standalone installation of mist.io that does not require authentication.
+        :param mist_uri: By default it is 'https://mist.io'. Can be changed if
+        there's a different installation of mist.io
+        :param email: Email to authenticate with mist.io. May be left 'None' if
+        there's a standalone installation of mist.io that does not require
+        authentication.
+        :param password: Password to authenticate with mist.io. May be left
+        'None' if there's a standalone installation of mist.io that does not
+        require authentication.
         """
         if not mist_uri.endswith("/"):
             mist_uri = mist_uri + "/"
@@ -40,17 +46,16 @@ class MistClient(object):
 
     def __authenticate(self):
         """
-        Sends a json payload with the email and password in order to get the authentication api_token to be used with
-        the rest of the requests
+        Sends a json payload with the email and password in order to get the
+        authentication api_token to be used with the rest of the requests
         """
-        auth_uri = self.uri.split('/api/v1')[0] + '/auth'
         if self.api_token:
             return
+        auth_uri = self.uri.split('/api/v1')[0] + '/auth'
         payload = {
             'email': self.email,
             'password': self.password
         }
-
         data = json.dumps(payload)
         req = self.request(auth_uri, data=data)
         response = req.post().json()
@@ -456,6 +461,7 @@ class MistClient(object):
         response = req.delete()
         return response
 
+    # exists in Machine model, too
     def run_script(self, cloud_id, machine_id, script_id, script_params="",
                    env=None, su=False, fire_and_forget=True):
         payload = {
