@@ -48,8 +48,9 @@ def parse_config(renew):
     if not api_token or renew:
         # FIXME
         client = MistClient(mist_uri='http://172.17.0.1', email=email, password=password)
-        api_token = client.api_token
-    if not os.path.isfile(config_path) or renew:
+    if not os.path.isfile(config_path) or not api_token or renew:
+        if client:
+            api_token = client.api_token
         prompt_save_config(mist_uri, email, password, api_token, config_path)
 
     return {

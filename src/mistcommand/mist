@@ -424,7 +424,7 @@ def main():
 
     p_associate_key.add_argument(
         '--key', required=True,
-        help="Id or name of the key you want to act on"
+        help="Name of the key you want to act on"
     )
 
     p_disassociate_key = subparsers.add_parser(
@@ -434,14 +434,14 @@ def main():
 
     p_disassociate_key.add_argument(
         '--key', required=True,
-        help="Id or name of the key you want to act on"
+        help="Name of the key you want to act on"
     )
 
     for parser in [p_delete_key, p_rename_key, p_describe_key]:
         group = parser.add_mutually_exclusive_group(required=True)
         group.add_argument(
             '--key-id',
-            help="Id of the key you want to act on"
+            help="Name of the key you want to act on"
         )
         group.add_argument(
             'key_name', nargs="?",
@@ -533,7 +533,7 @@ def main():
 
     p_remove_script.add_argument(
         '--id', required=True,
-        help="Name of the script to be removed.\n"
+        help="Id of the script to be removed.\n"
              "You can use list-scripts to retrieve the scripts' IDs"
     )
 
@@ -544,7 +544,8 @@ def main():
 
     p_run_script.add_argument(
         '--id',
-        help="Id of the script to be run"
+        help="Id of the script to be run.\n"
+             "You can use list-scripts to retrieve the scripts' IDs"
     )
 
     run_script_group = p_run_script.add_mutually_exclusive_group(required=True)
@@ -758,20 +759,25 @@ def main():
         '--machine-name', required=True,
         help="Name for the new machine"
     )
+
     p_create_machine.add_argument(
         '--key-id',
         help="Name of SSH Key to associate with the machine"
     )
+
     p_create_machine.add_argument(
         '--image-id', required=True,
         help="Id of OS Image. You can list images for the "
              "given cloud to find their ids"
     )
+
     p_create_machine.add_argument(
         '--size-id', required=True,
         help="Id of machine size. You can list sizes for the "
              "given cloud to find their ids"
     )
+
+    # should it be required?
     p_create_machine.add_argument(
         '--location-id', required=True,
         help="Id of the cloud location. "
