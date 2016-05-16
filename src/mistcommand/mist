@@ -760,7 +760,7 @@ def main():
     )
     p_create_machine.add_argument(
         '--key-id',
-        help="Id of SSH Key to associate with the machine"
+        help="Name of SSH Key to associate with the machine"
     )
     p_create_machine.add_argument(
         '--image-id', required=True,

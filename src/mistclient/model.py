@@ -445,8 +445,10 @@ class Machine(object):
 
     def probe(self, key_id=None, ssh_user=None):
         """
-        If no parameter is provided, mist.io will try to probe the machine with the default
-        :param key_id: Optional. Give if you explicitly want to probe with this key_id
+        If no parameter is provided, mist.io will try to probe the machine with
+        the default
+        :param key_id: Optional. Give if you explicitly want to probe with this
+        key_id
         :param ssh_user: Optional. Give if you explicitly want a specific user
         :returns: A list of data received by the probing (e.g. uptime etc)
         """
@@ -460,7 +462,8 @@ class Machine(object):
             'ssh_user': ssh_user
         }
         data = json.dumps(payload)
-        req = self.request(self.mist_client.uri+"/clouds/"+self.cloud.id+"/machines/"+self.id+"/probe", data=data)
+        req = self.request(self.mist_client.uri + "/clouds/" + self.cloud.id +
+                           "/machines/" + self.id + "/probe", data=data)
         probe_info = req.post().json()
         self.probed = True
         return probe_info

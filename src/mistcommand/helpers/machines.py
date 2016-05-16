@@ -26,6 +26,14 @@ def clean_tags(tags):
     return ', '.join(_tags)
 
 
+def parsed_probe(info):
+    load = info['loadavg']
+    output = ''
+    output += 'LOAD: %s/%s/%s' % (load[0], load[1], load[2])
+    output += 'PING: %s/%s/%s' % (info['rtt_min'], info['rtt_avg'], info['rtt_max'])
+    return output
+
+
 def list_machines(client, cloud, pretty):
     x = PrettyTable(["Name", "ID", "State", "Public Ips", "Cloud Title", "Tags"])
     if not cloud:
@@ -110,9 +118,10 @@ def machine_take_action(machine, action):
     elif action == "probe":
         info = machine.probe()
         if "uptime" in info.keys():
-            print "Machine %s is probed" % machine.name
+            print "Short probe output for machine %s:" % machine.name
+            print parsed_probe(info)
         else:
-            print "Not probed"
+            print "Machine could not be probed successfully" % machine.name
 
 
 def choose_machine(client, args):
