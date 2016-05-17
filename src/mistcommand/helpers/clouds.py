@@ -157,13 +157,14 @@ def add_vcloud_cloud(client, args):
 def add_indonesian_cloud(client, args):
     title = args.name
     provider = args.provider
-
     username = args.indonesian_username
     password = args.indonesian_password
     organization = args.indonesian_organization
+    indonesianRegion = args.indonesian_region
 
-    client.add_cloud(title=title, provider=provider, username=username, password=password,
-                       organization=organization)
+    client.add_cloud(title=title, provider=provider, username=username,
+                     password=password, organization=organization,
+                     indonesianRegion=indonesianRegion)
 
 
 def add_docker_cloud(client, args):

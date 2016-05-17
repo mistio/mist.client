@@ -274,7 +274,8 @@ class MistClient(object):
             'username': kwargs.get('username', ''),
             'password': kwargs.get('password', ''),
             'organization': kwargs.get('organization', ''),
-            'host': kwargs.get('host', '')
+            'host': kwargs.get('host', ''),
+            'indonesianRegion': kwargs.get('indonesianRegion', '')
         }
         return payload
 

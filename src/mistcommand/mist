@@ -358,6 +358,10 @@ def main():
         help="Your organization's name - "
              "the one you are registered to vCloud with"
     )
+    indonesian_group.add_argument(
+        '--indonesian-region', choices=['my.idcloudonline.com', 'compute.idcloudonline.com'],
+        help="Region of the Indonesian vCloud"
+    )
 
     libvirt_group = p_add_cloud.add_argument_group("KVM via libvirt")
     libvirt_group.add_argument(
