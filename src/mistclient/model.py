@@ -396,13 +396,14 @@ class Machine(object):
         """
         return RequestsHandler(*args, api_token=self.api_token, **kwargs)
 
-    def run_script(self, script_id, params="", su=False, fire_and_forget=True):
-        script_job = self.mist_client.run_script(script_id=script_id, cloud_id=self.cloud.id,
-                                   machine_id=self.id,
-                                   script_params=script_params,
-                                   su=su)
-
-        return script_job
+    # exists in MistClient, too
+    # def run_script(self, script_id, params="", su=False, fire_and_forget=True):
+    #     script_job = self.mist_client.run_script(script_id=script_id, cloud_id=self.cloud.id,
+    #                                machine_id=self.id,
+    #                                script_params=script_params,
+    #                                su=su)
+    #
+    #     return script_job
 
     def _machine_actions(self, action):
         """
