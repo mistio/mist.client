@@ -132,13 +132,16 @@ def add_gce_cloud(client, args):
 def add_libvirt_cloud(client, args):
     title = args.name
     provider = args.provider
-
     machine_hostname = args.libvirt_hostname
     machine_user = args.libvirt_user
     machine_key = args.libvirt_key
+    images_location = args.libvirt_images
+    ssh_port = args.libvirt_ssh_port
 
-    client.add_cloud(title=title, provider=provider, machine_hostname=machine_hostname, machine_user=machine_user,
-                       machine_key=machine_key)
+    client.add_cloud(title=title, provider=provider,
+                     machine_hostname=machine_hostname,
+                     machine_user=machine_user, machine_key=machine_key,
+                     images_location=images_location, ssh_port=ssh_port)
 
 
 def add_vcloud_cloud(client, args):

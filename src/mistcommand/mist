@@ -369,13 +369,21 @@ def main():
         help="The hostname of your libvirt machine"
     )
     libvirt_group.add_argument(
-        '--libvirt-user',
-        help="User for your libvirt machine"
+        '--libvirt-user', default="root",
+        help="User for your libvirt machine. By default root"
     )
     libvirt_group.add_argument(
         '--libvirt-key',
         help="The SSH Key name that you have added to Mist.io "
              "and is associated with your libvirt machine"
+    )
+    libvirt_group.add_argument(
+        '--libvirt-ssh-port', default="22",
+        help="Port of the ssh-server. Defaults to 22"
+    )
+    libvirt_group.add_argument(
+        '--libvirt-images',
+        help="Path to *.iso images"
     )
 
     gce_group = p_add_cloud.add_argument_group("GCE")

@@ -294,7 +294,9 @@ class MistClient(object):
         payload = {
             'machine_hostname': kwargs.get('machine_hostname', ''),
             'machine_user': kwargs.get('machine_user', 'root'),
-            'machine_key': kwargs.get('machine_key', '')
+            'machine_key': kwargs.get('machine_key', ''),
+            'images_location': kwargs.get('images_location', ''),
+            'ssh_port': kwargs.get('ssh_port', 22)
         }
         return payload
 
