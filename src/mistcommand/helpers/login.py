@@ -51,7 +51,7 @@ def parse_config(renew):
     if not os.path.isfile(config_path) or not api_token or renew:
         if client:
             api_token = client.api_token
-        prompt_save_config(mist_uri, email, password, api_token, config_path)
+        prompt_save_config(mist_uri, email, password, api_token, config_path, renew)
 
     return {
         'mist_uri': mist_uri,
@@ -61,8 +61,11 @@ def parse_config(renew):
     }
 
 
-def prompt_save_config(mist_uri, email, password, api_token, config_path):
+def prompt_save_config(mist_uri, email, password, api_token, config_path, renew):
     answered = None
+    if renew:
+        answer = True
+        answered = True
     while not answered:
         answer = raw_input("Save config [Y/n]: ")
         if answer in ["y", "Y", "Yes"]:
