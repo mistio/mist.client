@@ -91,14 +91,16 @@ def add_cloud(client, args):
         add_openstack_cloud(client, args)
     elif "softlayer" in provider:
         add_softlayer_cloud(client, args)
-    elif "hp" in provider:
-        add_hp_cloud(client, args)
+    # elif "hp" in provider:
+    #     add_hp_cloud(client, args)
     elif "docker" in provider:
         add_docker_cloud(client, args)
     elif "azure" in provider:
         add_azure_cloud(client, args)
     elif "bare" in provider:
         add_bare_metal_cloud(client, args)
+    elif provider == "coreos":
+        add_coreos_cloud(client, args)
     elif "gce" in provider:
         add_gce_cloud(client, args)
     elif provider == "vcloud":
@@ -273,32 +275,42 @@ def add_softlayer_cloud(client, args):
     client.add_cloud(title=title, provider=provider, username=username, api_key=api_key)
 
 
-def add_hp_cloud(client, args):
-    title = args.name
-    provider = args.provider
-
-    username = args.hp_username
-    password = args.hp_password
-    tenant_name = args.hp_tenant
-    region = args.hp_region
-
-    client.add_cloud(title=title, provider=provider, username=username, password=password, tenant_name=tenant_name,
-                       region=region)
+# def add_hp_cloud(client, args):
+#     title = args.name
+#     provider = args.provider
+#     username = args.hp_username
+#     password = args.hp_password
+#     tenant_name = args.hp_tenant
+#     region = args.hp_region
+#
+#     client.add_cloud(title=title, provider=provider, username=username,
+#                      password=password, tenant_name=tenant_name, region=region)
 
 
 def add_bare_metal_cloud(client, args):
     title = args.name
     provider = args.provider
-
     machine_ip = args.bare_hostname
     machine_user = args.bare_user
-
     machine_port = args.bare_port
     machine_key = args.bare_ssh_key_id
 
-    client.add_cloud(title=title, provider=provider, machine_ip=machine_ip, machine_key=machine_key,
-                       machine_port=machine_port, machine_user=machine_user)
+    client.add_cloud(title=title, provider=provider, machine_ip=machine_ip,
+                     machine_key=machine_key, machine_port=machine_port,
+                     machine_user=machine_user)
 
+
+def add_coreos_cloud(client, args):
+    title = args.name
+    provider = args.provider
+    machine_ip = args.core_hostname
+    machine_user = args.core_user
+    machine_port = args.core_port
+    machine_key = args.core_ssh_key_id
+
+    client.add_cloud(title=title, provider=provider, machine_ip=machine_ip,
+                     machine_key=machine_key, machine_port=machine_port,
+                     machine_user=machine_user)
 
 def cloud_action(args):
 

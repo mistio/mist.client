@@ -96,6 +96,7 @@ def main():
 
     provider_choices = [
         'bare_metal',
+        'coreos',
         'ec2',
         'gce',
         'nephoscale',
@@ -277,6 +278,7 @@ def main():
         '--docker-cert-file',
         help="OPTIONAL. Path of your cert file used for TLS"
     )
+
     bare_group = p_add_cloud.add_argument_group("Bare Metal Server")
     bare_group.add_argument(
         '--bare-hostname',
@@ -292,7 +294,25 @@ def main():
     )
     bare_group.add_argument(
         '--bare-ssh-key-id',
-        help="The id of the ssh key that is associated with the machine"
+        help="The name of the ssh key that is associated with the machine"
+    )
+
+    core_group = p_add_cloud.add_argument_group("CoreOS")
+    core_group.add_argument(
+        '--core-hostname',
+        help="Hostname of the machine"
+    )
+    core_group.add_argument(
+        '--core-user', default="root",
+        help="By default root"
+    )
+    core_group.add_argument(
+        '--core-port', default="22",
+        help="Port of the ssh-server. By default 22"
+    )
+    core_group.add_argument(
+        '--core-ssh-key-id',
+        help="The name of the ssh key that is associated with the machine"
     )
 
     azure_group = p_add_cloud.add_argument_group("Azure")
@@ -353,6 +373,7 @@ def main():
         help="The SSH Key name that you have added to Mist.io "
              "and is associated with your libvirt machine"
     )
+
     gce_group = p_add_cloud.add_argument_group("GCE")
     gce_group.add_argument(
         '--gce-email',

@@ -173,14 +173,16 @@ class MistClient(object):
             payload = self._add_cloud_linode(**kwargs)
         elif provider == "bare_metal":
             payload = self._add_cloud_bare_metal(**kwargs)
+        elif provider == "coreos":
+            payload = self._add_cloud_coreos(**kwargs)
         elif provider in ['vcloud', 'indonesian_vcloud']:
             payload = self._add_cloud_vcloud(**kwargs)
         elif provider == "docker":
             payload = self._add_cloud_docker(**kwargs)
         elif provider == "libvirt":
             payload = self._add_cloud_libvirt(**kwargs)
-        elif provider == "hpcloud":
-            payload = self._add_cloud_hp(**kwargs)
+        # elif provider == "hpcloud":
+        #     payload = self._add_cloud_hp(**kwargs)
         elif provider == "openstack":
             payload = self._add_cloud_openstack(**kwargs)
 
@@ -258,6 +260,15 @@ class MistClient(object):
         }
         return payload
 
+    def _add_cloud_coreos(self, **kwargs):
+        payload = {
+            'machine_ip': kwargs.get('machine_ip', ''),
+            'machine_key': kwargs.get('machine_key', ''),
+            'machine_user': kwargs.get('machine_user', 'root'),
+            'machine_port': kwargs.get('machine_port', 22)
+        }
+        return payload
+
     def _add_cloud_vcloud(self, **kwargs):
         payload = {
             'username': kwargs.get('username', ''),
@@ -286,14 +297,14 @@ class MistClient(object):
         }
         return payload
 
-    def _add_cloud_hp(self, **kwargs):
-        payload = {
-            'username': kwargs.get('username', ''),
-            'password': kwargs.get('password', ''),
-            'tenant_name': kwargs.get('tenant_name', ''),
-            'region': kwargs.get('region', '')
-        }
-        return payload
+    # def _add_cloud_hp(self, **kwargs):
+    #     payload = {
+    #         'username': kwargs.get('username', ''),
+    #         'password': kwargs.get('password', ''),
+    #         'tenant_name': kwargs.get('tenant_name', ''),
+    #         'region': kwargs.get('region', '')
+    #     }
+    #     return payload
 
     def _add_cloud_openstack(self, **kwargs):
         payload = {
