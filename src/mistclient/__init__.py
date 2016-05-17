@@ -286,7 +286,8 @@ class MistClient(object):
             'auth_user': kwargs.get('auth_user', ''),
             'auth_password': kwargs.get('auth_password', ''),
             'key_file': kwargs.get('key_file', ''),
-            'cert_file': kwargs.get('cert_file', '')
+            'cert_file': kwargs.get('cert_file', ''),
+            'ca_cert_file': kwargs.get('ca_cert_file', '')
         }
         return payload
 

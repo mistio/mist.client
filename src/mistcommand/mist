@@ -278,6 +278,10 @@ def main():
         '--docker-cert-file',
         help="OPTIONAL. Path of your cert file used for TLS"
     )
+    docker_group.add_argument(
+        '--docker-ca-cert-file',
+        help="OPTIONAL. Path to your CA cert file used for TLS"
+    )
 
     bare_group = p_add_cloud.add_argument_group("Bare Metal Server")
     bare_group.add_argument(

@@ -173,7 +173,6 @@ def add_indonesian_cloud(client, args):
 def add_docker_cloud(client, args):
     title = args.name
     provider = args.provider
-
     docker_host = args.docker_host
     docker_port = args.docker_port
     docker_auth_user = args.docker_auth_user
@@ -188,10 +187,16 @@ def add_docker_cloud(client, args):
             cert_file = f.read()
     else:
         cert_file = ""
+    if args.docker_ca_cert_file:
+        with open(args.docker_ca_cert_file, 'r') as f:
+            ca_cert_file = f.read()
+    else:
+        ca_cert_file = ""
 
-    client.add_cloud(title=title, provider=provider, docker_host=docker_host, docker_port=docker_port,
-                       auth_user=docker_auth_user, auth_password=docker_auth_password, key_file=key_file,
-                       cert_file=cert_file)
+    client.add_cloud(title=title, provider=provider, docker_host=docker_host,
+                     docker_port=docker_port, auth_user=docker_auth_user,
+                     auth_password=docker_auth_password, key_file=key_file,
+                     cert_file=cert_file, ca_cert_file=ca_cert_file)
 
 
 def add_azure_cloud(client, args):
