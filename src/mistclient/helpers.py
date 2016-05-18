@@ -52,10 +52,6 @@ class RequestsHandler(object):
         """
         if resp.ok:
             return resp
-        elif str(resp.content).startswith('User not authenticated'):
-            print "API token no longer valid. Renewing ..."
-            mistcommand.helpers.login.authenticate(renew=True)
-            sys.exit(0)
         else:
             raise Exception(resp.content)
 

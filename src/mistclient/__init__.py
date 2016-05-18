@@ -11,7 +11,7 @@ class MistClient(object):
     The base class that initiates a new client that connects with mist.io service.
     """
 
-    def __init__(self, mist_uri="https://mist.io", email=None, password=None,
+    def __init__(self, mist_uri="http://172.17.0.1", email=None, password=None,
                  api_token=None, verify=True):
         """
         Initialize the mist.client. In case email and password are given, it
@@ -50,7 +50,30 @@ class MistClient(object):
         authentication api_token to be used with the rest of the requests
         """
         if self.api_token:
-            return
+            # at first, check whether any API tokens exist
+            tokens_uri = self.uri + '/tokens'
+            req = self.request(tokens_uri)
+            try:
+                tokens_list = req.get().json()
+            except Exception as exc:
+                if str(exc).startswith('User not authenticated'):
+                    self.api_token = None
+            else:
+                partial_match = False
+                for token in tokens_list:
+                    if self.api_token[:4] == token['token'].strip('...'):
+                        partial_match = True
+                    if partial_match:
+                        # tokens' first digits match
+                        check_auth_uri = self.uri.split('/api/v1')[0] + '/ping'
+                        req = self.request(check_auth_uri)
+                        check = req.get().json()
+                        # e-mails match?
+                        if self.email == check['hello']:
+                            return
+                        else:
+                            continue
+
         auth_uri = self.uri.split('/api/v1')[0] + '/auth'
         payload = {
             'email': self.email,
