@@ -177,6 +177,8 @@ class MistClient(object):
             payload = self._add_cloud_coreos(**kwargs)
         elif provider in ['vcloud', 'indonesian_vcloud']:
             payload = self._add_cloud_vcloud(**kwargs)
+        elif provider == 'vsphere':
+            payload = self._add_cloud_vsphere(**kwargs)
         elif provider == "docker":
             payload = self._add_cloud_docker(**kwargs)
         elif provider == "libvirt":
@@ -187,6 +189,8 @@ class MistClient(object):
             payload = self._add_cloud_openstack(**kwargs)
         elif provider == "hostvirtual":
             payload = self._add_cloud_hostvirtual(**kwargs)
+        elif provider == "vultr":
+            payload = self._add_cloud_vultr(**kwargs)
 
         payload['title'] = title
         payload['provider'] = provider
@@ -281,6 +285,14 @@ class MistClient(object):
         }
         return payload
 
+    def _add_cloud_vsphere(self, **kwargs):
+        payload = {
+            'username': kwargs.get('usename', ''),
+            'password': kwargs.get('password', ''),
+            'host': kwargs.get('host', '')
+        }
+        return payload
+
     def _add_cloud_docker(self, **kwargs):
         payload = {
             'docker_port': int(kwargs.get('docker_port', 4243)),
@@ -324,6 +336,12 @@ class MistClient(object):
         return payload
 
     def _add_cloud_hostvirtual(self, **kwargs):
+        payload = {
+            'api_key': kwargs.get('api_key', '')
+        }
+        return payload
+
+    def _add_cloud_vultr(self, **kwargs):
         payload = {
             'api_key': kwargs.get('api_key', '')
         }

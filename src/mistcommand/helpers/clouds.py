@@ -107,10 +107,14 @@ def add_cloud(client, args):
         add_vcloud_cloud(client, args)
     elif provider == "indonesian_vcloud":
         add_indonesian_cloud(client, args)
+    elif provider == 'vsphere':
+        add_vsphere_cloud(client, args)
     elif provider == "libvirt":
         add_libvirt_cloud(client, args)
     elif provider == 'hostvirtual':
         add_hostvirtual_cloud(client, args)
+    elif provider == 'vultr':
+        add_vultr_cloud(client, args)
 
 
 def add_gce_cloud(client, args):
@@ -157,6 +161,16 @@ def add_vcloud_cloud(client, args):
 
     client.add_cloud(title=title, provider=provider, username=username, password=password,
                        organization=organization, host=host)
+
+def add_vsphere_cloud(client, args):
+    title = args.name
+    provider = args.provider
+    username = args.vsphere_username
+    password = args.vsphere_password
+    host = args.vsphere_host
+
+    client.add_cloud(title=title, provider=provider, username=username,
+                     password=password, host=host)
 
 
 def add_indonesian_cloud(client, args):
@@ -331,6 +345,13 @@ def add_hostvirtual_cloud(client, args):
 
     client.add_cloud(title=title, provider=provider, api_key=api_key)
 
+
+def add_vultr_cloud(client, args):
+    title = args.name
+    provider = args.provider
+    api_key = args.vultr_api_key
+
+    client.add_cloud(title=title, provider=provider, api_key=api_key)
 
 def cloud_action(args):
 

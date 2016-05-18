@@ -348,6 +348,20 @@ def main():
              "the one you are registered to vCloud with"
     )
 
+    vsphere_group = p_add_cloud.add_argument_group("vSphere")
+    vsphere_group.add_argument(
+        '--vsphere-username', required=True,
+        help="Username for the vSphere cloud"
+    )
+    vsphere_group.add_argument(
+        '--vsphere-password', required=True,
+        help="Password for the vSphere cloud"
+    )
+    vsphere_group.add_argument(
+        '--vsphere-host', required=True,
+        help="Hostname"
+    )
+
     indonesian_group = p_add_cloud.add_argument_group("Indonesian vCloud")
     indonesian_group.add_argument(
         '--indonesian-username',
@@ -405,8 +419,14 @@ def main():
     )
 
     hostvirtual_group = p_add_cloud.add_argument_group("Hostvirtual")
-    hostvirtual_group.add.argument(
+    hostvirtual_group.add_argument(
         '--hostvirtual-api-key', required=True,
+        help="API Key"
+    )
+
+    vultr_group = p_add_cloud.add_argument_group("Vultr")
+    vultr_group.add_argument(
+        '--vultr-api-key', required=True,
         help="API Key"
     )
 
