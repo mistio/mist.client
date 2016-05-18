@@ -13,6 +13,7 @@ from mistcommand.helpers.clouds import cloud_action
 from mistcommand.helpers.providers import provider_action
 from mistcommand.helpers.keys import key_action
 from mistcommand.helpers.machines import machine_action
+from mistcommand.helpers.templates import template_action
 from mistcommand.helpers.images import image_action
 from mistcommand.helpers.sizes import size_action
 from mistcommand.helpers.locations import location_action
@@ -825,6 +826,55 @@ def main():
     p_create_machine.add_argument(
         '--monitoring', action='store_true')
 
+    # -------------------TEMPLATE ACTIONS-------------------
+    p_add_template = subparsers.add_parser(
+        'add-template',
+        description="Add a template"
+    )
+    p_add_template.add_argument(
+        '--name', required=True,
+        help="Name of the template"
+    )
+    p_add_template.add_argument(
+        '--template', required=True,
+        help="Template"
+    )
+    p_add_template.add_argument(
+        '--location', required=True, choices=['inline', 'github', 'url'],
+        help="Template location"
+    )
+    p_add_template.add_argument(
+        '--type', required=True, choices=['cloudify'],
+        help="Execution type"
+    )
+    p_add_template.add_argument(
+        '--entrypoint',
+        help="Entrypoint"
+    )
+    p_add_template.add_argument(
+        '--description',
+        help="Description of the template"
+    )
+
+    p_delete_template = subparsers.add_parser(
+        'delete-template',
+        description="Delete a template"
+    )
+    p_delete_template.add_argument(
+        '--template-id', required=True,
+        help="The ID of the template to be deleted. "
+             "You can retrieve all the template IDs by invoking list-templates"
+    )
+
+    p_list_templates = subparsers.add_parser(
+        'list-templates',
+        description="List all templates"
+    )
+    p_list_templates.add_argument(
+        '--pretty', action="store_true",
+        help='Print in a table format'
+    )
+
     # -------------------METRICS ACTIONS-------------------
     p_list_metrics = subparsers.add_parser(
         'list-metrics',
@@ -954,6 +1004,8 @@ def main():
                          'enable-monitoring', 'disable-monitoring',
                          'add-tag', 'remove-tag']:
         machine_action(args)
+    elif args.action in ['list-templates', 'add-template', 'delete-template']:
+        template_action(args)
     elif args.action in ['list-metrics', 'add-metric', 'add-custom-metric']:
         metric_action(args)
     elif args.action == 'user-info':

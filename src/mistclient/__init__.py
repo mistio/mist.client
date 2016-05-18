@@ -531,13 +531,19 @@ class MistClient(object):
             'description': kwargs.get('description', ''),
             'template': kwargs.get('template', ''),
             'location_type': kwargs.get('location_type', ''),
-            'exec_type': kwargs.get('exec_type', '')
+            'exec_type': kwargs.get('exec_type', ''),
+            'entrypoint': kwargs.get('entrypoint', ''),
         }
 
         req = self.request(self.uri + '/templates',
                            data=json.dumps(payload), api_version=2)
         response = req.post()
         return response.json()
+
+    def delete_template(self, template_id):
+        req = self.request(self.uri + '/templates/' + template_id)
+        response = req.delete()
+        return response
 
     def create_stack(self, template_id, inputs=""):
 
