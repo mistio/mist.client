@@ -350,15 +350,15 @@ def main():
 
     vsphere_group = p_add_cloud.add_argument_group("vSphere")
     vsphere_group.add_argument(
-        '--vsphere-username', required=True,
+        '--vsphere-username',
         help="Username for the vSphere cloud"
     )
     vsphere_group.add_argument(
-        '--vsphere-password', required=True,
+        '--vsphere-password',
         help="Password for the vSphere cloud"
     )
     vsphere_group.add_argument(
-        '--vsphere-host', required=True,
+        '--vsphere-host',
         help="Hostname"
     )
 
@@ -420,19 +420,19 @@ def main():
 
     hostvirtual_group = p_add_cloud.add_argument_group("Hostvirtual")
     hostvirtual_group.add_argument(
-        '--hostvirtual-api-key', required=True,
+        '--hostvirtual-api-key',
         help="API Key"
     )
 
     vultr_group = p_add_cloud.add_argument_group("Vultr")
     vultr_group.add_argument(
-        '--vultr-api-key', required=True,
+        '--vultr-api-key',
         help="API Key"
     )
 
     packet_group = p_add_cloud.add_argument_group("Packet.net")
     packet_group.add_argument(
-        '--packet-api-key', required=True,
+        '--packet-api-key',
         help="API Key"
     )
     packet_group.add_argument(
