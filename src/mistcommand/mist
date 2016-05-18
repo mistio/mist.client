@@ -105,7 +105,6 @@ def main():
         'openstack',
         'rackspace',
         'softlayer',
-        'hpcloud',
         'docker',
         'azure',
         'vcloud',
@@ -114,6 +113,7 @@ def main():
         'hostvirtual',
         'vultr',
         'vsphere',
+        'packet_net'
     ]
     p_add_cloud.add_argument(
         '--provider', required=True, choices=provider_choices,
@@ -403,6 +403,13 @@ def main():
         '--gce-private-key',
         help="Path of file that contains your GCE private key"
     )
+
+    hostvirtual_group = p_add_cloud.add_argument_group("Hostvirtual")
+    hostvirtual_group.add.argument(
+        '--hostvirtual-api-key', required=True,
+        help="API Key"
+    )
+
     # ---------------KEY ACTIONS----------------------
     p_list_keys = subparsers.add_parser(
         'list-keys',

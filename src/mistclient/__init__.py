@@ -185,6 +185,8 @@ class MistClient(object):
         #     payload = self._add_cloud_hp(**kwargs)
         elif provider == "openstack":
             payload = self._add_cloud_openstack(**kwargs)
+        elif provider == "hostvirtual":
+            payload = self._add_cloud_hostvirtual(**kwargs)
 
         payload['title'] = title
         payload['provider'] = provider
@@ -321,6 +323,12 @@ class MistClient(object):
         }
         return payload
 
+    def _add_cloud_hostvirtual(self, **kwargs):
+        payload = {
+            'api_key': kwargs.get('api_key', '')
+        }
+        return payload
+    
     def _list_keys(self):
         """
         Retrieves a list of all added Keys and populates the self._keys dict with Key instances

@@ -109,6 +109,8 @@ def add_cloud(client, args):
         add_indonesian_cloud(client, args)
     elif provider == "libvirt":
         add_libvirt_cloud(client, args)
+    elif provider == 'hostvirtual':
+        add_hostvirtual_cloud(client, args)
 
 
 def add_gce_cloud(client, args):
@@ -320,6 +322,15 @@ def add_coreos_cloud(client, args):
     client.add_cloud(title=title, provider=provider, machine_ip=machine_ip,
                      machine_key=machine_key, machine_port=machine_port,
                      machine_user=machine_user)
+
+
+def add_hostvirtual_cloud(client, args):
+    title = args.name
+    provider = args.provider
+    api_key = args.hostvirtual_api_key
+
+    client.add_cloud(title=title, provider=provider, api_key=api_key)
+
 
 def cloud_action(args):
 
