@@ -14,6 +14,7 @@ from mistcommand.helpers.providers import provider_action
 from mistcommand.helpers.keys import key_action
 from mistcommand.helpers.machines import machine_action
 from mistcommand.helpers.templates import template_action
+from mistcommand.helpers.stacks import stack_action
 from mistcommand.helpers.images import image_action
 from mistcommand.helpers.sizes import size_action
 from mistcommand.helpers.locations import location_action
@@ -875,6 +876,72 @@ def main():
         help='Print in a table format'
     )
 
+    # -------------------STACK ACTIONS-------------------
+    p_list_stacks = subparsers.add_parser(
+        'list-stacks',
+        description="List all available stacks"
+    )
+    p_list_stacks.add_argument(
+        '--pretty', action="store_true",
+        help="Print in a table format"
+    )
+
+    p_add_stack = subparsers.add_parser(
+        'create-stack',
+        description="Start a template job"
+    )
+    p_add_stack.add_argument(
+        '--template-id', required=True,
+        help="Id of the template to be used"
+    )
+    p_add_stack.add_argument(
+        '--stack-name', required=True,
+        help="The name of the new stack"
+    )
+    p_add_stack.add_argument(
+        '--stack-description',
+        help="Description of the stack"
+    )
+    p_add_stack.add_argument(
+        '--deploy', action="store_true",
+        help="Deploy the stack"
+    )
+    p_add_stack.add_argument(
+        '--inputs',
+        help="Workflow inputs"
+    )
+
+    p_delete_stack = subparsers.add_parser(
+        'delete-stack',
+        description="Remove a stack"
+    )
+    p_delete_stack.add_argument(
+        '--stack-id', required=True,
+        help="ID of the stack to be removed. "
+             "You can retrieve all stack IDs by invoking list-stacks"
+    )
+    p_delete_stack.add_argument(
+        '--inputs',
+        help="Workflow inputs"
+    )
+
+    p_run_workflow = subparsers.add_parser(
+        'run-workflow',
+        description="Run a template job"
+    )
+    p_run_workflow.add_argument(
+        '--stack-id', required=True,
+        help="Id of the targeted stack"
+    )
+    p_run_workflow.add_argument(
+        '--inputs',
+        help="Workflow inputs"
+    )
+    p_run_workflow.add_argument(
+        '--workflow', required=True,
+        help="Workflow to be run"
+    )
+
     # -------------------METRICS ACTIONS-------------------
     p_list_metrics = subparsers.add_parser(
         'list-metrics',
@@ -1006,6 +1073,9 @@ def main():
         machine_action(args)
     elif args.action in ['list-templates', 'add-template', 'delete-template']:
         template_action(args)
+    elif args.action in ['list-stacks', 'create-stack', 'delete-stack',
+                         'run-workflow']:
+        stack_action(args)
     elif args.action in ['list-metrics', 'add-metric', 'add-custom-metric']:
         metric_action(args)
     elif args.action == 'user-info':

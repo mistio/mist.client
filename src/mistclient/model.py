@@ -793,3 +793,18 @@ class Script(object):
         :returns: An instance of RequestsHandler
         """
         return RequestsHandler(*args, api_token=self.api_token, **kwargs)
+
+
+# # TODO
+# class Template(object):
+#     """
+#     A Template instance
+#     """
+#     def __init__(self, template, mist_client):
+#
+#
+# class Stack(object):
+#     """
+#     A Stack instance
+#     """
+#     def __init__(self, stack, mist_client):

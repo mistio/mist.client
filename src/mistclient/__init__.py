@@ -459,11 +459,11 @@ class MistClient(object):
         response = req.get()
         return response.json()
 
-    # self.scripts() exists too
-    def get_scripts(self, **_):
-        req = self.request(self.uri + '/scripts')
-        response = req.get()
-        return response.json()
+    # # self.scripts() exists too
+    # def get_scripts(self, **_):
+    #     req = self.request(self.uri + '/scripts')
+    #     response = req.get()
+    #     return response.json()
 
     # TODO: move these to Script?
     def add_script(self, **kwargs):
@@ -545,13 +545,42 @@ class MistClient(object):
         response = req.delete()
         return response
 
-    def create_stack(self, template_id, inputs=""):
+    def get_stacks(self):
+        req = self.request(self.uri + '/stacks')
+        response = req.get()
+        return response.json()
 
+    def create_stack(self, template_id, stack_name, stack_description, deploy,
+                     inputs={}):
         payload = {
+            'template_id': template_id,
             'inputs': inputs,
+            'stack_name': stack_name,
+            'stack_description': stack_description,
+            'deploy': deploy
         }
 
-        data = json.dumps(payload)
-        req = self.request(self.uri + "/templates/" + template_id, data=data)
+        req = self.request(self.uri + "/stacks", data=json.dumps(payload))
         re = req.post()
         return re.json()
+
+    def delete_stack(self, stack_id, inputs={}):
+        payload = {
+            'inputs': inputs
+        }
+
+        req = self.request(self.uri + "/stacks/" + stack_id,
+                           data=json.dumps(payload))
+        response = req.delete()
+        return response
+
+    def run_workflow(self, stack_id, workflow, inputs={}):
+        payload = {
+            'workflow': workflow,
+            'inputs': inputs
+        }
+
+        req = self.request(self.uri + "/stacks/" + stack_id,
+                           data=json.dumps(payload))
+        response = req.post()
+        return response.json()
