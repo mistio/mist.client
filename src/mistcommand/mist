@@ -105,15 +105,16 @@ def main():
         'openstack',
         'rackspace',
         'softlayer',
-        'hpcloud',
+        # 'hpcloud',
         'docker',
         'azure',
         'vcloud',
         'indonesian_vcloud',
         'libvirt',
-        'hostvirtual',
-        'vultr',
-        'vsphere',
+        # 'hostvirtual',
+        # 'vultr',
+        # 'vsphere',
+        # 'packet_net'
     ]
     p_add_cloud.add_argument(
         '--provider', required=True, choices=provider_choices,
