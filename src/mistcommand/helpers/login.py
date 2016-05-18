@@ -6,17 +6,16 @@ from mistclient import MistClient
 from prettytable import PrettyTable
 
 
-def init_client(mist_uri, email, password, api_token):
-    try:
-        # TODO regular (username, password) auth
-        client = MistClient(mist_uri=mist_uri, email=email, password=password,
-                            api_token=api_token)
-        # Ensures that GET requests are authenticated
-        client.clouds()
-        return client
-    except Exception as e:
-        print e
-        sys.exit(1)
+# def init_client(mist_uri, email, password, api_token):
+#     try:
+#         client = MistClient(mist_uri=mist_uri, email=email, password=password,
+#                             api_token=api_token)
+#         # Ensures that GET requests are authenticated
+#         client.clouds()
+#         return client
+#     except Exception as e:
+#         print e
+#         sys.exit(1)
 
 
 def parse_config():
@@ -45,7 +44,7 @@ def parse_config():
     email = config.get("mist.credentials", "email") or prompt_email()
     password = config.get("mist.credentials", "password") or prompt_password()
     _api_token = config.get("mist.credentials", "api_token") or None
-    # verify the API token
+    # initiate a new MistClient to verify the existing token or request a new
     client = MistClient(mist_uri='http://172.17.0.1', email=email,
                         password=password, api_token=_api_token)
     api_token = client.api_token
@@ -54,12 +53,7 @@ def parse_config():
             print "API token no longer valid. Renewing ..."
         prompt_save_config(mist_uri, email, password, api_token, config_path)
 
-    return {
-        'mist_uri': mist_uri,
-        'email': email,
-        'password': password,
-        'api_token': api_token
-    }
+    return client
 
 
 def prompt_save_config(mist_uri, email, password, api_token, config_path):
@@ -102,9 +96,8 @@ def prompt_password():
 
 
 def authenticate():
-    config = parse_config()
-    return init_client(config["mist_uri"], config["email"],
-                       config["password"], config["api_token"])
+    client = parse_config()
+    return client
 
 
 def user_info():

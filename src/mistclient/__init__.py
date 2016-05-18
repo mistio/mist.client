@@ -1,5 +1,6 @@
 import json
 
+import sys
 from time import sleep
 
 from mistclient.helpers import RequestsHandler, HTMLParser
@@ -73,6 +74,8 @@ class MistClient(object):
                             return
                         else:
                             continue
+                print "Authentication failed"
+                sys.exit(1)
 
         auth_uri = self.uri.split('/api/v1')[0] + '/auth'
         payload = {
