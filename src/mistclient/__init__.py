@@ -51,29 +51,17 @@ class MistClient(object):
         authentication api_token to be used with the rest of the requests
         """
         if self.api_token:
-            # at first, check whether any API tokens exist
-            tokens_uri = self.uri + '/tokens'
-            req = self.request(tokens_uri)
+            # verify current API token
+            check_auth_uri = self.uri.split('/api/v1')[0] + '/ping'
+            req = self.request(check_auth_uri)
             try:
-                tokens_list = req.get().json()
+                ping = req.get().json()
             except Exception as exc:
                 if str(exc).startswith('User not authenticated'):
                     self.api_token = None
             else:
-                partial_match = False
-                for token in tokens_list:
-                    if self.api_token[:4] == token['token'].strip('...'):
-                        partial_match = True
-                    if partial_match:
-                        # tokens' first digits match
-                        check_auth_uri = self.uri.split('/api/v1')[0] + '/ping'
-                        req = self.request(check_auth_uri)
-                        check = req.get().json()
-                        # e-mails match?
-                        if self.email == check['hello']:
-                            return
-                        else:
-                            continue
+                if self.email == ping['hello']:
+                    return
                 print "Authentication failed"
                 sys.exit(1)
 
