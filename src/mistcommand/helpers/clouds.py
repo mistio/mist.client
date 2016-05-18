@@ -115,6 +115,8 @@ def add_cloud(client, args):
         add_hostvirtual_cloud(client, args)
     elif provider == 'vultr':
         add_vultr_cloud(client, args)
+    elif provider == 'packet':
+        add_packet_cloud(client, args)
 
 
 def add_gce_cloud(client, args):
@@ -352,6 +354,17 @@ def add_vultr_cloud(client, args):
     api_key = args.vultr_api_key
 
     client.add_cloud(title=title, provider=provider, api_key=api_key)
+
+
+def add_packet_cloud(client, args):
+    title = args.name
+    provider = args.provider
+    api_key = args.packet_api_key
+    project_id = args.packet_project
+
+    client.add_cloud(title=title, provider=provider, api_key=api_key,
+                     project_id=project_id)
+
 
 def cloud_action(args):
 

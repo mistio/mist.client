@@ -191,6 +191,8 @@ class MistClient(object):
             payload = self._add_cloud_hostvirtual(**kwargs)
         elif provider == "vultr":
             payload = self._add_cloud_vultr(**kwargs)
+        elif provider == "packet":
+            payload = self._add_cloud_packet(**kwargs)
 
         payload['title'] = title
         payload['provider'] = provider
@@ -344,6 +346,13 @@ class MistClient(object):
     def _add_cloud_vultr(self, **kwargs):
         payload = {
             'api_key': kwargs.get('api_key', '')
+        }
+        return payload
+
+    def _add_cloud_packet(self, **kwargs):
+        payload = {
+            'api_key': kwargs.get('api_key', ''),
+            'project_id': kwargs.get('project_id', '')
         }
         return payload
     

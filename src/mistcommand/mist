@@ -113,7 +113,7 @@ def main():
         'hostvirtual',
         'vultr',
         'vsphere',
-        'packet_net'
+        'packet'
     ]
     p_add_cloud.add_argument(
         '--provider', required=True, choices=provider_choices,
@@ -428,6 +428,16 @@ def main():
     vultr_group.add_argument(
         '--vultr-api-key', required=True,
         help="API Key"
+    )
+
+    packet_group = p_add_cloud.add_argument_group("Packet.net")
+    packet_group.add_argument(
+        '--packet-api-key', required=True,
+        help="API Key"
+    )
+    packet_group.add_argument(
+        '--packet-project',
+        help="Optional project name"
     )
 
     # ---------------KEY ACTIONS----------------------
