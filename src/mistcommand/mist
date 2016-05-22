@@ -854,9 +854,8 @@ def main():
              "given cloud to find their ids"
     )
 
-    # should it be required?
     p_create_machine.add_argument(
-        '--location-id', required=True,
+        '--location-id',
         help="Id of the cloud location. "
              "You can list locations for the given cloud to find their ids"
     )
