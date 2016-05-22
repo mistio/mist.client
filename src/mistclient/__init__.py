@@ -1,5 +1,6 @@
 import json
 
+import sys
 from time import sleep
 
 from mistclient.helpers import RequestsHandler, HTMLParser
@@ -11,7 +12,7 @@ class MistClient(object):
     The base class that initiates a new client that connects with mist.io service.
     """
 
-    def __init__(self, mist_uri="https://mist.io", email=None, password=None,
+    def __init__(self, mist_uri="http://172.17.0.1", email=None, password=None,
                  api_token=None, verify=True):
         """
         Initialize the mist.client. In case email and password are given, it
@@ -50,7 +51,20 @@ class MistClient(object):
         authentication api_token to be used with the rest of the requests
         """
         if self.api_token:
-            return
+            # verify current API token
+            check_auth_uri = self.uri.split('/api/v1')[0] + '/ping'
+            req = self.request(check_auth_uri)
+            try:
+                ping = req.get().json()
+            except Exception as exc:
+                if str(exc).startswith('User not authenticated'):
+                    self.api_token = None
+            else:
+                if self.email == ping['hello']:
+                    return
+                print "Authentication failed"
+                sys.exit(1)
+
         auth_uri = self.uri.split('/api/v1')[0] + '/auth'
         payload = {
             'email': self.email,
@@ -484,11 +498,11 @@ class MistClient(object):
         response = req.get()
         return response.json()
 
-    # self.scripts() exists too
-    def get_scripts(self, **_):
-        req = self.request(self.uri + '/scripts')
-        response = req.get()
-        return response.json()
+    # # self.scripts() exists too
+    # def get_scripts(self, **_):
+    #     req = self.request(self.uri + '/scripts')
+    #     response = req.get()
+    #     return response.json()
 
     # TODO: move these to Script?
     def add_script(self, **kwargs):
@@ -550,13 +564,19 @@ class MistClient(object):
         response = req.get()
         return response.json()
 
+    def show_template(self, template_id):
+        req = self.request(self.uri + '/template/' + template_id)
+        response = req.get()
+        return response.json()
+
     def add_template(self, **kwargs):
         payload = {
             'name': kwargs.get('name', ''),
             'description': kwargs.get('description', ''),
             'template': kwargs.get('template', ''),
             'location_type': kwargs.get('location_type', ''),
-            'exec_type': kwargs.get('exec_type', '')
+            'exec_type': kwargs.get('exec_type', ''),
+            'entrypoint': kwargs.get('entrypoint', ''),
         }
 
         req = self.request(self.uri + '/templates',
@@ -564,13 +584,47 @@ class MistClient(object):
         response = req.post()
         return response.json()
 
-    def create_stack(self, template_id, inputs=""):
+    def delete_template(self, template_id):
+        req = self.request(self.uri + '/template/' + template_id)
+        response = req.delete()
+        return response
 
+    def get_stacks(self):
+        req = self.request(self.uri + '/stacks')
+        response = req.get()
+        return response.json()
+
+    def create_stack(self, template_id, stack_name, stack_description, deploy,
+                     inputs={}):
         payload = {
+            'template_id': template_id,
             'inputs': inputs,
+            'stack_name': stack_name,
+            'stack_description': stack_description,
+            'deploy': deploy
         }
 
-        data = json.dumps(payload)
-        req = self.request(self.uri + "/templates/" + template_id, data=data)
+        req = self.request(self.uri + "/stacks", data=json.dumps(payload))
         re = req.post()
         return re.json()
+
+    def delete_stack(self, stack_id, inputs={}):
+        payload = {
+            'inputs': inputs
+        }
+
+        req = self.request(self.uri + "/stack/" + stack_id,
+                           data=json.dumps(payload))
+        response = req.delete()
+        return response
+
+    def run_workflow(self, stack_id, workflow, inputs={}):
+        payload = {
+            'workflow': workflow,
+            'inputs': inputs
+        }
+
+        req = self.request(self.uri + "/stack/" + stack_id,
+                           data=json.dumps(payload))
+        response = req.post()
+        return response.json()

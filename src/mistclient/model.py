@@ -146,7 +146,13 @@ class Cloud(object):
         data = json.dumps(payload)
         req = self.request(self.mist_client.uri+'/clouds/'+self.id+'/networks',
                            data=data)
-        req.post()
+        return req.post().json()
+
+    def delete_network(self, network):
+
+        req = self.request(self.mist_client.uri + '/clouds/' + self.id + '/networks/' + network )
+        req.delete()
+
 
     @property
     def images(self):
@@ -793,3 +799,18 @@ class Script(object):
         :returns: An instance of RequestsHandler
         """
         return RequestsHandler(*args, api_token=self.api_token, **kwargs)
+
+
+# # TODO
+# class Template(object):
+#     """
+#     A Template instance
+#     """
+#     def __init__(self, template, mist_client):
+#
+#
+# class Stack(object):
+#     """
+#     A Stack instance
+#     """
+#     def __init__(self, stack, mist_client):
