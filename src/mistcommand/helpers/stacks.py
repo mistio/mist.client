@@ -13,7 +13,7 @@ def stack_action(args):
         print "Stack %s based on template %s was successfully created" \
               % (args.stack_name, args.template_id),
         if args.deploy:
-            print " and deployed"
+            print "and deployed"
     elif args.action == 'delete-stack':
         client.delete_stack(args.stack_id, args.inputs)
         print "Stack %s destroyed" % args.stack_id
@@ -36,9 +36,9 @@ def list_stacks(client, pretty):
         print x
     else:
         for stack in stacks:
-            print "%-40s %-40s %-40s %-40s" \
-                  % (stack['name'], stack['id'], stack['description'],
-                     stack['template'])
+            print "%-40s %-40s %-40s %-40s" % (stack['name'], stack['id'],
+                                               stack['description'],
+                                               stack['template'])
 
 
 def create_stack(client, args):
