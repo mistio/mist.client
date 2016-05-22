@@ -93,7 +93,7 @@ def main():
 
     p_add_cloud = subparsers.add_parser(
         'add-cloud',
-        help="Add a new cloud"
+        description="Add a new cloud"
     )
 
     provider_choices = [
@@ -456,7 +456,7 @@ def main():
 
     p_add_key = subparsers.add_parser(
         'add-key',
-        help="Add a new SSH Key"
+        description="Add a new SSH Key"
     )
 
     p_add_key.add_argument(
@@ -677,8 +677,8 @@ def main():
 
     p_list_networks = subparsers.add_parser(
         'list-networks',
-        help="List available networks for specified provider "
-             "(currently only OPENSTACK support)"
+        description="List available networks for specified provider "
+                    "(currently only OPENSTACK support)"
     )
 
     p_list_networks.add_argument(
@@ -728,7 +728,7 @@ def main():
 
     p_describe_machine = subparsers.add_parser(
         'describe-machine',
-        help="Show information about a specified machine"
+        description="Show information about a specified machine"
     )
 
     p_probe = subparsers.add_parser(
@@ -815,7 +815,7 @@ def main():
 
     p_create_machine = subparsers.add_parser(
         'create-machine',
-        help="Create a new machine"
+        description="Create a new machine"
     )
 
     group = p_create_machine.add_mutually_exclusive_group(required=True)
@@ -1022,7 +1022,7 @@ def main():
 
     p_add_metric = subparsers.add_parser(
         'add-metric',
-        help="Add a new metric to the machine"
+        description="Add a new metric to the machine"
     )
 
     p_add_metric.add_argument(
@@ -1075,20 +1075,20 @@ def main():
     #     description="Get stats from a monitored machine"
     # )
 
-    p_run = subparsers.add_parser(
-        'run',
-        description="Run a command in multiple machines"
-    )
-
-    p_run.add_argument(
-        '--command', required=True,
-        help="Run this command"
-    )
-
-    p_run.add_argument(
-        '--tag', required=True,
-        help="Run the command in machines that have this tag"
-    )
+    # p_run = subparsers.add_parser(
+    #     'run',
+    #     description="Run a command in multiple machines"
+    # )
+    #
+    # p_run.add_argument(
+    #     '--command', required=True,
+    #     help="Run this command"
+    # )
+    #
+    # p_run.add_argument(
+    #     '--tag', required=True,
+    #     help="Run the command in machines that have this tag"
+    # )
 
     # ----------------MIST SSH-------------------------
     p_ssh = subparsers.add_parser(
