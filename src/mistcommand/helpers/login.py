@@ -84,7 +84,7 @@ api_token=%s
         print "Saved config at %s" % config_path
         return
     else:
-        return
+        sys.exit(0)
 
 
 def prompt_email():
