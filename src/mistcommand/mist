@@ -876,6 +876,20 @@ def main():
         help='Print in a table format'
     )
 
+    p_show_template = subparsers.add_parser(
+        'show-template',
+        description='Show template information'
+    )
+    p_show_template.add_argument(
+        '--template-id', required=True,
+        help="The ID of the template to be looked up. "
+             "You can retrieve templates' IDs by invoking list-templates"
+    )
+    p_show_template.add_argument(
+        '--pretty', action='store_true',
+        help='Print in a table format'
+    )
+
     # -------------------STACK ACTIONS-------------------
     p_list_stacks = subparsers.add_parser(
         'list-stacks',
@@ -1071,7 +1085,8 @@ def main():
                          'enable-monitoring', 'disable-monitoring',
                          'add-tag', 'remove-tag']:
         machine_action(args)
-    elif args.action in ['list-templates', 'add-template', 'delete-template']:
+    elif args.action in ['list-templates', 'add-template', 'delete-template',
+                         'show-template']:
         template_action(args)
     elif args.action in ['list-stacks', 'create-stack', 'delete-stack',
                          'run-workflow']:

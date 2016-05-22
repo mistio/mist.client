@@ -525,6 +525,11 @@ class MistClient(object):
         response = req.get()
         return response.json()
 
+    def show_template(self, template_id):
+        req = self.request(self.uri + '/template/' + template_id)
+        response = req.get()
+        return response.json()
+
     def add_template(self, **kwargs):
         payload = {
             'name': kwargs.get('name', ''),
@@ -541,7 +546,7 @@ class MistClient(object):
         return response.json()
 
     def delete_template(self, template_id):
-        req = self.request(self.uri + '/templates/' + template_id)
+        req = self.request(self.uri + '/template/' + template_id)
         response = req.delete()
         return response
 

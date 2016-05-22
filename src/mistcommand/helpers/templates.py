@@ -8,6 +8,8 @@ def template_action(args):
     client = authenticate()
     if args.action == 'list-templates':
         list_templates(client, args.pretty)
+    elif args.action == 'show-template':
+        show_template(client, args.template_id, args.pretty)
     elif args.action == 'add-template':
         add_template(client, args)
         print "Template %s added successfully" % args.name
@@ -30,6 +32,25 @@ def list_templates(client, pretty):
         for template in templates:
             print "%-40s %-40s %-40s" \
                   % (template['name'], template['id'], template['description'])
+
+
+def show_template(client, template_id, pretty):
+    ret_dict = client.show_template(template_id)
+    template = ret_dict['template']
+    if not template:
+        print 'Template not found'
+        sys.exit(0)
+    if pretty:
+        x = PrettyTable(['Name', 'Description', 'Type', 'Location', 'Deleted'])
+        x.add_row([template['name'], template['description'],
+                   template['exec_type'], template['location_type'],
+                   template['deleted']])
+    else:
+        print "%-40s %-40s %-40s %-40s %-40s" % (template['name'],
+                                                 template['description'],
+                                                 template['exec_type'],
+                                                 template['location_type'],
+                                                 template['deleted'])
 
 
 def add_template(client, args):
