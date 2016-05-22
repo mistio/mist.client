@@ -12,7 +12,7 @@ class MistClient(object):
     The base class that initiates a new client that connects with mist.io service.
     """
 
-    def __init__(self, mist_uri="http://172.17.0.1", email=None, password=None,
+    def __init__(self, mist_uri="https://mist.io", email=None, password=None,
                  api_token=None, verify=True):
         """
         Initialize the mist.client. In case email and password are given, it

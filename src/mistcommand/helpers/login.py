@@ -26,7 +26,7 @@ def parse_config():
 
     # Set default mist uri
     config.add_section("mist.io")
-    config.set("mist.io", "mist_uri", "http://172.17.0.1")
+    config.set("mist.io", "mist_uri", "https://mist.io")
 
     # Set default credentials
     config.add_section("mist.credentials")
@@ -45,7 +45,7 @@ def parse_config():
     password = config.get("mist.credentials", "password") or prompt_password()
     _api_token = config.get("mist.credentials", "api_token") or None
     # initiate a new MistClient to verify the existing token or request a new
-    client = MistClient(mist_uri='http://172.17.0.1', email=email,
+    client = MistClient(mist_uri='https://mist.io', email=email,
                         password=password, api_token=_api_token)
     api_token = client.api_token
     if _api_token != api_token:
