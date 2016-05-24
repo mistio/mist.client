@@ -38,7 +38,6 @@ def script_action(args):
                 sys.exit(1)
             with open(args.script_file, 'r') as f:
                 script = f.read()
-        print script
         kwargs = {
             'name': args.name,
             'description': args.description,
