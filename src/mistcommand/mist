@@ -583,22 +583,27 @@ def main():
     )
 
     p_add_script.add_argument(
-        '--script', required=True,
-        help="Script to be executed. Can be either source code, url, or repo, "
-             "depending on location type"
-    )
-
-    p_add_script.add_argument(
         '--run', action='store_true', default=False,
         help="Run the script immediately on the specified machine"
     )
 
-    add_script_group = p_add_script.add_mutually_exclusive_group()
-    add_script_group.add_argument(
+    add_script_group0 = p_add_script.add_mutually_exclusive_group(required=True)
+    add_script_group0.add_argument(
+        '--script',
+        help='Script to be executed. Can be either source code, url, or repo, '
+             'depending on location type'
+    )
+    add_script_group0.add_argument(
+        '--script-file',
+        help='Add inline script from local file'
+    )
+
+    add_script_group1 = p_add_script.add_mutually_exclusive_group()
+    add_script_group1.add_argument(
         '--machine-id',
         help="Id of the machine"
     )
-    add_script_group.add_argument(
+    add_script_group1.add_argument(
         '--machine-name',
         help="Name of the machine"
     )
@@ -888,9 +893,14 @@ def main():
         '--name', required=True,
         help="Name of the template"
     )
-    p_add_template.add_argument(
-        '--template', required=True,
+    add_template_group = p_add_template.add_mutually_exclusive_group(required=True)
+    add_template_group.add_argument(
+        '--template',
         help="Template"
+    )
+    add_template_group.add_argument(
+        '--template-file',
+        help='Template input from file'
     )
     p_add_template.add_argument(
         '--location', required=True, choices=['inline', 'github', 'url'],

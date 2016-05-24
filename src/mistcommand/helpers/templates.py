@@ -55,7 +55,14 @@ def show_template(client, template_id, pretty):
 
 def add_template(client, args):
     name = args.name
-    template = args.template
+    if args.template:
+        template = args.template
+    elif args.template_file:
+        if not args.location == 'inline':
+            print 'File input is only available for inline templates'
+            sys.exit(1)
+        with open(args.template_file, 'r') as f:
+            template = f.read()
     location_type = args.location
     exec_type = args.type
     entrypoint = args.entrypoint

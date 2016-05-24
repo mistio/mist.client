@@ -30,13 +30,19 @@ def script_action(args):
         pretty = args.pretty
         list_scripts(client, pretty)
     elif args.action == 'add-script':
-        # TODO: what about input from file?
-        # with open(args.script, 'r') as f:
-        #     script = f.read()
+        if args.script:
+            script = args.script
+        elif args.script_file:
+            if not args.location == 'inline':
+                print 'File input is only available for inline scripts'
+                sys.exit(1)
+            with open(args.script_file, 'r') as f:
+                script = f.read()
+        print script
         kwargs = {
             'name': args.name,
             'description': args.description,
-            'script': '#!/bin/bash\n' + str(args.script).strip("'"),
+            'script': script,
             'location_type': args.location,
             'exec_type': args.type,
             'entrypoint': args.entrypoint
