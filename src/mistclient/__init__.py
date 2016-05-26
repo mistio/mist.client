@@ -472,8 +472,15 @@ class MistClient(object):
                         script_params="", env=None, su=False,
                         fire_and_forget=True)
 
+
+
     def get_templates(self, **_):
         req = self.request(self.uri + '/templates')
+        response = req.get()
+        return response.json()
+
+    def show_template(self, template_id):
+        req = self.request(self.uri + '/template/' + template_id)
         response = req.get()
         return response.json()
 
@@ -483,7 +490,8 @@ class MistClient(object):
             'description': kwargs.get('description', ''),
             'template': kwargs.get('template', ''),
             'location_type': kwargs.get('location_type', ''),
-            'exec_type': kwargs.get('exec_type', '')
+            'exec_type': kwargs.get('exec_type', ''),
+            'entrypoint': kwargs.get('entrypoint', ''),
         }
 
         req = self.request(self.uri + '/templates',
@@ -491,13 +499,47 @@ class MistClient(object):
         response = req.post()
         return response.json()
 
-    def create_stack(self, template_id, inputs=""):
+    def delete_template(self, template_id):
+        req = self.request(self.uri + '/template/' + template_id)
+        response = req.delete()
+        return response
 
+    def get_stacks(self):
+        req = self.request(self.uri + '/stacks')
+        response = req.get()
+        return response.json()
+
+    def create_stack(self, template_id, stack_name, stack_description, deploy,
+                     inputs={}):
         payload = {
+            'template_id': template_id,
             'inputs': inputs,
+            'stack_name': stack_name,
+            'stack_description': stack_description,
+            'deploy': deploy
         }
 
-        data = json.dumps(payload)
-        req = self.request(self.uri + "/templates/" + template_id, data=data)
+        req = self.request(self.uri + "/stacks", data=json.dumps(payload))
         re = req.post()
         return re.json()
+
+    def delete_stack(self, stack_id, inputs={}):
+        payload = {
+            'inputs': inputs
+        }
+
+        req = self.request(self.uri + "/stack/" + stack_id,
+                           data=json.dumps(payload))
+        response = req.delete()
+        return response
+
+    def run_workflow(self, stack_id, workflow, inputs={}):
+        payload = {
+            'workflow': workflow,
+            'inputs': inputs
+        }
+
+        req = self.request(self.uri + "/stack/" + stack_id,
+                           data=json.dumps(payload))
+        response = req.post()
+        return response.json()
