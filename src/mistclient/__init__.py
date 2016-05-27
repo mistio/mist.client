@@ -528,7 +528,7 @@ class MistClient(object):
             'inputs': inputs
         }
 
-        req = self.request(self.uri + "/stack/" + stack_id,
+        req = self.request(self.uri + "/stacks/" + stack_id,
                            data=json.dumps(payload))
         response = req.delete()
         return response
@@ -539,13 +539,13 @@ class MistClient(object):
             'inputs': inputs
         }
 
-        req = self.request(self.uri + "/stack/" + stack_id,
+        req = self.request(self.uri + "/stacks/" + stack_id,
                            data=json.dumps(payload))
         response = req.post()
         return response.json()
 
     def show_stack(self, stack_id):
 
-        req = self.request(self.uri + "/stack/" + stack_id)
+        req = self.request(self.uri + "/stacks/" + stack_id)
         response = req.get()
         return response.json()
