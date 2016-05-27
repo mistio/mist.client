@@ -480,7 +480,7 @@ class MistClient(object):
         return response.json()
 
     def show_template(self, template_id):
-        req = self.request(self.uri + '/template/' + template_id)
+        req = self.request(self.uri + '/templates/' + template_id)
         response = req.get()
         return response.json()
 
@@ -500,7 +500,7 @@ class MistClient(object):
         return response.json()
 
     def delete_template(self, template_id):
-        req = self.request(self.uri + '/template/' + template_id)
+        req = self.request(self.uri + '/templates/' + template_id)
         response = req.delete()
         return response
 
