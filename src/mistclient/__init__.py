@@ -543,3 +543,9 @@ class MistClient(object):
                            data=json.dumps(payload))
         response = req.post()
         return response.json()
+
+    def show_stack(self, stack_id):
+
+        req = self.request(self.uri + "/stack/" + stack_id)
+        response = req.get()
+        return response.json()
