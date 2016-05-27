@@ -3,8 +3,6 @@ import json
 
 import time
 
-import mistcommand.helpers.login
-
 from HTMLParser import HTMLParser as _HTMLParser
 from HTMLParser import HTMLParseError
 

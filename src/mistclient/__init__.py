@@ -498,11 +498,11 @@ class MistClient(object):
         response = req.get()
         return response.json()
 
-    # # self.scripts() exists too
-    # def get_scripts(self, **_):
-    #     req = self.request(self.uri + '/scripts')
-    #     response = req.get()
-    #     return response.json()
+    # self.scripts() exists too
+    def get_scripts(self, **_):
+        req = self.request(self.uri + '/scripts')
+        response = req.get()
+        return response.json()
 
     # TODO: move these to Script?
     def add_script(self, **kwargs):
