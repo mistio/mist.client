@@ -52,7 +52,7 @@ class MistClient(object):
         """
         if self.api_token:
             # verify current API token
-            check_auth_uri = self.uri.split('/api/v1')[0] + '/ping'
+            check_auth_uri = self.uri.split('/api/v1')[0] + '/check_token'
             req = self.request(check_auth_uri)
             try:
                 ping = req.get().json()
