@@ -49,15 +49,20 @@ def parse_config():
                         password=password, api_token=_api_token)
     api_token = client.api_token
     if _api_token != api_token:
+        renew = False
         if _api_token is not None:
-            print "API token no longer valid. Renewing ..."
-        prompt_save_config(mist_uri, email, password, api_token, config_path)
+            renew = True
+            print 'API token no longer valid. Renewing ...'
+        prompt_save_config(mist_uri, email, password, api_token, config_path, renew)
 
     return client
 
 
-def prompt_save_config(mist_uri, email, password, api_token, config_path):
+def prompt_save_config(mist_uri, email, password, api_token, config_path, renew):
     answered = None
+    if renew:
+        answered = True
+        answer = True
     while not answered:
         answer = raw_input("Save config [Y/n]: ")
         if answer in ["y", "Y", "Yes"]:
