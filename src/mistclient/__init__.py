@@ -565,7 +565,7 @@ class MistClient(object):
         return response.json()
 
     def show_template(self, template_id):
-        req = self.request(self.uri + '/template/' + template_id)
+        req = self.request(self.uri + '/templates/' + template_id)
         response = req.get()
         return response.json()
 
@@ -585,7 +585,7 @@ class MistClient(object):
         return response.json()
 
     def delete_template(self, template_id):
-        req = self.request(self.uri + '/template/' + template_id)
+        req = self.request(self.uri + '/templates/' + template_id)
         response = req.delete()
         return response
 
@@ -613,7 +613,7 @@ class MistClient(object):
             'inputs': inputs
         }
 
-        req = self.request(self.uri + "/stack/" + stack_id,
+        req = self.request(self.uri + "/stacks/" + stack_id,
                            data=json.dumps(payload))
         response = req.delete()
         return response
@@ -624,7 +624,7 @@ class MistClient(object):
             'inputs': inputs
         }
 
-        req = self.request(self.uri + "/stack/" + stack_id,
+        req = self.request(self.uri + "/stacks/" + stack_id,
                            data=json.dumps(payload))
         response = req.post()
         return response.json()
