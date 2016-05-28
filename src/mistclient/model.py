@@ -248,7 +248,7 @@ class Cloud(object):
         :param disk: Needed only by Linode cloud
         :returns: An update list of added machines
         """
-        if isinstance(key, str):
+        if isinstance(key, basestring):
             key_id = key
         else:
             key_id = key.id
