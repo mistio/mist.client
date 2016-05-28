@@ -352,6 +352,7 @@ class Cloud(object):
                         raise Exception("Create machine failed. Check the logs.")
                     elif verbose and not error:
                         print "Finished without errors!"
+                    self.update_machines()
                     return job
 
                 elif time() - started_at > timeout:
