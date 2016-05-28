@@ -319,7 +319,7 @@ class MistClient(object):
                     if id == self._keys[key_id].id]
         elif search:
             return [self._keys[key_id] for key_id in self._keys.keys()
-                    if search in self._keys[key_id].id]
+                    if (search in self._keys[key_id].id) or (search in self._keys[key_id].name)]
         else:
             return [self._keys[key_id] for key_id in self._keys.keys()]
 
@@ -367,8 +367,10 @@ class MistClient(object):
         data = json.dumps(payload)
 
         req = self.request(self.uri + '/keys', data=data)
-        req.put()
+        response = req.put().json()
+
         self.update_keys()
+        return response
 
     def _list_scripts(self):
         """

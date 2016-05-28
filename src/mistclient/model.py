@@ -645,6 +645,7 @@ class Key(object):
         self.api_token = self.mist_client.api_token
         self.id = key['id']
         self.is_default = key['isDefault']
+        self.name = key["name"]
         self.info = key
 
     def __str__(self):
