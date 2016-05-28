@@ -668,6 +668,7 @@ class Key(object):
         self.mist_client = mist_client
         self.api_token = self.mist_client.api_token
         self.id = key['id']
+        self.name = key['name']
         self.is_default = key['isDefault']
         self.info = key
 
@@ -716,7 +717,7 @@ class Key(object):
         :returns: An updated list of added keys
         """
         payload = {
-            'new_id': new_name
+            'new_name': new_name
         }
         data = json.dumps(payload)
         req = self.request(self.mist_client.uri+'/keys/'+self.id, data=data)

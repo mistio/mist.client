@@ -6,13 +6,12 @@ from mistcommand.helpers.machines import choose_machine
 
 
 def show_key(key):
-    print "Name: %s" % key.id
+    print "Name: %s" % key.name
+    print "ID: %s" % key.id
     print
-
     print "Private key:"
     print key.private
     print
-
     print "Puclic key:"
     print key.public
 
@@ -24,14 +23,14 @@ def list_keys(client, pretty):
         sys.exit(0)
 
     if pretty:
-        x = PrettyTable(["Name", "Is Default"])
+        x = PrettyTable(["ID", "Name", "Is Default"])
         for key in keys:
-            x.add_row([key.id, key.is_default])
+            x.add_row([key.id, key.name, key.is_default])
 
         print x
     else:
         for key in keys:
-            print "%s" % key.id
+            print "%-40s %-30s %-20s" % (key.id, key.name, key.is_default)
 
 
 def key_action(args):
@@ -58,7 +57,7 @@ def key_action(args):
         key = keys[0] if keys else None
         if key:
             key.delete()
-            print "Deleted %s" % key.id
+            print "Deleted %s (%s)" % (key.name, key.id)
         else:
             print "Could not find key: %s" % args.key
             sys.exit(0)
