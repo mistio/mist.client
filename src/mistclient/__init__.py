@@ -303,7 +303,7 @@ class MistClient(object):
 
     def _add_cloud_vsphere(self, **kwargs):
         payload = {
-            'username': kwargs.get('usename', ''),
+            'username': kwargs.get('username', ''),
             'password': kwargs.get('password', ''),
             'host': kwargs.get('host', '')
         }
