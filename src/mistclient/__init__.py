@@ -441,7 +441,7 @@ class MistClient(object):
         :returns: An updated list of added keys.
         """
         payload = {
-            'id': key_name,
+            'name': key_name,
             'priv': private
         }
 

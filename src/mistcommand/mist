@@ -501,7 +501,7 @@ def main():
 
     p_associate_key.add_argument(
         '--key', required=True,
-        help="Name of the key you want to act on"
+        help="Id of the key you want to act on"
     )
 
     p_disassociate_key = subparsers.add_parser(
@@ -518,11 +518,8 @@ def main():
         group = parser.add_mutually_exclusive_group(required=True)
         group.add_argument(
             '--key-id',
-            help="Name of the key you want to act on"
-        )
-        group.add_argument(
-            'key_name', nargs="?",
-            help="Name of the key you want to act on"
+            help="ID of the key you want to act on. "
+                 "You can retrieve all key IDs via list-keys"
         )
 
     for parser in [p_associate_key, p_disassociate_key]:
@@ -601,11 +598,11 @@ def main():
     add_script_group1 = p_add_script.add_mutually_exclusive_group()
     add_script_group1.add_argument(
         '--machine-id',
-        help="Id of the machine"
+        help="Id of the machine to run the script on"
     )
     add_script_group1.add_argument(
         '--machine-name',
-        help="Name of the machine"
+        help="Name of the machine to run the script on"
     )
 
     p_remove_script = subparsers.add_parser(
@@ -694,10 +691,6 @@ def main():
     for parser in [p_list_images, p_list_sizes, p_list_locations, p_list_networks]:
         group = parser.add_mutually_exclusive_group(required=True)
         group.add_argument(
-            '--cloud',
-            help="This can be either a cloud's name or id"
-        )
-        group.add_argument(
             '--cloud-id',
             help="Specify a cloud's id"
         )
@@ -723,7 +716,7 @@ def main():
     )
     group.add_argument(
         '--cloud-name',
-        help="Sepcify a cloud's name"
+        help="Specify a cloud's name"
     )
 
     p_list_machines.add_argument(
@@ -882,7 +875,9 @@ def main():
     )
 
     p_create_machine.add_argument(
-        '--monitoring', action='store_true')
+        '--monitoring', action='store_true',
+        help='Enable machine monitoring immediately after deployment'
+    )
 
     # -------------------TEMPLATE ACTIONS-------------------
     p_add_template = subparsers.add_parser(
@@ -1075,7 +1070,7 @@ def main():
             help="Name of the specified machine"
         )
         group.add_argument(
-            '--machine', nargs="?",
+            'machine', nargs="?",
             help="Name or id of the machine you want to specify"
         )
 
