@@ -254,7 +254,7 @@ class Cloud(object):
         :param disk: Needed only by Linode cloud
         :returns: An update list of added machines
         """
-        if isinstance(key, str):
+        if isinstance(key, basestring):
             key_id = key
         else:
             key_id = key.id
@@ -358,6 +358,7 @@ class Cloud(object):
                         raise Exception("Create machine failed. Check the logs.")
                     elif verbose and not error:
                         print "Finished without errors!"
+                    self.update_machines()
                     return job
 
                 elif time() - started_at > timeout:
@@ -670,6 +671,7 @@ class Key(object):
         self.id = key['id']
         self.name = key['name']
         self.is_default = key['isDefault']
+        self.name = key["name"]
         self.info = key
 
     def __str__(self):

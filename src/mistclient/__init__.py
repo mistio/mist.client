@@ -412,7 +412,7 @@ class MistClient(object):
                     if id == self._keys[key_id].id]
         elif search:
             return [self._keys[key_id] for key_id in self._keys.keys()
-                    if search in self._keys[key_id].id]
+                    if (search in self._keys[key_id].id) or (search in self._keys[key_id].name)]
         else:
             return [self._keys[key_id] for key_id in self._keys.keys()]
 
@@ -460,8 +460,10 @@ class MistClient(object):
         data = json.dumps(payload)
 
         req = self.request(self.uri + '/keys', data=data)
-        req.put()
+        response = req.put().json()
+
         self.update_keys()
+        return response
 
     def _list_scripts(self):
         """
@@ -571,6 +573,8 @@ class MistClient(object):
                         script_params="", env=None, su=False,
                         fire_and_forget=True)
 
+
+
     def get_templates(self, **_):
         req = self.request(self.uri + '/templates')
         response = req.get()
@@ -639,4 +643,10 @@ class MistClient(object):
         req = self.request(self.uri + "/stacks/" + stack_id,
                            data=json.dumps(payload))
         response = req.post()
+        return response.json()
+
+    def show_stack(self, stack_id):
+
+        req = self.request(self.uri + "/stacks/" + stack_id)
+        response = req.get()
         return response.json()
