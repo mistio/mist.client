@@ -127,6 +127,18 @@ class MistClient(object):
         else:
             self._clouds = {}
 
+    def post_logs(self, entries=[]):
+        if not entries:
+            return
+
+        payload = {
+            'entries': entries,
+        }
+
+        data = json.dumps(payload)
+        req = self.request(self.uri + '/logs', data=data)
+        req.post()
+
     def clouds(self, id=None, name=None, provider=None, search=None):
         """
         Property-like function to call the _list_clouds function in order to populate self._clouds dict
@@ -369,7 +381,7 @@ class MistClient(object):
             'project_id': kwargs.get('project_id', '')
         }
         return payload
-    
+
     def _list_keys(self):
         """
         Retrieves a list of all added Keys and populates the self._keys dict with Key instances
