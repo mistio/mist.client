@@ -512,6 +512,17 @@ class MistClient(object):
         response = req.get()
         return response.json()
 
+    def end_job(self, job_id, exit_code=None, output=None, error=None):
+        payload = {
+            'exit_code': exit_code,
+            'output': output,
+            'error': error
+        }
+        req = self.request(self.uri + "/jobs/" + job_id,
+                           data=json.dumps(payload))
+        response = req.delete()
+        return response.json()
+
     # self.scripts() exists too
     def get_scripts(self, **_):
         req = self.request(self.uri + '/scripts')
