@@ -137,6 +137,17 @@ class Cloud(object):
         else:
             print "Network actions not supported yet for %s provider" % self.provider
 
+    def create_network(self, network, router=None, subnet=None):
+        payload = {
+          "network": network,
+          "router": router,
+          "subnet": subnet
+        }
+        data = json.dumps(payload)
+        req = self.request(self.mist_client.uri+'/clouds/'+self.id+'/networks',
+                           data=data)
+        req.post()
+
     @property
     def images(self):
         """
@@ -224,7 +235,7 @@ class Cloud(object):
                        ips=[], networks=[], location_name="", async=False,
                        docker_command="", quantity=1, persist=False, fire_and_forget=True,
                        timeout=6000, script_id="", script_params="", verbose=False,
-                       associate_floating_ip=False):
+                       associate_floating_ip=False, provider=""):
         """
         Create a new machine on the given cloud
 
@@ -237,9 +248,15 @@ class Cloud(object):
         :param disk: Needed only by Linode cloud
         :returns: An update list of added machines
         """
+        if isinstance(key, basestring):
+            key_id = key
+        else:
+            key_id = key.id
+
         payload = {
             'name': name,
-            'key': key.id,
+            'provider': provider,
+            'key': key_id,
             'image': image_id,
             'location': location_id,
             'size': size_id,
@@ -332,12 +349,15 @@ class Cloud(object):
                             error = log.get('error', None)
                             if error:
                                 print " - ", error
+                        raise Exception("Create machine failed. Check the logs.")
                     elif verbose and not error:
                         print "Finished without errors!"
+                    self.update_machines()
                     return job
 
                 elif time() - started_at > timeout:
                     print "Timed out!"
+                    raise Exception("Create machine timed out. Check the logs.")
                     return job
 
                 sleep(5)
@@ -376,6 +396,14 @@ class Machine(object):
         :returns: An instance of RequestsHandler
         """
         return RequestsHandler(*args, api_token=self.api_token, **kwargs)
+
+    def run_script(self, script_id, params="", su=False, fire_and_forget=True):
+        script_job = self.mist_client.run_script(script_id=script_id, cloud_id=self.cloud.id,
+                                   machine_id=self.id,
+                                   script_params=script_params,
+                                   su=su)
+
+        return script_job
 
     def _machine_actions(self, action):
         """
@@ -618,6 +646,7 @@ class Key(object):
         self.api_token = self.mist_client.api_token
         self.id = key['id']
         self.is_default = key['isDefault']
+        self.name = key["name"]
         self.info = key
 
     def __str__(self):

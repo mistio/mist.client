@@ -19,7 +19,9 @@ class MistClient(object):
         :param email: Email to authenticate with mist.io. May be left 'None' if there's a standalone installation of mist.io that does not require authentication.
         :param password: Password to authenticate with mist.io. May be left 'None' if there's a standalone installation of mist.io that does not require authentication.
         """
-        self.uri = mist_uri
+        if not mist_uri.endswith("/"):
+            mist_uri = mist_uri + "/"
+        self.uri = mist_uri + "api/v1"
         self.email = email
         self.password = password
         self.api_token = api_token
@@ -317,7 +319,7 @@ class MistClient(object):
                     if id == self._keys[key_id].id]
         elif search:
             return [self._keys[key_id] for key_id in self._keys.keys()
-                    if search in self._keys[key_id].id]
+                    if (search in self._keys[key_id].id) or (search in self._keys[key_id].name)]
         else:
             return [self._keys[key_id] for key_id in self._keys.keys()]
 
@@ -333,6 +335,10 @@ class MistClient(object):
         self._keys = {}
         self._list_keys()
         return self._keys
+
+    def _generate_and_add_key(self, key_name):
+        priv = self.generate_key()
+        self.add_key(key_name, priv)
 
     def generate_key(self):
         """
@@ -361,8 +367,10 @@ class MistClient(object):
         data = json.dumps(payload)
 
         req = self.request(self.uri + '/keys', data=data)
-        req.put()
+        response = req.put().json()
+
         self.update_keys()
+        return response
 
     def _list_scripts(self):
         """
@@ -433,9 +441,6 @@ class MistClient(object):
 
     def run_script(self, cloud_id, machine_id, script_id, script_params="",
                    env=None, su=False, fire_and_forget=True):
-        if not fire_and_forget:
-            raise NotImplementedError()
-
         payload = {
             'cloud_id': cloud_id,
             'machine_id': machine_id,
@@ -447,10 +452,37 @@ class MistClient(object):
         data = json.dumps(payload)
         req = self.request(self.uri + "/scripts/" + script_id, data=data)
         re = req.post()
-        return re.json()
+        re = re.json()
+        if not fire_and_forget:
+            job_id = re["job_id"]
+            while True:
+                job = self.client.get_job(job_id)
+                if job["error"]:
+                    raise Exception("Failed to run script")
+                if job["finished_at"]:
+                    break
+                sleep(10)
+        return re
+
+    def add_and_run_script(self, cloud_id, machine_id,
+                           script_params="", env=None, su=False,
+                           fire_and_forget=True, **kwargs):
+
+        script = self.add_script(**kwargs)
+
+        self.run_script(self, cloud_id, machine_id, script["script_id"],
+                        script_params="", env=None, su=False,
+                        fire_and_forget=True)
+
+
 
     def get_templates(self, **_):
         req = self.request(self.uri + '/templates')
+        response = req.get()
+        return response.json()
+
+    def show_template(self, template_id):
+        req = self.request(self.uri + '/templates/' + template_id)
         response = req.get()
         return response.json()
 
@@ -460,7 +492,8 @@ class MistClient(object):
             'description': kwargs.get('description', ''),
             'template': kwargs.get('template', ''),
             'location_type': kwargs.get('location_type', ''),
-            'exec_type': kwargs.get('exec_type', '')
+            'exec_type': kwargs.get('exec_type', ''),
+            'entrypoint': kwargs.get('entrypoint', ''),
         }
 
         req = self.request(self.uri + '/templates',
@@ -468,13 +501,53 @@ class MistClient(object):
         response = req.post()
         return response.json()
 
-    def create_stack(self, template_id, inputs=""):
+    def delete_template(self, template_id):
+        req = self.request(self.uri + '/templates/' + template_id)
+        response = req.delete()
+        return response
 
+    def get_stacks(self):
+        req = self.request(self.uri + '/stacks')
+        response = req.get()
+        return response.json()
+
+    def create_stack(self, template_id, stack_name, stack_description, deploy,
+                     inputs={}):
         payload = {
+            'template_id': template_id,
             'inputs': inputs,
+            'stack_name': stack_name,
+            'stack_description': stack_description,
+            'deploy': deploy
         }
 
-        data = json.dumps(payload)
-        req = self.request(self.uri + "/templates/" + template_id, data=data)
+        req = self.request(self.uri + "/stacks", data=json.dumps(payload))
         re = req.post()
         return re.json()
+
+    def delete_stack(self, stack_id, inputs={}):
+        payload = {
+            'inputs': inputs
+        }
+
+        req = self.request(self.uri + "/stacks/" + stack_id,
+                           data=json.dumps(payload))
+        response = req.delete()
+        return response
+
+    def run_workflow(self, stack_id, workflow, inputs={}):
+        payload = {
+            'workflow': workflow,
+            'inputs': inputs
+        }
+
+        req = self.request(self.uri + "/stacks/" + stack_id,
+                           data=json.dumps(payload))
+        response = req.post()
+        return response.json()
+
+    def show_stack(self, stack_id):
+
+        req = self.request(self.uri + "/stacks/" + stack_id)
+        response = req.get()
+        return response.json()
