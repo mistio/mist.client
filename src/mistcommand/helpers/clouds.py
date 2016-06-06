@@ -91,22 +91,32 @@ def add_cloud(client, args):
         add_openstack_cloud(client, args)
     elif "softlayer" in provider:
         add_softlayer_cloud(client, args)
-    elif "hp" in provider:
-        add_hp_cloud(client, args)
+    # elif "hp" in provider:
+    #     add_hp_cloud(client, args)
     elif "docker" in provider:
         add_docker_cloud(client, args)
     elif "azure" in provider:
         add_azure_cloud(client, args)
     elif "bare" in provider:
         add_bare_metal_cloud(client, args)
+    elif provider == "coreos":
+        add_coreos_cloud(client, args)
     elif "gce" in provider:
         add_gce_cloud(client, args)
     elif provider == "vcloud":
         add_vcloud_cloud(client, args)
     elif provider == "indonesian_vcloud":
         add_indonesian_cloud(client, args)
+    elif provider == 'vsphere':
+        add_vsphere_cloud(client, args)
     elif provider == "libvirt":
         add_libvirt_cloud(client, args)
+    elif provider == 'hostvirtual':
+        add_hostvirtual_cloud(client, args)
+    elif provider == 'vultr':
+        add_vultr_cloud(client, args)
+    elif provider == 'packet':
+        add_packet_cloud(client, args)
 
 
 def add_gce_cloud(client, args):
@@ -130,13 +140,16 @@ def add_gce_cloud(client, args):
 def add_libvirt_cloud(client, args):
     title = args.name
     provider = args.provider
-
     machine_hostname = args.libvirt_hostname
     machine_user = args.libvirt_user
     machine_key = args.libvirt_key
+    images_location = args.libvirt_images
+    ssh_port = args.libvirt_ssh_port
 
-    client.add_cloud(title=title, provider=provider, machine_hostname=machine_hostname, machine_user=machine_user,
-                       machine_key=machine_key)
+    client.add_cloud(title=title, provider=provider,
+                     machine_hostname=machine_hostname,
+                     machine_user=machine_user, machine_key=machine_key,
+                     images_location=images_location, ssh_port=ssh_port)
 
 
 def add_vcloud_cloud(client, args):
@@ -151,23 +164,33 @@ def add_vcloud_cloud(client, args):
     client.add_cloud(title=title, provider=provider, username=username, password=password,
                        organization=organization, host=host)
 
+def add_vsphere_cloud(client, args):
+    title = args.name
+    provider = args.provider
+    username = args.vsphere_username
+    password = args.vsphere_password
+    host = args.vsphere_host
+
+    client.add_cloud(title=title, provider=provider, username=username,
+                     password=password, host=host)
+
 
 def add_indonesian_cloud(client, args):
     title = args.name
     provider = args.provider
-
     username = args.indonesian_username
     password = args.indonesian_password
     organization = args.indonesian_organization
+    indonesianRegion = args.indonesian_region
 
-    client.add_cloud(title=title, provider=provider, username=username, password=password,
-                       organization=organization)
+    client.add_cloud(title=title, provider=provider, username=username,
+                     password=password, organization=organization,
+                     indonesianRegion=indonesianRegion)
 
 
 def add_docker_cloud(client, args):
     title = args.name
     provider = args.provider
-
     docker_host = args.docker_host
     docker_port = args.docker_port
     docker_auth_user = args.docker_auth_user
@@ -182,10 +205,16 @@ def add_docker_cloud(client, args):
             cert_file = f.read()
     else:
         cert_file = ""
+    if args.docker_ca_cert_file:
+        with open(args.docker_ca_cert_file, 'r') as f:
+            ca_cert_file = f.read()
+    else:
+        ca_cert_file = ""
 
-    client.add_cloud(title=title, provider=provider, docker_host=docker_host, docker_port=docker_port,
-                       auth_user=docker_auth_user, auth_password=docker_auth_password, key_file=key_file,
-                       cert_file=cert_file)
+    client.add_cloud(title=title, provider=provider, docker_host=docker_host,
+                     docker_port=docker_port, auth_user=docker_auth_user,
+                     auth_password=docker_auth_password, key_file=key_file,
+                     cert_file=cert_file, ca_cert_file=ca_cert_file)
 
 
 def add_azure_cloud(client, args):
@@ -273,31 +302,68 @@ def add_softlayer_cloud(client, args):
     client.add_cloud(title=title, provider=provider, username=username, api_key=api_key)
 
 
-def add_hp_cloud(client, args):
-    title = args.name
-    provider = args.provider
-
-    username = args.hp_username
-    password = args.hp_password
-    tenant_name = args.hp_tenant
-    region = args.hp_region
-
-    client.add_cloud(title=title, provider=provider, username=username, password=password, tenant_name=tenant_name,
-                       region=region)
+# def add_hp_cloud(client, args):
+#     title = args.name
+#     provider = args.provider
+#     username = args.hp_username
+#     password = args.hp_password
+#     tenant_name = args.hp_tenant
+#     region = args.hp_region
+#
+#     client.add_cloud(title=title, provider=provider, username=username,
+#                      password=password, tenant_name=tenant_name, region=region)
 
 
 def add_bare_metal_cloud(client, args):
     title = args.name
     provider = args.provider
-
     machine_ip = args.bare_hostname
     machine_user = args.bare_user
-
     machine_port = args.bare_port
     machine_key = args.bare_ssh_key_id
 
-    client.add_cloud(title=title, provider=provider, machine_ip=machine_ip, machine_key=machine_key,
-                       machine_port=machine_port, machine_user=machine_user)
+    client.add_cloud(title=title, provider=provider, machine_ip=machine_ip,
+                     machine_key=machine_key, machine_port=machine_port,
+                     machine_user=machine_user)
+
+
+def add_coreos_cloud(client, args):
+    title = args.name
+    provider = args.provider
+    machine_ip = args.core_hostname
+    machine_user = args.core_user
+    machine_port = args.core_port
+    machine_key = args.core_ssh_key_id
+
+    client.add_cloud(title=title, provider=provider, machine_ip=machine_ip,
+                     machine_key=machine_key, machine_port=machine_port,
+                     machine_user=machine_user)
+
+
+def add_hostvirtual_cloud(client, args):
+    title = args.name
+    provider = args.provider
+    api_key = args.hostvirtual_api_key
+
+    client.add_cloud(title=title, provider=provider, api_key=api_key)
+
+
+def add_vultr_cloud(client, args):
+    title = args.name
+    provider = args.provider
+    api_key = args.vultr_api_key
+
+    client.add_cloud(title=title, provider=provider, api_key=api_key)
+
+
+def add_packet_cloud(client, args):
+    title = args.name
+    provider = args.provider
+    api_key = args.packet_api_key
+    project_id = args.packet_project
+
+    client.add_cloud(title=title, provider=provider, api_key=api_key,
+                     project_id=project_id)
 
 
 def cloud_action(args):

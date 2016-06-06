@@ -1,6 +1,9 @@
 import json
 
-from mistclient.helpers import RequestsHandler
+import sys
+from time import sleep
+
+from mistclient.helpers import RequestsHandler, HTMLParser
 from mistclient.model import Cloud, Key, Script
 
 
@@ -9,15 +12,21 @@ class MistClient(object):
     The base class that initiates a new client that connects with mist.io service.
     """
 
-    def __init__(self, mist_uri="https://mist.io", email=None, password=None, verify=True, api_token=None):
+    def __init__(self, mist_uri="https://mist.io", email=None, password=None,
+                 api_token=None, verify=True):
         """
-        Initialize the mist.client. In case email and password are given, it will try to authenticate with mist.io
-        and keep the api_token that is returned to be used with the later requests.
+        Initialize the mist.client. In case email and password are given, it
+        will try to authenticate with mist.io and keep the api_token that is
+        returned to be used with the later requests.
 
-
-        :param mist_uri: By default it is 'https://mist.io'. Can be changed if there's a different installation of mist.io
-        :param email: Email to authenticate with mist.io. May be left 'None' if there's a standalone installation of mist.io that does not require authentication.
-        :param password: Password to authenticate with mist.io. May be left 'None' if there's a standalone installation of mist.io that does not require authentication.
+        :param mist_uri: By default it is 'https://mist.io'. Can be changed if
+        there's a different installation of mist.io
+        :param email: Email to authenticate with mist.io. May be left 'None' if
+        there's a standalone installation of mist.io that does not require
+        authentication.
+        :param password: Password to authenticate with mist.io. May be left
+        'None' if there's a standalone installation of mist.io that does not
+        require authentication.
         """
         if not mist_uri.endswith("/"):
             mist_uri = mist_uri + "/"
@@ -38,18 +47,31 @@ class MistClient(object):
 
     def __authenticate(self):
         """
-        Sends a json payload with the email and password in order to get the authentication api_token to be used with
-        the rest of the requests
+        Sends a json payload with the email and password in order to get the
+        authentication api_token to be used with the rest of the requests
         """
         if self.api_token:
-            return
+            # verify current API token
+            check_auth_uri = self.uri.split('/api/v1')[0] + '/check_token'
+            req = self.request(check_auth_uri)
+            try:
+                ping = req.get().json()
+            except Exception as exc:
+                if str(exc).startswith('User not authenticated'):
+                    self.api_token = None
+            else:
+                if self.email == ping['hello']:
+                    return
+                print "Authentication failed"
+                sys.exit(1)
+
+        auth_uri = self.uri.split('/api/v1')[0] + '/auth'
         payload = {
             'email': self.email,
             'password': self.password
         }
-
         data = json.dumps(payload)
-        req = self.request(self.uri + '/auth', data=data)
+        req = self.request(auth_uri, data=data)
         response = req.post().json()
         token = response.get('mist_api_token', None)
         if token:
@@ -57,7 +79,16 @@ class MistClient(object):
             self.api_token = "mist_1 %s:%s" % (self.email, token)
         else:
             self.api_token = response.get('token', None)
-        self.user_details = response
+
+    def user_info(self):
+        """
+        General user info information as returned in /account in our API
+        """
+        account_uri = self.uri.split('/api/v1')[0] + '/account'
+        req = self.request(account_uri)
+        account_info = req.get()
+        user_data = HTMLParser(account_info.content)
+        return user_data
 
     def request(self, *args, **kwargs):
         """
@@ -95,6 +126,18 @@ class MistClient(object):
                 self._clouds[cloud['id']] = Cloud(cloud, self)
         else:
             self._clouds = {}
+
+    def post_logs(self, entries=[]):
+        if not entries:
+            return
+
+        payload = {
+            'entries': entries,
+        }
+
+        data = json.dumps(payload)
+        req = self.request(self.uri + '/logs', data=data)
+        req.post()
 
     def clouds(self, id=None, name=None, provider=None, search=None):
         """
@@ -156,16 +199,26 @@ class MistClient(object):
             payload = self._add_cloud_linode(**kwargs)
         elif provider == "bare_metal":
             payload = self._add_cloud_bare_metal(**kwargs)
+        elif provider == "coreos":
+            payload = self._add_cloud_coreos(**kwargs)
         elif provider in ['vcloud', 'indonesian_vcloud']:
             payload = self._add_cloud_vcloud(**kwargs)
+        elif provider == 'vsphere':
+            payload = self._add_cloud_vsphere(**kwargs)
         elif provider == "docker":
             payload = self._add_cloud_docker(**kwargs)
         elif provider == "libvirt":
             payload = self._add_cloud_libvirt(**kwargs)
-        elif provider == "hpcloud":
-            payload = self._add_cloud_hp(**kwargs)
+        # elif provider == "hpcloud":
+        #     payload = self._add_cloud_hp(**kwargs)
         elif provider == "openstack":
             payload = self._add_cloud_openstack(**kwargs)
+        elif provider == "hostvirtual":
+            payload = self._add_cloud_hostvirtual(**kwargs)
+        elif provider == "vultr":
+            payload = self._add_cloud_vultr(**kwargs)
+        elif provider == "packet":
+            payload = self._add_cloud_packet(**kwargs)
 
         payload['title'] = title
         payload['provider'] = provider
@@ -241,11 +294,29 @@ class MistClient(object):
         }
         return payload
 
+    def _add_cloud_coreos(self, **kwargs):
+        payload = {
+            'machine_ip': kwargs.get('machine_ip', ''),
+            'machine_key': kwargs.get('machine_key', ''),
+            'machine_user': kwargs.get('machine_user', 'root'),
+            'machine_port': kwargs.get('machine_port', 22)
+        }
+        return payload
+
     def _add_cloud_vcloud(self, **kwargs):
         payload = {
             'username': kwargs.get('username', ''),
             'password': kwargs.get('password', ''),
             'organization': kwargs.get('organization', ''),
+            'host': kwargs.get('host', ''),
+            'indonesianRegion': kwargs.get('indonesianRegion', '')
+        }
+        return payload
+
+    def _add_cloud_vsphere(self, **kwargs):
+        payload = {
+            'username': kwargs.get('username', ''),
+            'password': kwargs.get('password', ''),
             'host': kwargs.get('host', '')
         }
         return payload
@@ -257,7 +328,8 @@ class MistClient(object):
             'auth_user': kwargs.get('auth_user', ''),
             'auth_password': kwargs.get('auth_password', ''),
             'key_file': kwargs.get('key_file', ''),
-            'cert_file': kwargs.get('cert_file', '')
+            'cert_file': kwargs.get('cert_file', ''),
+            'ca_cert_file': kwargs.get('ca_cert_file', '')
         }
         return payload
 
@@ -265,18 +337,20 @@ class MistClient(object):
         payload = {
             'machine_hostname': kwargs.get('machine_hostname', ''),
             'machine_user': kwargs.get('machine_user', 'root'),
-            'machine_key': kwargs.get('machine_key', '')
+            'machine_key': kwargs.get('machine_key', ''),
+            'images_location': kwargs.get('images_location', ''),
+            'ssh_port': kwargs.get('ssh_port', 22)
         }
         return payload
 
-    def _add_cloud_hp(self, **kwargs):
-        payload = {
-            'username': kwargs.get('username', ''),
-            'password': kwargs.get('password', ''),
-            'tenant_name': kwargs.get('tenant_name', ''),
-            'region': kwargs.get('region', '')
-        }
-        return payload
+    # def _add_cloud_hp(self, **kwargs):
+    #     payload = {
+    #         'username': kwargs.get('username', ''),
+    #         'password': kwargs.get('password', ''),
+    #         'tenant_name': kwargs.get('tenant_name', ''),
+    #         'region': kwargs.get('region', '')
+    #     }
+    #     return payload
 
     def _add_cloud_openstack(self, **kwargs):
         payload = {
@@ -286,6 +360,25 @@ class MistClient(object):
             'tenant_name': kwargs.get('tenant_name', ''),
             'region': kwargs.get('region', ''),
             'compute_endpoint': kwargs.get('compute_endpoint', '')
+        }
+        return payload
+
+    def _add_cloud_hostvirtual(self, **kwargs):
+        payload = {
+            'api_key': kwargs.get('api_key', '')
+        }
+        return payload
+
+    def _add_cloud_vultr(self, **kwargs):
+        payload = {
+            'api_key': kwargs.get('api_key', '')
+        }
+        return payload
+
+    def _add_cloud_packet(self, **kwargs):
+        payload = {
+            'api_key': kwargs.get('api_key', ''),
+            'project_id': kwargs.get('project_id', '')
         }
         return payload
 
@@ -360,7 +453,7 @@ class MistClient(object):
         :returns: An updated list of added keys.
         """
         payload = {
-            'id': key_name,
+            'name': key_name,
             'priv': private
         }
 
@@ -419,11 +512,13 @@ class MistClient(object):
         response = req.get()
         return response.json()
 
+    # self.scripts() exists too
     def get_scripts(self, **_):
         req = self.request(self.uri + '/scripts')
         response = req.get()
         return response.json()
 
+    # TODO: move these to Script?
     def add_script(self, **kwargs):
         payload = {
             'name': kwargs.get('name', ''),
@@ -439,6 +534,12 @@ class MistClient(object):
         response = req.post()
         return response.json()
 
+    def remove_script(self, script_id):
+        req = self.request(self.uri + '/scripts/' + script_id,  api_version=2)
+        response = req.delete()
+        return response
+
+    # exists in Machine model, too
     def run_script(self, cloud_id, machine_id, script_id, script_params="",
                    env=None, su=False, fire_and_forget=True):
         payload = {
@@ -464,13 +565,11 @@ class MistClient(object):
                 sleep(10)
         return re
 
-    def add_and_run_script(self, cloud_id, machine_id,
-                           script_params="", env=None, su=False,
-                           fire_and_forget=True, **kwargs):
+    def add_and_run_script(self, cloud_id, machine_id, script_params="",
+                           env=None, su=False, fire_and_forget=True, **kwargs):
 
         script = self.add_script(**kwargs)
-
-        self.run_script(self, cloud_id, machine_id, script["script_id"],
+        self.run_script(cloud_id, machine_id, script["script_id"],
                         script_params="", env=None, su=False,
                         fire_and_forget=True)
 

@@ -8,13 +8,30 @@ from mistcommand.helpers.clouds import return_cloud
 def choose_machines_by_tag(client, tag):
     chosen_machines = []
     machines = client.machines()
-
     for machine in machines:
         machine_tags = machine.info.get('tags', [])
         if tag in machine_tags:
             chosen_machines.append(machine)
-
     return chosen_machines
+
+
+def clean_tags(tags):
+    _tags = []
+    if not tags:
+        return '-'
+    for tag in tags:
+        for key, value in tag.iteritems():
+            tag_pair = '%s=%s' % (key, value)
+            _tags.append(tag_pair)
+    return ', '.join(_tags)
+
+
+def parsed_probe(info):
+    load = info['loadavg']
+    output = ''
+    output += 'LOAD: %s/%s/%s' % (load[0], load[1], load[2])
+    output += 'PING: %s/%s/%s' % (info['rtt_min'], info['rtt_avg'], info['rtt_max'])
+    return output
 
 
 def list_machines(client, cloud, pretty):
@@ -27,18 +44,22 @@ def list_machines(client, cloud, pretty):
                 ips = " -- ".join(public_ips)
             except:
                 ips = ""
-            machine_tags = machine.info.get('tags', [])
-            try:
-                tags = machine_tags
-            except:
-                tags = []
-
+            machine_tags = machine.info.get('tags', '')
+            machine_tags = clean_tags(machine_tags)
+            # try:
+            #     tags = machine_tags
+            # except:
+            #     tags = []
             if pretty:
-                x.add_row([machine.name, machine.id, machine.info['state'], ips, machine.cloud.title, tags])
+                x.add_row([machine.name, machine.id, machine.info['state'],
+                           ips, machine.cloud.title, machine_tags])
             else:
-                print "%-25s %-60s %-10s %-20s %-30s %-20s" % (machine.name, machine.id, machine.info['state'], ips,
-                                                               machine.cloud.title, tags)
-
+                print "%-25s %-60s %-10s %-20s %-30s %-20s" % (machine.name,
+                                                               machine.id,
+                                                               machine.info['state'],
+                                                               ips,
+                                                               machine.cloud.title,
+                                                               machine_tags)
     else:
         machines = cloud.machines()
         for machine in machines:
@@ -47,14 +68,19 @@ def list_machines(client, cloud, pretty):
                 ips = " -- ".join(public_ips)
             except:
                 ips = ""
-            machine_tags = machine.info.get('tags', [])
-            tags = ",".join(machine_tags)
+            machine_tags = machine.info.get('tags', '')
+            machine_tags = clean_tags(machine_tags)
+            # tags = ",".join(machine_tags)
             if pretty:
-                x.add_row([machine.name, machine.id, machine.info['state'], ips, cloud.title, tags])
+                x.add_row([machine.name, machine.id, machine.info['state'],
+                           ips, cloud.title, machine_tags])
             else:
-                print "%-25s %-60s %-10s %-20s %-30s %-20s" % (machine.name, machine.id, machine.info['state'], ips,
-                                                               machine.cloud.title, tags)
-
+                print "%-25s %-60s %-10s %-20s %-30s %-20s" % (machine.name,
+                                                               machine.id,
+                                                               machine.info['state'],
+                                                               ips,
+                                                               machine.cloud.title,
+                                                               machine_tags)
     if pretty:
         print x
 
@@ -68,10 +94,11 @@ def display_machine(machine):
     except:
         ips = ""
 
-    machine_tags = machine.info.get('tags', [])
-    tags = ",".join(machine_tags)
+    machine_tags = machine.info.get('tags', '')
+    machine_tags = clean_tags(machine_tags)
 
-    x.add_row([machine.name, machine.id, machine.info['state'], ips, machine.cloud.title, tags])
+    x.add_row([machine.name, machine.id, machine.info['state'],
+               ips, machine.cloud.title, machine_tags])
     print x
 
 
@@ -91,14 +118,15 @@ def machine_take_action(machine, action):
     elif action == "probe":
         info = machine.probe()
         if "uptime" in info.keys():
-            print "Machine %s is probed" % machine.name
+            print "Short probe output for machine %s:" % machine.name
+            print parsed_probe(info)
         else:
-            print "Not probed"
+            print "Machine could not be probed successfully" % machine.name
 
 
 def choose_machine(client, args):
-    machine_id = args.id
-    machine_name = args.name
+    machine_id = args.machine_id
+    machine_name = args.machine_name
     if machine_id:
         machines = client.machines(id=machine_id)
         machine = machines[0] if machines else None
@@ -143,9 +171,9 @@ def create_machine(client, cloud, args):
     networks = []
     if args.network_id:
         networks.append(args.network_id)
-
-    cloud.create_machine(name=name, key=key, image_id=image_id, size_id=size_id, location_id=location_id,
-                           networks=networks, script_id=args.script_id, script_params=args.script_params, monitoring=args.monitoring)
+    cloud.create_machine(name=name, key=key, image_id=image_id, size_id=size_id,
+                         location_id=location_id, networks=networks, script_id=args.script_id,
+                         script_params=args.script_params, monitoring=args.monitoring)
 
 
 def machine_action(args):
@@ -164,7 +192,6 @@ def machine_action(args):
 
     elif args.action == 'describe-machine':
         machine = choose_machine(client, args)
-
         display_machine(machine)
 
     elif args.action == 'create-machine':
@@ -182,6 +209,7 @@ def machine_action(args):
         except:
             print "Failed to execute %s action on %s " % (args.action, machine)
             sys.exit(0)
+
     elif args.action == 'enable-monitoring':
         machine = choose_machine(client, args)
         machine.enable_monitoring()
@@ -192,12 +220,22 @@ def machine_action(args):
         machine.disable_monitoring()
         print "Disabled monitoring to machine %s" % machine.name
 
-    elif args.action == 'tag':
+    elif args.action in ['add-tag', 'remove-tag']:
         machine = choose_machine(client, args)
-
         if machine.info['can_tag']:
-            machine.tag(tag=args.new_tag)
-            print "Add tag %s to machine %s" % (args.new_tag, machine.name)
+            if args.action == 'add-tag':
+                machine.add_tag(key=args.key, value=args.value)
+                print "Added tag %s=%s to machine %s" % (args.key,
+                                                         args.value,
+                                                         machine.name)
+            elif args.action == 'remove-tag':
+                machine.del_tag(key=args.key, value=args.value)
+                print "Removed tag %s=%s from machine %s" % (args.key,
+                                                             args.value,
+                                                             machine.name)
+            else:
+                "Unknown action to be performed on machine tags"
+                sys.exit(0)
         else:
             print "Cannot tag machine on provider %s" % machine.cloud.title
             sys.exit(0)

@@ -13,6 +13,8 @@ from mistcommand.helpers.clouds import cloud_action
 from mistcommand.helpers.providers import provider_action
 from mistcommand.helpers.keys import key_action
 from mistcommand.helpers.machines import machine_action
+from mistcommand.helpers.templates import template_action
+from mistcommand.helpers.stacks import stack_action
 from mistcommand.helpers.images import image_action
 from mistcommand.helpers.sizes import size_action
 from mistcommand.helpers.locations import location_action
@@ -24,6 +26,7 @@ from mistcommand.helpers.ssh import ssh_action
 
 from requests.packages import urllib3
 urllib3.disable_warnings()
+
 
 def main():
 
@@ -90,11 +93,12 @@ def main():
 
     p_add_cloud = subparsers.add_parser(
         'add-cloud',
-        help="Add a new cloud"
+        description="Add a new cloud"
     )
 
     provider_choices = [
         'bare_metal',
+        'coreos',
         'ec2',
         'gce',
         'nephoscale',
@@ -103,7 +107,7 @@ def main():
         'openstack',
         'rackspace',
         'softlayer',
-        'hpcloud',
+        # 'hpcloud',
         'docker',
         'azure',
         'vcloud',
@@ -112,6 +116,7 @@ def main():
         'hostvirtual',
         'vultr',
         'vsphere',
+        'packet'
     ]
     p_add_cloud.add_argument(
         '--provider', required=True, choices=provider_choices,
@@ -228,28 +233,28 @@ def main():
         help="API Key for the SoftLayer cloud"
     )
 
-    hp_group = p_add_cloud.add_argument_group("HP")
-    hp_regions = [
-        'region-a.geo-1',
-        'region-b.geo-1'
-    ]
-
-    hp_group.add_argument(
-        '--hp-region', choices=hp_regions,
-        help="Region for the HP Cloud Cloud"
-    )
-    hp_group.add_argument(
-        '--hp-username',
-        help="Username for the HP cloud"
-    )
-    hp_group.add_argument(
-        '--hp-password',
-        help="Passord for the HP cloud"
-    )
-    hp_group.add_argument(
-        '--hp-tenant',
-        help="Tenant name for the HP cloud"
-    )
+    # hp_group = p_add_cloud.add_argument_group("HP")
+    # hp_regions = [
+    #     'region-a.geo-1',
+    #     'region-b.geo-1'
+    # ]
+    #
+    # hp_group.add_argument(
+    #     '--hp-region', choices=hp_regions,
+    #     help="Region for the HP Cloud Cloud"
+    # )
+    # hp_group.add_argument(
+    #     '--hp-username',
+    #     help="Username for the HP cloud"
+    # )
+    # hp_group.add_argument(
+    #     '--hp-password',
+    #     help="Passord for the HP cloud"
+    # )
+    # hp_group.add_argument(
+    #     '--hp-tenant',
+    #     help="Tenant name for the HP cloud"
+    # )
 
     docker_group = p_add_cloud.add_argument_group("Docker")
     docker_group.add_argument(
@@ -276,6 +281,11 @@ def main():
         '--docker-cert-file',
         help="OPTIONAL. Path of your cert file used for TLS"
     )
+    docker_group.add_argument(
+        '--docker-ca-cert-file',
+        help="OPTIONAL. Path to your CA cert file used for TLS"
+    )
+
     bare_group = p_add_cloud.add_argument_group("Bare Metal Server")
     bare_group.add_argument(
         '--bare-hostname',
@@ -291,7 +301,25 @@ def main():
     )
     bare_group.add_argument(
         '--bare-ssh-key-id',
-        help="The id of the ssh key that is associated with the machine"
+        help="The name of the ssh key that is associated with the machine"
+    )
+
+    core_group = p_add_cloud.add_argument_group("CoreOS")
+    core_group.add_argument(
+        '--core-hostname',
+        help="Hostname of the machine"
+    )
+    core_group.add_argument(
+        '--core-user', default="root",
+        help="By default root"
+    )
+    core_group.add_argument(
+        '--core-port', default="22",
+        help="Port of the ssh-server. By default 22"
+    )
+    core_group.add_argument(
+        '--core-ssh-key-id',
+        help="The name of the ssh key that is associated with the machine"
     )
 
     azure_group = p_add_cloud.add_argument_group("Azure")
@@ -319,7 +347,22 @@ def main():
     )
     vcloud_group.add_argument(
         '--vcloud-organization',
-        help="Your organization's name - the one you are registered to vCloud with"
+        help="Your organization's name - "
+             "the one you are registered to vCloud with"
+    )
+
+    vsphere_group = p_add_cloud.add_argument_group("vSphere")
+    vsphere_group.add_argument(
+        '--vsphere-username',
+        help="Username for the vSphere cloud"
+    )
+    vsphere_group.add_argument(
+        '--vsphere-password',
+        help="Password for the vSphere cloud"
+    )
+    vsphere_group.add_argument(
+        '--vsphere-host',
+        help="Hostname"
     )
 
     indonesian_group = p_add_cloud.add_argument_group("Indonesian vCloud")
@@ -333,7 +376,12 @@ def main():
     )
     indonesian_group.add_argument(
         '--indonesian-organization',
-        help="Your organization's name - the one you are registered to vCloud with"
+        help="Your organization's name - "
+             "the one you are registered to vCloud with"
+    )
+    indonesian_group.add_argument(
+        '--indonesian-region', choices=['my.idcloudonline.com', 'compute.idcloudonline.com'],
+        help="Region of the Indonesian vCloud"
     )
 
     libvirt_group = p_add_cloud.add_argument_group("KVM via libvirt")
@@ -342,13 +390,23 @@ def main():
         help="The hostname of your libvirt machine"
     )
     libvirt_group.add_argument(
-        '--libvirt-user',
-        help="User for your libvirt machine"
+        '--libvirt-user', default="root",
+        help="User for your libvirt machine. By default root"
     )
     libvirt_group.add_argument(
         '--libvirt-key',
-        help="The SSH Key name that you have added to Mist.io and is associated with your libvirt machine"
+        help="The SSH Key name that you have added to Mist.io "
+             "and is associated with your libvirt machine"
     )
+    libvirt_group.add_argument(
+        '--libvirt-ssh-port', default="22",
+        help="Port of the ssh-server. Defaults to 22"
+    )
+    libvirt_group.add_argument(
+        '--libvirt-images',
+        help="Path to *.iso images"
+    )
+
     gce_group = p_add_cloud.add_argument_group("GCE")
     gce_group.add_argument(
         '--gce-email',
@@ -362,6 +420,29 @@ def main():
         '--gce-private-key',
         help="Path of file that contains your GCE private key"
     )
+
+    hostvirtual_group = p_add_cloud.add_argument_group("Hostvirtual")
+    hostvirtual_group.add_argument(
+        '--hostvirtual-api-key',
+        help="API Key"
+    )
+
+    vultr_group = p_add_cloud.add_argument_group("Vultr")
+    vultr_group.add_argument(
+        '--vultr-api-key',
+        help="API Key"
+    )
+
+    packet_group = p_add_cloud.add_argument_group("Packet.net")
+    packet_group.add_argument(
+        '--packet-api-key',
+        help="API Key"
+    )
+    packet_group.add_argument(
+        '--packet-project',
+        help="Optional project name"
+    )
+
     # ---------------KEY ACTIONS----------------------
     p_list_keys = subparsers.add_parser(
         'list-keys',
@@ -375,7 +456,7 @@ def main():
 
     p_add_key = subparsers.add_parser(
         'add-key',
-        help="Add a new SSH Key"
+        description="Add a new SSH Key"
     )
 
     p_add_key.add_argument(
@@ -403,7 +484,6 @@ def main():
         description="Rename key"
     )
 
-
     p_rename_key.add_argument(
         '--new-name', required=True,
         help="New name for the key"
@@ -414,16 +494,152 @@ def main():
         description="Show information about a specified key"
     )
 
+    p_associate_key = subparsers.add_parser(
+        'associate-key',
+        description="Associate a private/public key pair to a machine"
+    )
+
+    p_associate_key.add_argument(
+        '--key', required=True,
+        help="Id of the key you want to act on"
+    )
+
+    p_disassociate_key = subparsers.add_parser(
+        'disassociate-key',
+        description="Undo a key-machine association"
+    )
+
+    p_disassociate_key.add_argument(
+        '--key', required=True,
+        help="Name of the key you want to act on"
+    )
+
     for parser in [p_delete_key, p_rename_key, p_describe_key]:
         group = parser.add_mutually_exclusive_group(required=True)
         group.add_argument(
             '--key-id',
-            help="Id of the key you want to delete"
+            help="ID of the key you want to act on. "
+                 "You can retrieve all key IDs via list-keys"
+        )
+
+    for parser in [p_associate_key, p_disassociate_key]:
+        group = parser.add_mutually_exclusive_group(required=True)
+        group.add_argument(
+            '--machine-id',
+            help="Id of the machine"
         )
         group.add_argument(
-            'key_name', nargs="?",
-            help="Name of the key you want to delete"
+            '--machine-name',
+            help="Name of the machine"
         )
+        # group.add_argument(
+        #     'machine', nargs="?",
+        #     help="Id or name of the machine"
+        # )
+
+    # ----------------SCRIPT ACTIONS------------------
+    p_list_scripts = subparsers.add_parser(
+        'list-scripts',
+        description="List scripts"
+    )
+
+    p_list_scripts.add_argument(
+        '--pretty', action='store_true', default=False,
+        help="Print in a table format"
+    )
+
+    p_add_script = subparsers.add_parser(
+        'add-script',
+        description="Add a script"
+    )
+
+    p_add_script.add_argument(
+        '--name', required=True,
+        help="Name of the script"
+    )
+
+    p_add_script.add_argument(
+        '--description',
+        help="Script description"
+    )
+
+    p_add_script.add_argument(
+        '--location', required=True, choices=['inline', 'url', 'github'],
+        help="Location of script"
+    )
+
+    p_add_script.add_argument(
+        '--type', required=True, choices=['executable', 'ansible',
+                                          'collectd_python_plugin'],
+        help="Script execution type"
+    )
+
+    p_add_script.add_argument(
+        '--entrypoint',
+        help="Entrypoint"
+    )
+
+    p_add_script.add_argument(
+        '--run', action='store_true', default=False,
+        help="Run the script immediately on the specified machine"
+    )
+
+    add_script_group0 = p_add_script.add_mutually_exclusive_group(required=True)
+    add_script_group0.add_argument(
+        '--script',
+        help='Script to be executed. Can be either source code, url, or repo, '
+             'depending on location type'
+    )
+    add_script_group0.add_argument(
+        '--script-file',
+        help='Add inline script from local file'
+    )
+
+    add_script_group1 = p_add_script.add_mutually_exclusive_group()
+    add_script_group1.add_argument(
+        '--machine-id',
+        help="Id of the machine to run the script on"
+    )
+    add_script_group1.add_argument(
+        '--machine-name',
+        help="Name of the machine to run the script on"
+    )
+
+    p_remove_script = subparsers.add_parser(
+        'remove-script',
+        description="Remove a script"
+    )
+
+    p_remove_script.add_argument(
+        '--id', required=True,
+        help="Id of the script to be removed.\n"
+             "You can use list-scripts to retrieve the scripts' IDs"
+    )
+
+    p_run_script = subparsers.add_parser(
+        'run-script',
+        description="Run a script"
+    )
+
+    p_run_script.add_argument(
+        '--id',
+        help="Id of the script to be run.\n"
+             "You can use list-scripts to retrieve the scripts' IDs"
+    )
+
+    run_script_group = p_run_script.add_mutually_exclusive_group(required=True)
+    run_script_group.add_argument(
+        '--machine-id',
+        help="Id of the machine"
+    )
+    run_script_group.add_argument(
+        '--machine-name',
+        help="Name of the machine"
+    )
+    # script_group.add_argument(
+    #     'machine', nargs="?",
+    #     help="Id or name of the machine"
+    # )
 
     # ----------------IMAGES/SIZES/LOCATIONS/NETWORKS------------------
     p_list_images = subparsers.add_parser(
@@ -461,19 +677,10 @@ def main():
         help="Print in a table format"
     )
 
-    p_list_scripts = subparsers.add_parser(
-        'list-scripts',
-        description="List scripts"
-    )
-
-    p_list_scripts.add_argument(
-        '--pretty', action='store_true', default=False,
-        help="Print in a table format"
-    )
-
     p_list_networks = subparsers.add_parser(
         'list-networks',
-        help="List availablen networks for specified provider (currently only OPENSTACK support)"
+        description="List available networks for specified provider "
+                    "(currently only OPENSTACK support)"
     )
 
     p_list_networks.add_argument(
@@ -484,16 +691,12 @@ def main():
     for parser in [p_list_images, p_list_sizes, p_list_locations, p_list_networks]:
         group = parser.add_mutually_exclusive_group(required=True)
         group.add_argument(
-            '--cloud',
-            help="This can be either a cloud's name or id"
-        )
-        group.add_argument(
             '--cloud-id',
             help="Specify a cloud's id"
         )
         group.add_argument(
             '--cloud-name',
-            help="Sepcify a cloud's name"
+            help="Specify a cloud's name"
         )
 
     # --------------MACHINE ACTIONS-------------------------
@@ -513,7 +716,7 @@ def main():
     )
     group.add_argument(
         '--cloud-name',
-        help="Sepcify a cloud's name"
+        help="Specify a cloud's name"
     )
 
     p_list_machines.add_argument(
@@ -523,7 +726,7 @@ def main():
 
     p_describe_machine = subparsers.add_parser(
         'describe-machine',
-        help="Show information about a specified machine"
+        description="Show information about a specified machine"
     )
 
     p_probe = subparsers.add_parser(
@@ -551,14 +754,34 @@ def main():
         description="Destroy a machine"
     )
 
-    p_tag = subparsers.add_parser(
-        'tag',
+    p_add_tag = subparsers.add_parser(
+        'add-tag',
         description="Tag a machine"
     )
 
-    p_tag.add_argument(
-        '--new-tag', required=True,
-        help="Add this tag to the machine"
+    p_add_tag.add_argument(
+        '--key', required=True,
+        help="Specifies the key of the tag to be added to the machine"
+    )
+
+    p_add_tag.add_argument(
+        '--value', required=True,
+        help="Specifies the value of the tag to be added to the machine"
+    )
+
+    p_remove_tag = subparsers.add_parser(
+        'remove-tag',
+        description="Remove a tag from a machine"
+    )
+
+    p_remove_tag.add_argument(
+        '--key', required=True,
+        help="Specifies the key of the tag to be removed from a machine"
+    )
+
+    p_remove_tag.add_argument(
+        '--value', required=True,
+        help="Specifies the value of the tag to be removed from a machine"
     )
 
     p_enable_monitoring = subparsers.add_parser(
@@ -571,15 +794,16 @@ def main():
         description="Disable monitoring on a machine"
     )
 
-    for parser in [p_describe_machine, p_probe, p_start, p_stop, p_reboot, p_destroy, p_tag,
+    for parser in [p_describe_machine, p_probe, p_start, p_stop, p_reboot,
+                   p_destroy, p_add_tag, p_remove_tag,
                    p_enable_monitoring, p_disable_monitoring]:
         group = parser.add_mutually_exclusive_group(required=True)
         group.add_argument(
-            '--id',
+            '--machine-id',
             help="Id of the specified machine"
         )
         group.add_argument(
-            '--name',
+            '--machine-name',
             help="Name of the specified machine"
         )
         group.add_argument(
@@ -589,7 +813,7 @@ def main():
 
     p_create_machine = subparsers.add_parser(
         'create-machine',
-        help="Create a new machine"
+        description="Create a new machine"
     )
 
     group = p_create_machine.add_mutually_exclusive_group(required=True)
@@ -603,33 +827,41 @@ def main():
     )
     group.add_argument(
         '--cloud-name',
-        help="Sepcify a cloud's name"
+        help="Specify a cloud's name"
     )
 
     p_create_machine.add_argument(
         '--machine-name', required=True,
         help="Name for the new machine"
     )
+
     p_create_machine.add_argument(
         '--key-id',
-        help="Id of SSH Key to associate with the machine"
+        help="Name of SSH Key to associate with the machine"
     )
+
     p_create_machine.add_argument(
         '--image-id', required=True,
-        help="Id of OS Image. You can list images for the given cloud to find their ids"
+        help="Id of OS Image. You can list images for the "
+             "given cloud to find their ids"
     )
+
     p_create_machine.add_argument(
         '--size-id', required=True,
-        help="Id of machine size. You can list sizes for the given cloud to find their ids"
+        help="Id of machine size. You can list sizes for the "
+             "given cloud to find their ids"
     )
+
     p_create_machine.add_argument(
-        '--location-id', required=True,
-        help="Id of the cloud location. You can list locations for the given cloud to find their ids"
+        '--location-id',
+        help="Id of the cloud location. "
+             "You can list locations for the given cloud to find their ids"
     )
 
     p_create_machine.add_argument(
         '--network-id', required=False,
-        help="Currently supported only for Openstack. Required if multiple openstack networks are available"
+        help="Currently supported only for Openstack. "
+             "Required if multiple openstack networks are available"
     )
 
     p_create_machine.add_argument(
@@ -643,8 +875,143 @@ def main():
     )
 
     p_create_machine.add_argument(
-        '--monitoring', action='store_true')
+        '--monitoring', action='store_true',
+        help='Enable machine monitoring immediately after deployment'
+    )
 
+    # -------------------TEMPLATE ACTIONS-------------------
+    p_add_template = subparsers.add_parser(
+        'add-template',
+        description="Add a template"
+    )
+    p_add_template.add_argument(
+        '--name', required=True,
+        help="Name of the template"
+    )
+    add_template_group = p_add_template.add_mutually_exclusive_group(required=True)
+    add_template_group.add_argument(
+        '--template',
+        help="Template"
+    )
+    add_template_group.add_argument(
+        '--template-file',
+        help='Template input from file'
+    )
+    p_add_template.add_argument(
+        '--location', required=True, choices=['inline', 'github', 'url'],
+        help="Template location"
+    )
+    p_add_template.add_argument(
+        '--type', required=True, choices=['cloudify'],
+        help="Execution type"
+    )
+    p_add_template.add_argument(
+        '--entrypoint',
+        help="Entrypoint"
+    )
+    p_add_template.add_argument(
+        '--description',
+        help="Description of the template"
+    )
+
+    p_delete_template = subparsers.add_parser(
+        'delete-template',
+        description="Delete a template"
+    )
+    p_delete_template.add_argument(
+        '--template-id', required=True,
+        help="The ID of the template to be deleted. "
+             "You can retrieve all the template IDs by invoking list-templates"
+    )
+
+    p_list_templates = subparsers.add_parser(
+        'list-templates',
+        description="List all templates"
+    )
+    p_list_templates.add_argument(
+        '--pretty', action="store_true",
+        help='Print in a table format'
+    )
+
+    p_show_template = subparsers.add_parser(
+        'show-template',
+        description='Show template information'
+    )
+    p_show_template.add_argument(
+        '--template-id', required=True,
+        help="The ID of the template to be looked up. "
+             "You can retrieve templates' IDs by invoking list-templates"
+    )
+    p_show_template.add_argument(
+        '--pretty', action='store_true',
+        help='Print in a table format'
+    )
+
+    # -------------------STACK ACTIONS-------------------
+    p_list_stacks = subparsers.add_parser(
+        'list-stacks',
+        description="List all available stacks"
+    )
+    p_list_stacks.add_argument(
+        '--pretty', action="store_true",
+        help="Print in a table format"
+    )
+
+    p_add_stack = subparsers.add_parser(
+        'create-stack',
+        description="Start a template job"
+    )
+    p_add_stack.add_argument(
+        '--template-id', required=True,
+        help="Id of the template to be used"
+    )
+    p_add_stack.add_argument(
+        '--stack-name', required=True,
+        help="The name of the new stack"
+    )
+    p_add_stack.add_argument(
+        '--stack-description',
+        help="Description of the stack"
+    )
+    p_add_stack.add_argument(
+        '--deploy', action="store_true",
+        help="Deploy the stack"
+    )
+    p_add_stack.add_argument(
+        '--inputs',
+        help="Workflow inputs"
+    )
+
+    p_delete_stack = subparsers.add_parser(
+        'delete-stack',
+        description="Remove a stack"
+    )
+    p_delete_stack.add_argument(
+        '--stack-id', required=True,
+        help="ID of the stack to be removed. "
+             "You can retrieve all stack IDs by invoking list-stacks"
+    )
+    p_delete_stack.add_argument(
+        '--inputs',
+        help="Workflow inputs"
+    )
+
+    p_run_workflow = subparsers.add_parser(
+        'run-workflow',
+        description="Run a template job"
+    )
+    p_run_workflow.add_argument(
+        '--stack-id', required=True,
+        help="Id of the targeted stack"
+    )
+    p_run_workflow.add_argument(
+        '--inputs',
+        help="Workflow inputs"
+    )
+    p_run_workflow.add_argument(
+        '--workflow', required=True,
+        help="Workflow to be run"
+    )
 
     # -------------------METRICS ACTIONS-------------------
     p_list_metrics = subparsers.add_parser(
@@ -659,7 +1026,7 @@ def main():
 
     p_add_metric = subparsers.add_parser(
         'add-metric',
-        help="Add a new metric to the machine"
+        description="Add a new metric to the machine"
     )
 
     p_add_metric.add_argument(
@@ -703,34 +1070,31 @@ def main():
             help="Name of the specified machine"
         )
         group.add_argument(
-            '--machine', nargs="?",
+            'machine', nargs="?",
             help="Name or id of the machine you want to specify"
         )
-
-
 
     # p_get_stats = subparsers.add_parser(
     #     'get-stats',
     #     description="Get stats from a monitored machine"
     # )
 
-    p_run = subparsers.add_parser(
-        'run',
-        description="Run a command in multiple machines"
-    )
+    # p_run = subparsers.add_parser(
+    #     'run',
+    #     description="Run a command in multiple machines"
+    # )
+    #
+    # p_run.add_argument(
+    #     '--command', required=True,
+    #     help="Run this command"
+    # )
+    #
+    # p_run.add_argument(
+    #     '--tag', required=True,
+    #     help="Run the command in machines that have this tag"
+    # )
 
-    p_run.add_argument(
-        '--command', required=True,
-        help="Run this command"
-    )
-
-    p_run.add_argument(
-        '--tag', required=True,
-        help="Run the command in machines that have this tag"
-    )
-
-    # MIST SSH
-
+    # ----------------MIST SSH-------------------------
     p_ssh = subparsers.add_parser(
         'ssh',
         description="Open ssh connection and interactive shell to machine"
@@ -756,10 +1120,11 @@ def main():
         ssh_action(args)
     elif args.action == 'list-providers':
         provider_action(args)
-    elif args.action in ['list-keys', 'add-key', 'describe-key', 'rename-key', 'delete-key']:
+    elif args.action in ['list-keys', 'add-key', 'delete-key', 'rename-key',
+                         'describe-key', 'associate-key', 'disassociate-key']:
         key_action(args)
-    elif args.action in ['list-clouds', 'rename-cloud', 'delete-cloud', 'describe-cloud',
-                         'add-cloud']:
+    elif args.action in ['list-clouds', 'rename-cloud', 'delete-cloud',
+                         'describe-cloud', 'add-cloud']:
         cloud_action(args)
     elif args.action == 'list-images':
         image_action(args)
@@ -767,16 +1132,26 @@ def main():
         size_action(args)
     elif args.action == 'list-locations':
         location_action(args)
-    elif args.action == 'list-scripts':
+    elif args.action in ['list-scripts', 'add-script', 'remove-script',
+                         'run-script']:
         script_action(args)
     elif args.action == 'list-networks':
         network_action(args)
-    elif args.action in ['list-machines', 'describe-machine', 'probe', 'start', 'stop', 'reboot',
-                         'destroy', 'tag', 'create-machine', 'enable-monitoring', 'disable-monitoring']:
+    elif args.action in ['list-machines', 'create-machine', 'describe-machine',
+                         'probe', 'start', 'stop', 'reboot', 'destroy',
+                         'enable-monitoring', 'disable-monitoring',
+                         'add-tag', 'remove-tag']:
         machine_action(args)
+    elif args.action in ['list-templates', 'add-template', 'delete-template',
+                         'show-template']:
+        template_action(args)
+    elif args.action in ['list-stacks', 'create-stack', 'delete-stack',
+                         'run-workflow']:
+        stack_action(args)
     elif args.action in ['list-metrics', 'add-metric', 'add-custom-metric']:
         metric_action(args)
     elif args.action == 'user-info':
         user_info()
+
 if __name__ == "__main__":
     main()
