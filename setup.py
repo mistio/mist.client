@@ -10,7 +10,9 @@ requires = [
     'argcomplete',
     'pyyaml',
     'prettytable',
-    'ansible==1.9.3'
+    'cryptography',
+    'ansible==1.9.3',
+    'HTMLParser'
 ]
 
 

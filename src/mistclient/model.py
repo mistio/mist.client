@@ -146,7 +146,13 @@ class Cloud(object):
         data = json.dumps(payload)
         req = self.request(self.mist_client.uri+'/clouds/'+self.id+'/networks',
                            data=data)
-        req.post()
+        return req.post().json()
+
+    def delete_network(self, network):
+
+        req = self.request(self.mist_client.uri + '/clouds/' + self.id + '/networks/' + network )
+        req.delete()
+
 
     @property
     def images(self):
@@ -397,13 +403,14 @@ class Machine(object):
         """
         return RequestsHandler(*args, api_token=self.api_token, **kwargs)
 
-    def run_script(self, script_id, params="", su=False, fire_and_forget=True):
-        script_job = self.mist_client.run_script(script_id=script_id, cloud_id=self.cloud.id,
-                                   machine_id=self.id,
-                                   script_params=script_params,
-                                   su=su)
-
-        return script_job
+    # exists in MistClient, too
+    # def run_script(self, script_id, params="", su=False, fire_and_forget=True):
+    #     script_job = self.mist_client.run_script(script_id=script_id, cloud_id=self.cloud.id,
+    #                                machine_id=self.id,
+    #                                script_params=script_params,
+    #                                su=su)
+    #
+    #     return script_job
 
     def _machine_actions(self, action):
         """
@@ -446,8 +453,10 @@ class Machine(object):
 
     def probe(self, key_id=None, ssh_user=None):
         """
-        If no parameter is provided, mist.io will try to probe the machine with the default
-        :param key_id: Optional. Give if you explicitly want to probe with this key_id
+        If no parameter is provided, mist.io will try to probe the machine with
+        the default
+        :param key_id: Optional. Give if you explicitly want to probe with this
+        key_id
         :param ssh_user: Optional. Give if you explicitly want a specific user
         :returns: A list of data received by the probing (e.g. uptime etc)
         """
@@ -461,22 +470,23 @@ class Machine(object):
             'ssh_user': ssh_user
         }
         data = json.dumps(payload)
-        req = self.request(self.mist_client.uri+"/clouds/"+self.cloud.id+"/machines/"+self.id+"/probe", data=data)
+        req = self.request(self.mist_client.uri + "/clouds/" + self.cloud.id +
+                           "/machines/" + self.id + "/probe", data=data)
         probe_info = req.post().json()
         self.probed = True
         return probe_info
 
-    def associate_key(self, key_id, host=None, ssh_user=None, ssh_port=22):
-        payload = {
-            'ssh_user': ssh_user,
-            'host': host,
-            'ssh_port': ssh_port
-        }
-        data = json.dumps(payload)
-        req = self.request(self.mist_client.uri+"/clouds/"+self.cloud.id+"/machines/"+self.id+"/keys/"+key_id,
-                           data=data)
-        req.put()
-        self.mist_client.update_keys()
+    # def associate_key(self, key_id, host=None, ssh_user=None, ssh_port=22):
+    #     payload = {
+    #         'ssh_user': ssh_user,
+    #         'host': host,
+    #         'ssh_port': ssh_port
+    #     }
+    #     data = json.dumps(payload)
+    #     req = self.request(self.mist_client.uri+"/clouds/"+self.cloud.id+"/machines/"+self.id+"/keys/"+key_id,
+    #                        data=data)
+    #     req.put()
+    #     self.mist_client.update_keys()
 
     def _toggle_monitoring(self, action, no_ssh=False):
         """
@@ -620,14 +630,28 @@ class Machine(object):
                            data=data)
         req.post()
 
-    def tag(self, tag):
+    def add_tag(self, key, value):
+        # TODO: multiple tags
         payload = {
-            'tag': tag
+          'tags': {
+              key: value
+          }
         }
         data = json.dumps(payload)
-        req = self.request(self.mist_client.uri+"/clouds/"+self.cloud.id+"/machines/"+self.id+"/metadata",
-                           data=data)
+        req = self.request(self.mist_client.uri + "/clouds/" + self.cloud.id +
+                           "/machines/" + self.id + "/tags", data=data)
         req.post()
+        self.cloud.update_machines()
+
+    def del_tag(self, key, value):
+        # TODO: multiple tags
+        payload = {
+            'value': value
+        }
+        data = json.dumps(payload)
+        req = self.request(self.mist_client.uri + "/clouds/" + self.cloud.id +
+                           "/machines/" + self.id + "/tags/" + key, data=data)
+        req.delete()
         self.cloud.update_machines()
 
 
@@ -645,6 +669,7 @@ class Key(object):
         self.mist_client = mist_client
         self.api_token = self.mist_client.api_token
         self.id = key['id']
+        self.name = key['name']
         self.is_default = key['isDefault']
         self.name = key["name"]
         self.info = key
@@ -657,8 +682,8 @@ class Key(object):
 
     def request(self, *args, **kwargs):
         """
-        The main purpose of this is to be a wrapper-like function to pass the api_token and all the other params to the
-        requests that are being made
+        The main purpose of this is to be a wrapper-like function to pass the
+        api_token and all the other params to the requests that are being made
 
         :returns: An instance of RequestsHandler
         """
@@ -694,7 +719,7 @@ class Key(object):
         :returns: An updated list of added keys
         """
         payload = {
-            'new_id': new_name
+            'new_name': new_name
         }
         data = json.dumps(payload)
         req = self.request(self.mist_client.uri+'/keys/'+self.id, data=data)
@@ -723,16 +748,29 @@ class Key(object):
         req.delete()
         self.mist_client.update_keys()
 
-    def associate_to_machine(self, cloud_id, machine_id, host=None, ssh_user=None, ssh_port=22):
+    def associate(self, cloud_id, machine_id, host=None,
+                  ssh_user=None, ssh_port=22):
         payload = {
             'ssh_user': ssh_user,
             'host': host,
             'ssh_port': ssh_port
         }
         data = json.dumps(payload)
-        req = self.request(self.mist_client.uri+"/clouds/"+cloud_id+"/machines/"+machine_id+"/keys/"+self.id,
+        req = self.request(self.mist_client.uri + "/clouds/" + cloud_id +
+                           "/machines/" + machine_id + "/keys/" + self.id,
                            data=data)
         req.put()
+        self.mist_client.update_keys()
+
+    def disassociate(self, cloud_id, machine_id, host=None):
+        payload = {
+            'host': host
+        }
+        data = json.dumps(payload)
+        req = self.request(self.mist_client.uri + "/clouds/" + cloud_id +
+                           "/machines/" + machine_id + "/keys/" + self.id,
+                           data=data)
+        req.delete()
         self.mist_client.update_keys()
 
 
@@ -750,7 +788,6 @@ class Script(object):
         self.name = script['name']
         self.description = script['description']
 
-
     def __str__(self):
         return "%s => %s" % (self.__class__.__name__, self.id)
 
@@ -765,3 +802,18 @@ class Script(object):
         :returns: An instance of RequestsHandler
         """
         return RequestsHandler(*args, api_token=self.api_token, **kwargs)
+
+
+# # TODO
+# class Template(object):
+#     """
+#     A Template instance
+#     """
+#     def __init__(self, template, mist_client):
+#
+#
+# class Stack(object):
+#     """
+#     A Stack instance
+#     """
+#     def __init__(self, stack, mist_client):
