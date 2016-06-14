@@ -1013,6 +1013,71 @@ def main():
         help="Workflow to be run"
     )
 
+    # -------------------VPN ACTIONS-------------------
+    p_list_tunnels = subparsers.add_parser(
+        'list-tunnels',
+        description='List all available VPN Tunnels'
+    )
+    p_list_tunnels.add_argument(
+        '--pretty', action='store_true',
+        help='Print in a table format'
+    )
+
+    p_add_tunnel = subparsers.add_parser(
+        'add-tunnel',
+        description='Add a new VPN Tunnel'
+    )
+    p_add_tunnel.add_argument(
+        '--name', required=True,
+        help='Tunnel name'
+    )
+    p_add_tunnel.add_argument(
+        '--cidrs', required=True,
+        help='List of private networks in CIDR notation '
+             'accessible via this tunnel'
+    )
+    p_add_tunnel.add_argument(
+        '--client-address',
+        help='IP address of the VPN client'
+    )
+    p_add_tunnel.add_argument(
+        '--description',
+        help='Description'
+    )
+
+    p_edit_tunnel = subparsers.add_parser(
+        'edit-tunnel',
+        description='Edit an existing VPN Tunnel'
+    )
+    p_edit_tunnel.add_argument(
+        '--tunnel-id', required=True,
+        help='ID of the tunnel to be edited.'
+             'You can retrieve all tunnel IDs by invoking list-tunnels'
+    )
+    p_edit_tunnel.add_argument(
+        '--name', required=True,
+        help='Existing/new name of the specified tunnel'
+    )
+    p_edit_tunnel.add_argument(
+        '--cidrs', required=True,
+        help='Existing/new list of the reachable private'
+             'networks in CIDR notation'
+    )
+    p_edit_tunnel.add_argument(
+        '--description',
+        help='Description'
+    )
+
+    p_delete_tunnel = subparsers.add_parser(
+        'delete-tunnel',
+        description='Delete an existing VPN Tunnel'
+    )
+    p_delete_tunnel.add_argument(
+        '--tunnel-id', required=True,
+        help='ID of the tunnel to be deleted.'
+             'You can retrieve all tunnel IDs by invoking list-tunnels'
+    )
+
     # -------------------METRICS ACTIONS-------------------
     p_list_metrics = subparsers.add_parser(
         'list-metrics',
