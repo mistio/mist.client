@@ -23,6 +23,7 @@ from mistcommand.helpers.metrics import metric_action
 from mistcommand.helpers.scripts import script_action
 from mistcommand.helpers.mistansible import ansible_action
 from mistcommand.helpers.ssh import ssh_action
+from mistcommand.helpers.tunnels import tunnel_action
 
 from requests.packages import urllib3
 urllib3.disable_warnings()
@@ -1213,6 +1214,9 @@ def main():
     elif args.action in ['list-stacks', 'create-stack', 'delete-stack',
                          'run-workflow']:
         stack_action(args)
+    elif args.action in ['list-tunnels', 'add-tunnel', 'edit-tunnel',
+                         'delete-tunnel']:
+        tunnel_action(args)
     elif args.action in ['list-metrics', 'add-metric', 'add-custom-metric']:
         metric_action(args)
     elif args.action == 'user-info':
