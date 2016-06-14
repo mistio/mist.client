@@ -675,10 +675,10 @@ class Key(object):
         self.info = key
 
     def __str__(self):
-        return "%s => %s" % (self.__class__.__name__, self.id)
+        return "%s => %s" % (self.__class__.__name__, self.name)
 
     def __repr__(self):
-        return "%s => %s" % (self.__class__.__name__, self.id)
+        return "%s => %s" % (self.__class__.__name__, self.name)
 
     def request(self, *args, **kwargs):
         """
@@ -789,7 +789,7 @@ class Script(object):
         self.description = script['description']
 
     def __str__(self):
-        return "%s => %s" % (self.__class__.__name__, self.id)
+        return "%s => %s" % (self.__class__.__name__, self.name)
 
     def __repr__(self):
         return "%s => %s" % (self.__class__.__name__, self.name)
