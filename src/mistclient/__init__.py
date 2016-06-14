@@ -12,7 +12,7 @@ class MistClient(object):
     The base class that initiates a new client that connects with mist.io service.
     """
 
-    def __init__(self, mist_uri="https://mist.io", email=None, password=None,
+    def __init__(self, mist_uri="http://172.17.0.1", email=None, password=None,
                  api_token=None, verify=True):
         """
         Initialize the mist.client. In case email and password are given, it
@@ -586,8 +586,6 @@ class MistClient(object):
                         script_params="", env=None, su=False,
                         fire_and_forget=True)
 
-
-
     def get_templates(self, **_):
         req = self.request(self.uri + '/templates')
         response = req.get()
@@ -663,3 +661,37 @@ class MistClient(object):
         req = self.request(self.uri + "/stacks/" + stack_id)
         response = req.get()
         return response.json()
+
+    def list_tunnels(self):
+        req = self.request(self.uri + '/tunnels')
+        response = req.get()
+        return response.json()
+
+    def add_tunnel(self, name, cidrs, client_addr, description):
+        payload = {
+            'name': name,
+            'cidrs': cidrs,
+            'client_addr': client_addr,
+            'description': description
+        }
+
+        req = self.request(self.uri + '/tunnels', data=json.dumps(payload))
+        response = req.post()
+        return response.json()
+
+    def edit_tunnel(self, tunnel_id, name, cidrs, description):
+        payload = {
+            'name': name,
+            'cidrs': cidrs,
+            'description': description
+        }
+
+        req = self.request(self.uri + '/tunnel/' + tunnel_id,
+                           data=json.dumps(payload))
+        response = req.put()
+        return response.json()
+
+    def delete_tunnel(self, tunnel_id):
+        req = self.request(self.uri + '/tunnel/' + tunnel_id)
+        response = req.delete()
+        return response
