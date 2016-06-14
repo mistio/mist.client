@@ -3,6 +3,7 @@ import sys
 from prettytable import PrettyTable
 from mistcommand.helpers.login import authenticate
 
+
 def tunnel_action(args):
     client = authenticate()
     if args.action == 'list-tunnels':
@@ -16,28 +17,33 @@ def tunnel_action(args):
     elif args.action == 'delete-tunnel':
         client.delete_tunnel(args.tunnel_id)
         print 'Tunnel %s removed' % args.tunnel_id
+    elif args.action == 'tunnel-script':
+        get_conf(client, args.tunnel_id)
 
 
 def list_tunnels(client, pretty):
     tunnels = client.list_tunnels()
     if not tunnels:
-        print 'Could not find any VPN Tunnels found'
+        print 'Could not find any VPN Tunnels'
         sys.exit(0)
     if pretty:
         x = PrettyTable(['Name', 'ID', 'CIDRs', 'Description'])
         for tunnel in tunnels:
-            x.add_row([tunnel['name'], tunnel['id'], tunnel['cidrs'], tunnel['description']])
+            description = tunnel.get('description', '-')
+            x.add_row([tunnel['name'], tunnel['_id'], tunnel['cidrs'], description])
         print x
     else:
         for tunnel in tunnels:
-            print '%-40s %-40s %-40s %-40s' % (tunnel['name'], tunnel['id'],
-                                               tunnel['cidrs'], tunnel['description'])
+            description = tunnel.get('description', '-')
+            print '%-40s %-40s %-40s %-40s' % (tunnel['name'], tunnel['_id'],
+                                               tunnel['cidrs'], description)
 
 
 def add_tunnel(client, args):
     name = args.name
     cidrs = [cidr.strip(' ') for cidr in str(args.cidrs).split(',')]
-    client_addr = args.client_arg
+    print cidrs
+    client_addr = args.client_address if args.client_address else ''
     description = args.description
 
     client.add_tunnel(name=name, cidrs=cidrs, client_addr=client_addr,
@@ -54,3 +60,16 @@ def edit_tunnel(client, args):
                        description=description)
 
 
+def get_conf(client, tunnel_id):
+    tunnels = client.list_tunnels()
+    if not tunnels:
+        print 'Could not find any VPN Tunnels'
+        sys.exit(0)
+    for tunnel in tunnels:
+        if tunnel['_id'] == tunnel_id:
+            script = tunnel['script']
+            break
+    else:
+        print 'The ID provided does not correspond to any VPN Tunnel'
+        sys.exit(0)
+    print script

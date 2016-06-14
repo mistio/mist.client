@@ -1034,8 +1034,8 @@ def main():
     )
     p_add_tunnel.add_argument(
         '--cidrs', required=True,
-        help='List of private networks in CIDR notation '
-             'accessible via this tunnel'
+        help='List of private networks (separated by commas) '
+             'in CIDR notation accessible via this tunnel'
     )
     p_add_tunnel.add_argument(
         '--client-address',
@@ -1079,6 +1079,15 @@ def main():
              'You can retrieve all tunnel IDs by invoking list-tunnels'
     )
 
+    p_tunnel_script = subparsers.add_parser(
+        'tunnel-script',
+        description='Configuration script for setting up the VPN Tunnel'
+    )
+    p_tunnel_script.add_argument(
+        '--tunnel-id', required=True,
+        help='Get the configuration script of the VPN Tunnel.'
+             'You can retrieve the tunnel ID by invoking list-tunnels'
+    )
     # -------------------METRICS ACTIONS-------------------
     p_list_metrics = subparsers.add_parser(
         'list-metrics',
@@ -1215,7 +1224,7 @@ def main():
                          'run-workflow']:
         stack_action(args)
     elif args.action in ['list-tunnels', 'add-tunnel', 'edit-tunnel',
-                         'delete-tunnel']:
+                         'delete-tunnel', 'tunnel-script']:
         tunnel_action(args)
     elif args.action in ['list-metrics', 'add-metric', 'add-custom-metric']:
         metric_action(args)
