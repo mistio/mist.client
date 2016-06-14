@@ -12,7 +12,7 @@ class MistClient(object):
     The base class that initiates a new client that connects with mist.io service.
     """
 
-    def __init__(self, mist_uri="http://172.17.0.1", email=None, password=None,
+    def __init__(self, mist_uri="https://mist.io", email=None, password=None,
                  api_token=None, verify=True):
         """
         Initialize the mist.client. In case email and password are given, it
@@ -663,7 +663,7 @@ class MistClient(object):
         return response.json()
 
     def list_tunnels(self):
-        req = self.request(self.uri + '/tunnels')
+        req = self.request(self.uri.split('/api/v1')[0] + '/tunnels')
         response = req.get()
         return response.json()
 
@@ -675,7 +675,7 @@ class MistClient(object):
             'description': description
         }
 
-        req = self.request(self.uri + '/tunnels', data=json.dumps(payload))
+        req = self.request(self.uri.split('/api/v1')[0] + '/tunnels', data=json.dumps(payload))
         response = req.post()
         return response.json()
 
@@ -686,12 +686,12 @@ class MistClient(object):
             'description': description
         }
 
-        req = self.request(self.uri + '/tunnel/' + tunnel_id,
+        req = self.request(self.uri.split('/api/v1')[0] + '/tunnel/' + tunnel_id,
                            data=json.dumps(payload))
         response = req.put()
         return response.json()
 
     def delete_tunnel(self, tunnel_id):
-        req = self.request(self.uri + '/tunnel/' + tunnel_id)
+        req = self.request(self.uri.split('/api/v1')[0] + '/tunnel/' + tunnel_id)
         response = req.delete()
         return response
