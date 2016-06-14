@@ -31,12 +31,12 @@ def list_stacks(client, pretty):
     if pretty:
         x = PrettyTable(["Name", "ID", "Description", "Template", "Deployed"])
         for stack in stacks:
-            x.add_row([stack['name'], stack['id'], stack['description'],
+            x.add_row([stack['name'], stack['_id'], stack['description'],
                        stack['template'], stack['deploy']])
         print x
     else:
         for stack in stacks:
-            print "%-40s %-40s %-40s %-40s" % (stack['name'], stack['id'],
+            print "%-40s %-40s %-40s %-40s" % (stack['name'], stack['_id'],
                                                stack['description'],
                                                stack['template'])
 
