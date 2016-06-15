@@ -42,7 +42,6 @@ def list_tunnels(client, pretty):
 def add_tunnel(client, args):
     name = args.name
     cidrs = [cidr.strip(' ') for cidr in str(args.cidrs).split(',')]
-    print cidrs
     client_addr = args.client_address if args.client_address else ''
     description = args.description
 
