@@ -663,7 +663,7 @@ class MistClient(object):
         return response.json()
 
     def list_tunnels(self):
-        req = self.request(self.uri.split('/api/v1')[0] + '/tunnels')
+        req = self.request(self.uri + '/tunnels')
         response = req.get()
         return response.json()
 
@@ -675,7 +675,7 @@ class MistClient(object):
             'description': description
         }
 
-        req = self.request(self.uri.split('/api/v1')[0] + '/tunnels', data=json.dumps(payload))
+        req = self.request(self.uri + '/tunnels', data=json.dumps(payload))
         response = req.post()
         return response.json()
 
@@ -686,12 +686,12 @@ class MistClient(object):
             'description': description
         }
 
-        req = self.request(self.uri.split('/api/v1')[0] + '/tunnel/' + tunnel_id,
+        req = self.request(self.uri + '/tunnel/' + tunnel_id,
                            data=json.dumps(payload))
         response = req.put()
         return response.json()
 
     def delete_tunnel(self, tunnel_id):
-        req = self.request(self.uri.split('/api/v1')[0] + '/tunnel/' + tunnel_id)
+        req = self.request(self.uri + '/tunnel/' + tunnel_id)
         response = req.delete()
         return response
