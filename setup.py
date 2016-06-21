@@ -12,7 +12,8 @@ requires = [
     'prettytable',
     'cryptography',
     'ansible==1.9.3',
-    'HTMLParser'
+    'HTMLParser',
+    'netaddr'
 ]
 
 
