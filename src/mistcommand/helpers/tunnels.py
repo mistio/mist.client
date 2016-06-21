@@ -1,5 +1,7 @@
 import sys
 
+from netaddr import IPAddress, IPNetwork
+
 from prettytable import PrettyTable
 from mistcommand.helpers.login import authenticate
 
@@ -44,6 +46,22 @@ def add_tunnel(client, args):
     cidrs = [cidr.strip(' ') for cidr in str(args.cidrs).split(',')]
     client_addr = args.client_address if args.client_address else ''
     description = args.description
+
+    for network in ['192.168.0.0/16', '172.16.0.0/12', '10.0.0.0/8']:
+        for cidr in cidrs:
+            if IPNetwork(cidr) in IPNetwork(network):
+                break
+        else:
+            continue
+        break
+    else:
+        while True:
+            print 'You are attempting to route a public IP over VPN'
+            prompt = raw_input('Are you sure you want to proceed [Y/n]: ')
+            if prompt in ['Y', 'y', 'yes']:
+                break
+            elif prompt in ['N', 'n', 'no']:
+                sys.exit(0)
 
     client.add_tunnel(name=name, cidrs=cidrs, client_addr=client_addr,
                       description=description)
