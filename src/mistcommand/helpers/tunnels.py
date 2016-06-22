@@ -47,21 +47,19 @@ def add_tunnel(client, args):
     client_addr = args.client_address if args.client_address else ''
     description = args.description
 
-    for network in ['192.168.0.0/16', '172.16.0.0/12', '10.0.0.0/8']:
-        for cidr in cidrs:
+    for cidr in cidrs:
+        for network in ['192.168.0.0/16', '172.16.0.0/12', '10.0.0.0/8']:
             if IPNetwork(cidr) in IPNetwork(network):
                 break
         else:
-            continue
-        break
-    else:
-        while True:
-            print 'You are attempting to route a public IP over VPN'
-            prompt = raw_input('Are you sure you want to proceed [Y/n]: ')
-            if prompt in ['Y', 'y', 'yes']:
-                break
-            elif prompt in ['N', 'n', 'no']:
-                sys.exit(0)
+            while True:
+                print 'You are attempting to route a public IP over VPN'
+                prompt = raw_input('Are you sure you want to proceed [Y/n]: ')
+                if prompt in ['Y', 'y', 'yes']:
+                    break
+                elif prompt in ['N', 'n', 'no']:
+                    sys.exit(0)
+            break
 
     client.add_tunnel(name=name, cidrs=cidrs, client_addr=client_addr,
                       description=description)
