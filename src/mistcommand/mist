@@ -1033,9 +1033,9 @@ def main():
         help='Tunnel name'
     )
     p_add_tunnel.add_argument(
-        '--cidrs', required=True,
-        help='List of private networks (separated by commas) '
-             'in CIDR notation accessible via this tunnel'
+        '--cidrs', nargs='+', required=True,
+        help='List of private networks in CIDR notation '
+             'accessible via this tunnel'
     )
     p_add_tunnel.add_argument(
         '--client-address',
@@ -1051,7 +1051,7 @@ def main():
         description='Edit an existing VPN Tunnel'
     )
     p_edit_tunnel.add_argument(
-        '--tunnel-id', required=True,
+        'tunnel',
         help='ID of the tunnel to be edited.'
              'You can retrieve all tunnel IDs by invoking list-tunnels'
     )
@@ -1060,7 +1060,7 @@ def main():
         help='Existing/new name of the specified tunnel'
     )
     p_edit_tunnel.add_argument(
-        '--cidrs', required=True,
+        '--cidrs', nargs='+', required=True,
         help='Existing/new list of the reachable private'
              'networks in CIDR notation'
     )
@@ -1074,7 +1074,7 @@ def main():
         description='Delete an existing VPN Tunnel'
     )
     p_delete_tunnel.add_argument(
-        '--tunnel-id', required=True,
+        'tunnel',
         help='ID of the tunnel to be deleted.'
              'You can retrieve all tunnel IDs by invoking list-tunnels'
     )
@@ -1084,8 +1084,20 @@ def main():
         description='Configuration script for setting up the VPN Tunnel'
     )
     p_tunnel_script.add_argument(
-        '--tunnel-id', required=True,
+        'tunnel',
         help='Get the configuration script of the VPN Tunnel.'
+             'You can retrieve the tunnel ID by invoking list-tunnels'
+    )
+
+    p_tunnel_command = subparsers.add_parser(
+        'tunnel-command',
+        description='Shell command to automatically download and install'
+                    'the VPN client\'s configuration'
+    )
+    p_tunnel_command.add_argument(
+        'tunnel',
+        help='Get the shell command for downloading and running the VPN '
+             'configuration script. '
              'You can retrieve the tunnel ID by invoking list-tunnels'
     )
     # -------------------METRICS ACTIONS-------------------
@@ -1224,7 +1236,7 @@ def main():
                          'run-workflow']:
         stack_action(args)
     elif args.action in ['list-tunnels', 'add-tunnel', 'edit-tunnel',
-                         'delete-tunnel', 'tunnel-script']:
+                         'delete-tunnel', 'tunnel-script', 'tunnel-command']:
         tunnel_action(args)
     elif args.action in ['list-metrics', 'add-metric', 'add-custom-metric']:
         metric_action(args)
