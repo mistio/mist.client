@@ -695,3 +695,13 @@ class MistClient(object):
         req = self.request(self.uri + '/tunnel/' + tunnel_id)
         response = req.delete()
         return response
+
+    def tunnel_script(self, tunnel_id):
+        req = self.request(self.uri + '/tunnel/' + tunnel_id + '/script')
+        response = req.get()
+        return response.text
+
+    def tunnel_command(self, tunnel_id):
+        req = self.request(self.uri + '/tunnel/' + tunnel_id + '/command')
+        response = req.get()
+        return response.text
