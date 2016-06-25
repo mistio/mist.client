@@ -11,16 +11,26 @@ def tunnel_action(args):
     if args.action == 'list-tunnels':
         list_tunnels(client, args.pretty)
     elif args.action == 'add-tunnel':
-        add_tunnel(client, args)
-        print 'Tunnel %s to %s added successfully' % (args.name, args.cidrs)
+        tunnel = add_tunnel(client, args)
+        print '\nTunnel <%s> to %s added successfully\n' % (args.name, args.cidrs)
+        print 'Now, copy-paste and run the configuration script on your VPN ' \
+              'client in order to complete the VPN tunnel\'s establishment\n'
+        print '='*50 + '\n'
+        get_conf(client, tunnel['_id'])
+        print '='*50 + '\n'
+        print 'Or, you can simply run the following `curl` command directly ' \
+              'in your VPN client\'s shell:\n'
+        get_cmd(client, tunnel['_id'])
     elif args.action == 'edit-tunnel':
         edit_tunnel(client, args)
-        print 'Tunnel %s was edited successfully' % args.tunnel_id
+        print 'Tunnel %s was edited successfully' % args.tunnel
     elif args.action == 'delete-tunnel':
-        client.delete_tunnel(args.tunnel_id)
-        print 'Tunnel %s removed' % args.tunnel_id
+        client.delete_tunnel(args.tunnel)
+        print 'Tunnel %s removed' % args.tunnel
     elif args.action == 'tunnel-script':
-        get_conf(client, args.tunnel_id)
+        get_conf(client, args.tunnel)
+    elif args.action == 'tunnel-command':
+        get_cmd(client, args.tunnel)
 
 
 def list_tunnels(client, pretty):
@@ -43,7 +53,7 @@ def list_tunnels(client, pretty):
 
 def add_tunnel(client, args):
     name = args.name
-    cidrs = [cidr.strip(' ') for cidr in str(args.cidrs).split(',')]
+    cidrs = args.cidrs
     client_addr = args.client_address if args.client_address else ''
     description = args.description
 
@@ -61,14 +71,14 @@ def add_tunnel(client, args):
                     sys.exit(0)
             break
 
-    client.add_tunnel(name=name, cidrs=cidrs, client_addr=client_addr,
-                      description=description)
+    return client.add_tunnel(name=name, cidrs=cidrs, client_addr=client_addr,
+                             description=description)
 
 
 def edit_tunnel(client, args):
-    tunnel_id = args.tunnel_id
+    tunnel_id = args.tunnel
     name = args.name
-    cidrs = [cidr.strip(' ') for cidr in str(args.cidrs).split(',')]
+    cidrs = args.cidrs
     description = args.description
 
     client.edit_tunnel(tunnel_id=tunnel_id, name=name, cidrs=cidrs,
@@ -76,15 +86,8 @@ def edit_tunnel(client, args):
 
 
 def get_conf(client, tunnel_id):
-    tunnels = client.list_tunnels()
-    if not tunnels:
-        print 'Could not find any VPN Tunnels'
-        sys.exit(0)
-    for tunnel in tunnels:
-        if tunnel['_id'] == tunnel_id:
-            script = tunnel['script']
-            break
-    else:
-        print 'The ID provided does not correspond to any VPN Tunnel'
-        sys.exit(0)
-    print script
+    print client.tunnel_script(tunnel_id)
+
+
+def get_cmd(client, tunnel_id):
+    print client.tunnel_command(tunnel_id)
