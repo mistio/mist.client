@@ -1038,12 +1038,14 @@ def main():
              'accessible via this tunnel'
     )
     p_add_tunnel.add_argument(
-        '--client-address',
-        help='IP address of the VPN client'
+        '--exclude-cidrs', nargs='+',
+        help='List of private networks in CIDR notation you wish to exclude '
+             'from your VPN configuration in order to avoid potential, local '
+             'routing conflicts (OPTIONAL)'
     )
     p_add_tunnel.add_argument(
         '--description',
-        help='Description'
+        help='Description (OPTIONAL)'
     )
 
     p_edit_tunnel = subparsers.add_parser(
@@ -1066,7 +1068,7 @@ def main():
     )
     p_edit_tunnel.add_argument(
         '--description',
-        help='Description'
+        help='Description (OPTIONAL)'
     )
 
     p_delete_tunnel = subparsers.add_parser(

@@ -54,7 +54,7 @@ def list_tunnels(client, pretty):
 def add_tunnel(client, args):
     name = args.name
     cidrs = args.cidrs
-    client_addr = args.client_address if args.client_address else ''
+    excluded_cidrs = args.exclude_cidrs if args.exclude_cidrs else []
     description = args.description
 
     for cidr in cidrs:
@@ -71,7 +71,8 @@ def add_tunnel(client, args):
                     sys.exit(0)
             break
 
-    return client.add_tunnel(name=name, cidrs=cidrs, client_addr=client_addr,
+    return client.add_tunnel(name=name, cidrs=cidrs,
+                             excluded_cidrs=excluded_cidrs,
                              description=description)
 
 
