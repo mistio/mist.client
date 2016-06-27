@@ -667,14 +667,14 @@ class MistClient(object):
         response = req.get()
         return response.json()
 
-    def add_tunnel(self, name, cidrs, client_addr, description):
+    def add_tunnel(self, name, cidrs, excluded_cidrs, description):
         payload = {
             'name': name,
             'cidrs': cidrs,
-            'client_addr': client_addr,
+            'excluded_cidrs': excluded_cidrs,
             'description': description
         }
-
+        
         req = self.request(self.uri + '/tunnels', data=json.dumps(payload))
         response = req.post()
         return response.json()
