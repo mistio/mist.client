@@ -26,12 +26,12 @@ def list_templates(client, pretty):
     if pretty:
         x = PrettyTable(["Name", "ID", "Description"])
         for template in templates:
-            x.add_row([template['name'], template['id'], template['description']])
+            x.add_row([template['name'], template['_id'], template['description']])
         print x
     else:
         for template in templates:
             print "%-40s %-40s %-40s" \
-                  % (template['name'], template['id'], template['description'])
+                  % (template['name'], template['_id'], template['description'])
 
 
 def show_template(client, template_id, pretty):

@@ -586,8 +586,6 @@ class MistClient(object):
                         script_params="", env=None, su=False,
                         fire_and_forget=True)
 
-
-
     def get_templates(self, **_):
         req = self.request(self.uri + '/templates')
         response = req.get()
@@ -663,3 +661,47 @@ class MistClient(object):
         req = self.request(self.uri + "/stacks/" + stack_id)
         response = req.get()
         return response.json()
+
+    def list_tunnels(self):
+        req = self.request(self.uri + '/tunnels')
+        response = req.get()
+        return response.json()
+
+    def add_tunnel(self, name, cidrs, excluded_cidrs, description):
+        payload = {
+            'name': name,
+            'cidrs': cidrs,
+            'excluded_cidrs': excluded_cidrs,
+            'description': description
+        }
+        
+        req = self.request(self.uri + '/tunnels', data=json.dumps(payload))
+        response = req.post()
+        return response.json()
+
+    def edit_tunnel(self, tunnel_id, name, cidrs, description):
+        payload = {
+            'name': name,
+            'cidrs': cidrs,
+            'description': description
+        }
+
+        req = self.request(self.uri + '/tunnel/' + tunnel_id,
+                           data=json.dumps(payload))
+        response = req.put()
+        return response.json()
+
+    def delete_tunnel(self, tunnel_id):
+        req = self.request(self.uri + '/tunnel/' + tunnel_id)
+        response = req.delete()
+        return response
+
+    def tunnel_script(self, tunnel_id):
+        req = self.request(self.uri + '/tunnel/' + tunnel_id + '/script')
+        response = req.get()
+        return response.text
+
+    def tunnel_command(self, tunnel_id):
+        req = self.request(self.uri + '/tunnel/' + tunnel_id + '/command')
+        response = req.get()
+        return response.text

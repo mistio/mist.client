@@ -12,7 +12,8 @@ requires = [
     'prettytable',
     'cryptography',
     'ansible==1.9.3',
-    'HTMLParser'
+    'HTMLParser',
+    'netaddr'
 ]
 
 
@@ -22,7 +23,7 @@ def readme():
 
 setup(
     name='mist',
-    version='1.8',
+    version='1.9',
     description='Python client for mist.io',
     long_description=readme(),
     classifiers=[

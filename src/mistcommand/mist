@@ -23,6 +23,7 @@ from mistcommand.helpers.metrics import metric_action
 from mistcommand.helpers.scripts import script_action
 from mistcommand.helpers.mistansible import ansible_action
 from mistcommand.helpers.ssh import ssh_action
+from mistcommand.helpers.tunnels import tunnel_action
 
 from requests.packages import urllib3
 urllib3.disable_warnings()
@@ -1013,6 +1014,94 @@ def main():
         help="Workflow to be run"
     )
 
+    # -------------------VPN ACTIONS-------------------
+    p_list_tunnels = subparsers.add_parser(
+        'list-tunnels',
+        description='List all available VPN Tunnels'
+    )
+    p_list_tunnels.add_argument(
+        '--pretty', action='store_true',
+        help='Print in a table format'
+    )
+
+    p_add_tunnel = subparsers.add_parser(
+        'add-tunnel',
+        description='Add a new VPN Tunnel'
+    )
+    p_add_tunnel.add_argument(
+        '--name', required=True,
+        help='Tunnel name'
+    )
+    p_add_tunnel.add_argument(
+        '--cidrs', nargs='+', required=True,
+        help='List of private networks in CIDR notation '
+             'accessible via this tunnel'
+    )
+    p_add_tunnel.add_argument(
+        '--exclude-cidrs', nargs='+',
+        help='List of private networks in CIDR notation you wish to exclude '
+             'from your VPN configuration in order to avoid potential, local '
+             'routing conflicts (OPTIONAL)'
+    )
+    p_add_tunnel.add_argument(
+        '--description',
+        help='Description (OPTIONAL)'
+    )
+
+    p_edit_tunnel = subparsers.add_parser(
+        'edit-tunnel',
+        description='Edit an existing VPN Tunnel'
+    )
+    p_edit_tunnel.add_argument(
+        'tunnel',
+        help='ID of the tunnel to be edited.'
+             'You can retrieve all tunnel IDs by invoking list-tunnels'
+    )
+    p_edit_tunnel.add_argument(
+        '--name', required=True,
+        help='Existing/new name of the specified tunnel'
+    )
+    p_edit_tunnel.add_argument(
+        '--cidrs', nargs='+', required=True,
+        help='Existing/new list of the reachable private'
+             'networks in CIDR notation'
+    )
+    p_edit_tunnel.add_argument(
+        '--description',
+        help='Description (OPTIONAL)'
+    )
+
+    p_delete_tunnel = subparsers.add_parser(
+        'delete-tunnel',
+        description='Delete an existing VPN Tunnel'
+    )
+    p_delete_tunnel.add_argument(
+        'tunnel',
+        help='ID of the tunnel to be deleted.'
+             'You can retrieve all tunnel IDs by invoking list-tunnels'
+    )
+
+    p_tunnel_script = subparsers.add_parser(
+        'tunnel-script',
+        description='Configuration script for setting up the VPN Tunnel'
+    )
+    p_tunnel_script.add_argument(
+        'tunnel',
+        help='Get the configuration script of the VPN Tunnel.'
+             'You can retrieve the tunnel ID by invoking list-tunnels'
+    )
+
+    p_tunnel_command = subparsers.add_parser(
+        'tunnel-command',
+        description='Shell command to automatically download and install'
+                    'the VPN client\'s configuration'
+    )
+    p_tunnel_command.add_argument(
+        'tunnel',
+        help='Get the shell command for downloading and running the VPN '
+             'configuration script. '
+             'You can retrieve the tunnel ID by invoking list-tunnels'
+    )
     # -------------------METRICS ACTIONS-------------------
     p_list_metrics = subparsers.add_parser(
         'list-metrics',
@@ -1148,6 +1237,9 @@ def main():
     elif args.action in ['list-stacks', 'create-stack', 'delete-stack',
                          'run-workflow']:
         stack_action(args)
+    elif args.action in ['list-tunnels', 'add-tunnel', 'edit-tunnel',
+                         'delete-tunnel', 'tunnel-script', 'tunnel-command']:
+        tunnel_action(args)
     elif args.action in ['list-metrics', 'add-metric', 'add-custom-metric']:
         metric_action(args)
     elif args.action == 'user-info':
