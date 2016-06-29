@@ -87,7 +87,18 @@ def edit_tunnel(client, args):
 
 
 def get_conf(client, tunnel_id):
-    print client.tunnel_script(tunnel_id)
+    tunnels = client.list_tunnels()
+    if not tunnels:
+        print 'Could not find any VPN Tunnels'
+        sys.exit(0)
+    for tunnel in tunnels:
+        if tunnel['_id'] == tunnel_id:		
+            script = tunnel['script']		
+            break		
+    else:		
+        print 'The ID provided does not correspond to any VPN Tunnel'		
+        sys.exit(0)		
+    print script
 
 
 def get_cmd(client, tunnel_id):
