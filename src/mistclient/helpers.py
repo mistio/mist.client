@@ -4,7 +4,6 @@ import json
 import time
 
 from HTMLParser import HTMLParser as _HTMLParser
-from HTMLParser import HTMLParseError
 
 try:
     import requests
@@ -97,28 +96,31 @@ class HTMLParser(_HTMLParser):
             if str(data).startswith(' var '):
                 _data = data.lstrip(' var ').split('=')
                 key, value = _data[0], json.loads(_data[1])
-                if not isinstance(value, basestring) and \
-                        not isinstance(value, list) and \
-                        not isinstance(value, dict):
+                if not (isinstance(value, basestring) or
+                        isinstance(value, list) or
+                        isinstance(value, dict)):
                     pass
                 else:
                     self.user_info[key] = value
 
     def user_details(self):
         user = {}
-        for key in ['FIRST_NAME', 'LAST_NAME', 'EMAIL',
-                    'NUMBER_OF_SERVERS', 'COMPANY_NAME']:
-            if key in self.user_info.keys():
-                user[key] = self.user_info[key]
+        orgs = []
+        for key in ['FIRST_NAME', 'LAST_NAME', 'EMAIL']:
+            user[key] = self.user_info[key]
+        for org in self.user_info['ORGS']:
+            orgs.append(org['name'])
+            user['ORGANIZATIONS'] = ', '.join(orgs)
         return user
 
     def plan_details(self):
         current = self.user_info['CURRENT_PLAN']
         plan = {}
-        for key in ['title', 'started', 'expiration', 'machine_limit']:
-            if key in ['started', 'expiration']:
-                current[key] = time.ctime(current[key])
-            plan[key.upper()] = current[key]
+        if current:
+            for key in ['title', 'started', 'expiration', 'machine_limit']:
+                if key in ['started', 'expiration']:
+                    current[key] = time.ctime(current[key])
+                plan[key.upper()] = current[key]
         return plan
 
 
