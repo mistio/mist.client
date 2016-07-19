@@ -16,11 +16,11 @@ def tunnel_action(args):
         print 'Now, copy-paste and run the configuration script on your VPN ' \
               'client in order to complete the VPN tunnel\'s establishment\n'
         print '='*50 + '\n'
-        get_conf(client, tunnel['_id'])
+        get_conf(client, tunnel['id'])
         print '='*50 + '\n'
         print 'Or, you can simply run the following `curl` command directly ' \
               'in your VPN client\'s shell:\n'
-        get_cmd(client, tunnel['_id'])
+        get_cmd(client, tunnel['id'])
     elif args.action == 'edit-tunnel':
         edit_tunnel(client, args)
         print 'Tunnel %s was edited successfully' % args.tunnel
@@ -42,12 +42,12 @@ def list_tunnels(client, pretty):
         x = PrettyTable(['Name', 'ID', 'CIDRs', 'Description'])
         for tunnel in tunnels:
             description = tunnel.get('description', '-')
-            x.add_row([tunnel['name'], tunnel['_id'], tunnel['cidrs'], description])
+            x.add_row([tunnel['name'], tunnel['id'], tunnel['cidrs'], description])
         print x
     else:
         for tunnel in tunnels:
             description = tunnel.get('description', '-')
-            print '%-40s %-40s %-40s %-40s' % (tunnel['name'], tunnel['_id'],
+            print '%-40s %-40s %-40s %-40s' % (tunnel['name'], tunnel['id'],
                                                tunnel['cidrs'], description)
 
 
@@ -92,12 +92,12 @@ def get_conf(client, tunnel_id):
         print 'Could not find any VPN Tunnels'
         sys.exit(0)
     for tunnel in tunnels:
-        if tunnel['_id'] == tunnel_id:		
-            script = tunnel['script']		
-            break		
-    else:		
-        print 'The ID provided does not correspond to any VPN Tunnel'		
-        sys.exit(0)		
+        if tunnel['id'] == tunnel_id:		
+            script = tunnel['script']
+            break
+    else:
+        print 'The ID provided does not correspond to any VPN Tunnel'
+        sys.exit(0)
     print script
 
 

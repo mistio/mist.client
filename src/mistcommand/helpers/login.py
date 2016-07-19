@@ -6,18 +6,6 @@ from mistclient import MistClient
 from prettytable import PrettyTable
 
 
-# def init_client(mist_uri, email, password, api_token):
-#     try:
-#         client = MistClient(mist_uri=mist_uri, email=email, password=password,
-#                             api_token=api_token)
-#         # Ensures that GET requests are authenticated
-#         client.clouds()
-#         return client
-#     except Exception as e:
-#         print e
-#         sys.exit(1)
-
-
 def parse_config():
     home_path = os.getenv("HOME")
     config_path = os.path.join(home_path, ".mist")
@@ -32,6 +20,7 @@ def parse_config():
     config.add_section("mist.credentials")
     config.set("mist.credentials", "email", None)
     config.set("mist.credentials", "password", None)
+    config.set("mist.credentials", "org_name", None)
     config.set("mist.credentials", "api_token", None)
 
     # Read configuration file
@@ -43,22 +32,24 @@ def parse_config():
     mist_uri = config.get("mist.io", "mist_uri")
     email = config.get("mist.credentials", "email") or prompt_email()
     password = config.get("mist.credentials", "password") or prompt_password()
-    _api_token = config.get("mist.credentials", "api_token") or None
+    org_name = config.get("mist.credentials", "org_name") or prompt_org()
+    api_token = config.get("mist.credentials", "api_token") or None
     # initiate a new MistClient to verify the existing token or request a new
     client = MistClient(mist_uri='https://mist.io', email=email,
-                        password=password, api_token=_api_token)
-    api_token = client.api_token
-    if _api_token != api_token:
+                        password=password, org_name=org_name,
+                        api_token=api_token)
+    if api_token != client.api_token:
         renew = False
-        if _api_token is not None:
+        if api_token is not None:
             renew = True
             print 'API token no longer valid. Renewing ...'
-        prompt_save_config(mist_uri, email, password, api_token, config_path, renew)
-
+        prompt_save_config(mist_uri, email, password, org_name,
+                           client.api_token, config_path, renew)
     return client
 
 
-def prompt_save_config(mist_uri, email, password, api_token, config_path, renew):
+def prompt_save_config(mist_uri, email, password, org_name, api_token,
+                       config_path, renew):
     answered = None
     if renew:
         answered = True
@@ -80,8 +71,9 @@ mist_uri=%s
 [mist.credentials]
 email=%s
 password=%s
+org_name=%s
 api_token=%s
-""" % (mist_uri, email, password, api_token)
+""" % (mist_uri, email, password, org_name, api_token)
 
     if answer:
         with open(config_path, "w") as f:
@@ -98,6 +90,10 @@ def prompt_email():
 
 def prompt_password():
     return getpass.getpass("Password: ")
+
+
+def prompt_org():
+    return raw_input("Organization: ")
 
 
 def authenticate():
