@@ -23,7 +23,7 @@ def readme():
 
 setup(
     name='mist',
-    version='1.9',
+    version='1.10',
     description='Python client for mist.io',
     long_description=readme(),
     classifiers=[
