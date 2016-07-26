@@ -506,13 +506,14 @@ class MistClient(object):
         response = req.get()
         return response.json()
 
-    def end_job(self, job_id, exit_code=None, output=None, error=None,
-                node_instances=[]):
+    def end_job(self, job_id, exit_code=None, cmdout=None, error=None,
+                node_instances=[], outputs={}):
         payload = {
             'exit_code': exit_code,
-            'output': output,
+            'cmdout': cmdout,
             'error': error,
-            'node_instances': node_instances
+            'node_instances': node_instances,
+            'outputs': outputs,
         }
         req = self.request(self.uri + "/jobs/" + job_id,
                            data=json.dumps(payload))
