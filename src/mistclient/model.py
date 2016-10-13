@@ -279,6 +279,8 @@ class Cloud(object):
             'persist': persist,
             'associate_floating_ip': associate_floating_ip
         }
+        if self.mist_client.job_id:
+            payload['job_id'] = self.mist_client.job_id
         # add as params only if they are provided
         if script_id:
             payload['script_id'] = script_id

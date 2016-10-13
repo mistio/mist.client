@@ -13,7 +13,7 @@ class MistClient(object):
     """
 
     def __init__(self, mist_uri="https://mist.io", email=None, password=None,
-                 org_name=None, api_token=None, verify=True):
+                 org_name=None, api_token=None, verify=True, job_id=None):
         """
         Initialize the mist.client. In case email and password are given, it
         will try to authenticate with mist.io and keep the api_token that is
@@ -37,6 +37,7 @@ class MistClient(object):
         self.api_token = api_token
         self.user_details = None
         self.verify = verify
+        self.job_id = job_id
 
         self._clouds = None
         self._machines = None
@@ -99,6 +100,7 @@ class MistClient(object):
 
         :returns: An instance of mist.client.helpers.RequestsHandler
         """
+
         return RequestsHandler(*args, api_token=self.api_token,
                                verify=self.verify, **kwargs)
 
@@ -143,7 +145,7 @@ class MistClient(object):
 
     def clouds(self, id=None, name=None, provider=None, search=None):
         """
-        Property-like function to call the _list_clouds function in 
+        Property-like function to call the _list_clouds function in
         order to populate self._clouds dict
 
         :returns: A list of Cloud instances.
@@ -173,7 +175,7 @@ class MistClient(object):
         """
         Update added clouds' info and re-populate the self._clouds dict.
 
-        This one is used whenever a new cloud is added, renamed etc etc or 
+        This one is used whenever a new cloud is added, renamed etc etc or
         whenever you want to update the list of added clouds.
 
         :returns: A list of Cloud instances.
@@ -376,7 +378,7 @@ class MistClient(object):
 
     def _list_keys(self):
         """
-        Retrieves a list of all added Keys and populates the 
+        Retrieves a list of all added Keys and populates the
         self._keys dict with Key instances
 
         :returns: A list of Keys instances
@@ -392,7 +394,7 @@ class MistClient(object):
 
     def keys(self, id=None, search=None):
         """
-        Property-like function to call the _list_keys function in 
+        Property-like function to call the _list_keys function in
         order to populate self._keys dict
 
         :returns: A list of Key instances
@@ -413,7 +415,7 @@ class MistClient(object):
     def update_keys(self):
         """
         Update added keys' info and re-populate the self._keys dict.
-        This one is used whenever a new key is added, renamed etc etc or 
+        This one is used whenever a new key is added, renamed etc etc or
         whenever you want to update the list of added keys.
 
         :returns: A list of Key instances.
@@ -428,7 +430,7 @@ class MistClient(object):
 
     def generate_key(self):
         """
-        Ask mist.io to randomly generate a private ssh-key to be 
+        Ask mist.io to randomly generate a private ssh-key to be
         used with the creation of a new Key
 
         :returns: A string of a randomly generated ssh private key
@@ -669,7 +671,7 @@ class MistClient(object):
             'excluded_cidrs': excluded_cidrs,
             'description': description
         }
-        
+
         req = self.request(self.uri + '/tunnels', data=json.dumps(payload))
         response = req.post()
         return response.json()
