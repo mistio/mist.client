@@ -19,7 +19,7 @@ class RequestsHandler(object):
     """
 
     def __init__(self, mist_uri, data=None, api_token=None, timeout=None,
-                 api_version=None, verify=True):
+                 api_version=None, verify=True, job_id=None):
         """
 
         :param mist_uri: The uri to make the requests to.
@@ -38,6 +38,7 @@ class RequestsHandler(object):
         self.data = data
         self.timeout = timeout
         self.verify = verify
+        self.job_id = job_id
 
     def response(self, resp):
         """
@@ -53,6 +54,10 @@ class RequestsHandler(object):
             raise Exception(resp.content)
 
     def post(self):
+        if self.job_id:
+            data = json.loads(self.data)
+            data['job_id'] = self.job_id
+            self.data = json.dumps(data)
         resp = requests.post(self.uri, data=self.data, headers=self.headers,
                              timeout=self.timeout, verify=self.verify)
         return self.response(resp)
@@ -63,11 +68,19 @@ class RequestsHandler(object):
         return self.response(resp)
 
     def put(self):
+        if self.job_id:
+            data = json.loads(self.data)
+            data['job_id'] = self.job_id
+            self.data = json.dumps(data)
         resp = requests.put(self.uri, data=self.data, headers=self.headers,
                             timeout=self.timeout, verify=self.verify)
         return self.response(resp)
 
     def delete(self):
+        if self.job_id:
+            data = json.loads(self.data)
+            data['job_id'] = self.job_id
+            self.data = json.dumps(data)
         resp = requests.delete(self.uri, data=self.data, headers=self.headers,
                                timeout=self.timeout, verify=self.verify)
         return self.response(resp)
