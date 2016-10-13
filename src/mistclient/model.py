@@ -43,7 +43,8 @@ class Cloud(object):
         :returns: An instance of RequestsHandler
         """
         return RequestsHandler(*args, api_token=self.api_token,
-                               verify=self.mist_client.verify, **kwargs)
+                               verify=self.mist_client.verify,
+                               job_id=self.mist_client.job_id, **kwargs)
 
     def delete(self):
         """
@@ -402,9 +403,8 @@ class Machine(object):
 
         :returns: An instance of RequestsHandler
         """
-        if self.mist_client.job_id:
-            kwargs['job_id'] = self.mist_client.job_id
-        return RequestsHandler(*args, api_token=self.api_token, **kwargs)
+        return RequestsHandler(*args, api_token=self.api_token,
+                               job_id=self.mist_client.job_id, **kwargs)
 
     # exists in MistClient, too
     # def run_script(self, script_id, params="", su=False, fire_and_forget=True):
@@ -690,9 +690,8 @@ class Key(object):
 
         :returns: An instance of RequestsHandler
         """
-        if self.mist_client.job_id:
-            kwargs['job_id'] = self.mist_client.job_id
-        return RequestsHandler(*args, api_token=self.api_token, **kwargs)
+        return RequestsHandler(*args, api_token=self.api_token,
+                               job_id=self.mist_client.job_id, **kwargs)
 
     @property
     def private(self):
@@ -806,9 +805,8 @@ class Script(object):
 
         :returns: An instance of RequestsHandler
         """
-        if self.mist_client.job_id:
-            kwargs['job_id'] = self.mist_client.job_id
-        return RequestsHandler(*args, api_token=self.api_token, **kwargs)
+        return RequestsHandler(*args, api_token=self.api_token,
+                               job_id=self.mist_client.job_id, **kwargs)
 
 
 # # TODO
