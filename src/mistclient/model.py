@@ -279,8 +279,6 @@ class Cloud(object):
             'persist': persist,
             'associate_floating_ip': associate_floating_ip
         }
-        if self.mist_client.job_id:
-            payload['job_id'] = self.mist_client.job_id
         # add as params only if they are provided
         if script_id:
             payload['script_id'] = script_id
@@ -347,8 +345,9 @@ class Cloud(object):
 
                     print x
                     print
-
-                if job.get('finished_at', 0):
+                log_actions = [l.get('action') for l in job.get('logs')]
+                if job.get('finished_at', 0) or \
+                   'machine_creation_finished' in log_actions:
                     error = job.get('error', None)
                     if verbose and error:
                         print "Finished with errors:"
@@ -403,6 +402,8 @@ class Machine(object):
 
         :returns: An instance of RequestsHandler
         """
+        if self.mist_client.job_id:
+            kwargs['job_id'] = self.mist_client.job_id
         return RequestsHandler(*args, api_token=self.api_token, **kwargs)
 
     # exists in MistClient, too
