@@ -55,7 +55,9 @@ class RequestsHandler(object):
 
     def post(self):
         if self.job_id:
-            self.data['job_id'] = self.job_id
+            data = json.loads(self.data)
+            data['job_id'] = self.job_id
+            self.data = json.dumps(data)
         resp = requests.post(self.uri, data=self.data, headers=self.headers,
                              timeout=self.timeout, verify=self.verify)
         return self.response(resp)
@@ -67,14 +69,18 @@ class RequestsHandler(object):
 
     def put(self):
         if self.job_id:
-            self.data['job_id'] = self.job_id
+            data = json.loads(self.data)
+            data['job_id'] = self.job_id
+            self.data = json.dumps(data)
         resp = requests.put(self.uri, data=self.data, headers=self.headers,
                             timeout=self.timeout, verify=self.verify)
         return self.response(resp)
 
     def delete(self):
         if self.job_id:
-            self.data['job_id'] = self.job_id
+            data = json.loads(self.data)
+            data['job_id'] = self.job_id
+            self.data = json.dumps(data)
         resp = requests.delete(self.uri, data=self.data, headers=self.headers,
                                timeout=self.timeout, verify=self.verify)
         return self.response(resp)
