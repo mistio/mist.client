@@ -100,7 +100,8 @@ class MistClient(object):
 
         :returns: An instance of mist.client.helpers.RequestsHandler
         """
-
+        if self.job_id:
+            kwargs['job_id'] = self.job_id
         return RequestsHandler(*args, api_token=self.api_token,
                                verify=self.verify, **kwargs)
 

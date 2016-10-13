@@ -690,6 +690,8 @@ class Key(object):
 
         :returns: An instance of RequestsHandler
         """
+        if self.mist_client.job_id:
+            kwargs['job_id'] = self.mist_client.job_id
         return RequestsHandler(*args, api_token=self.api_token, **kwargs)
 
     @property
@@ -804,6 +806,8 @@ class Script(object):
 
         :returns: An instance of RequestsHandler
         """
+        if self.mist_client.job_id:
+            kwargs['job_id'] = self.mist_client.job_id
         return RequestsHandler(*args, api_token=self.api_token, **kwargs)
 
 
