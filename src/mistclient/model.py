@@ -348,7 +348,8 @@ class Cloud(object):
                     print
                 log_actions = [l.get('action') for l in job.get('logs')]
                 if job.get('finished_at', 0) or \
-                   'machine_creation_finished' in log_actions:
+                   (probes and 'post_deploy_finished' in log_actions) or \
+                   (not probes and 'machine_creation_finished' in log_actions):
                     error = job.get('error', None)
                     if verbose and error:
                         print "Finished with errors:"
