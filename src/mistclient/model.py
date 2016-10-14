@@ -354,6 +354,7 @@ class Cloud(object):
 
                     error = job.get('error', None)
                     if not error and 'post_deploy_finished' not in log_actions:
+                        sleep(5)
                         continue
 
                     if verbose and error:
