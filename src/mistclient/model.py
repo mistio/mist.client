@@ -307,49 +307,52 @@ class Cloud(object):
                     scripts = summary.get('script', {})
                     monitoring = summary.get('monitoring', {})
 
-                    states = [
-                        'success',
-                        'error',
-                        'skipped',
-                        'pending'
-                    ]
+#                    states = [
+#                        'success',
+#                        'error',
+#                        'skipped',
+#                        'pending'
+#                    ]
+#
+#                    x = PrettyTable(['', 'SUCCESS', 'ERROR', 'SKIPPED', 'PENDING'])
 
-                    x = PrettyTable(['', 'SUCCESS', 'ERROR', 'SKIPPED', 'PENDING'])
+#                    if creates:
+#                        machines_created = {}
+#                        for state in states:
+#                            machines_created[state] = '%s/%s' % (creates.get(state, 'Undefined'), quantity)
+#                        x.add_row(["Create:", machines_created['success'], machines_created['error'],
+#                                   machines_created['skipped'], machines_created['pending']])
+#
+#                    if probes:
+#                        probed_machines = {}
+#                        for state in states:
+#                            probed_machines[state] = '%s/%s' % (probes.get(state, 'Undefined'), quantity)
+#                        x.add_row(["Probe:", probed_machines['success'], probed_machines['error'],
+#                                   probed_machines['skipped'], probed_machines['pending']])
+#
+#                    if scripts:
+#                        scripted_machines = {}
+#                        for state in states:
+#                            scripted_machines[state] = '%s/%s' % (scripts.get(state, 'Undefined'), quantity)
+#                        x.add_row(["Script:", scripted_machines['success'], scripted_machines['error'],
+#                                   scripted_machines['skipped'], scripted_machines['pending']])
+#
+#                    if monitoring:
+#                        monitored_machines = {}
+#                        for state in states:
+#                            monitored_machines[state] = '%s/%s' % (monitoring.get(state, 'Undefined'), quantity)
+#                        x.add_row(["Monitoring:", monitored_machines['success'], monitored_machines['error'],
+#                                   monitored_machines['skipped'], monitored_machines['pending']])
+#
+#                    print x
+#                    print
 
-                    if creates:
-                        machines_created = {}
-                        for state in states:
-                            machines_created[state] = '%s/%s' % (creates.get(state, 'Undefined'), quantity)
-                        x.add_row(["Create:", machines_created['success'], machines_created['error'],
-                                   machines_created['skipped'], machines_created['pending']])
-
-                    if probes:
-                        probed_machines = {}
-                        for state in states:
-                            probed_machines[state] = '%s/%s' % (probes.get(state, 'Undefined'), quantity)
-                        x.add_row(["Probe:", probed_machines['success'], probed_machines['error'],
-                                   probed_machines['skipped'], probed_machines['pending']])
-
-                    if scripts:
-                        scripted_machines = {}
-                        for state in states:
-                            scripted_machines[state] = '%s/%s' % (scripts.get(state, 'Undefined'), quantity)
-                        x.add_row(["Script:", scripted_machines['success'], scripted_machines['error'],
-                                   scripted_machines['skipped'], scripted_machines['pending']])
-
-                    if monitoring:
-                        monitored_machines = {}
-                        for state in states:
-                            monitored_machines[state] = '%s/%s' % (monitoring.get(state, 'Undefined'), quantity)
-                        x.add_row(["Monitoring:", monitored_machines['success'], monitored_machines['error'],
-                                   monitored_machines['skipped'], monitored_machines['pending']])
-
-                    print x
-                    print
                 log_actions = [l.get('action') for l in job.get('logs')]
-                if job.get('finished_at', 0) or \
-                   (probes and 'post_deploy_finished' in log_actions) or \
-                   (not probes and 'machine_creation_finished' in log_actions):
+
+                if job.get('finished_at', 0):
+#                    (probes and 'post_deploy_finished' in log_actions) or \
+#                        (not probes and 'machine_creation_finished' in log_actions):
+
                     error = job.get('error', None)
                     if verbose and error:
                         print "Finished with errors:"
