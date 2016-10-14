@@ -241,7 +241,7 @@ class Cloud(object):
                        image_extra="", disk="", script="", monitoring=False,
                        ips=[], networks=[], location_name="", async=False,
                        docker_command="", quantity=1, persist=False, fire_and_forget=True,
-                       timeout=6000, script_id="", script_params="", verbose=False,
+                       timeout=300, script_id="", script_params="", verbose=False,
                        associate_floating_ip=False, provider=""):
         """
         Create a new machine on the given cloud
@@ -347,13 +347,15 @@ class Cloud(object):
 #                    print x
 #                    print
 
-                log_actions = [l.get('action') for l in job.get('logs')]
+                log_actions = [log.get('action') for log in job.get('logs')]
 
-                if job.get('finished_at', 0):
-#                    (probes and 'post_deploy_finished' in log_actions) or \
-#                        (not probes and 'machine_creation_finished' in log_actions):
+                if job.get('finished_at', 0) or \
+                        'machine_creation_finished' in log_actions:
 
                     error = job.get('error', None)
+                    if not error and 'post_deploy_finished' not in log_actions:
+                        continue
+
                     if verbose and error:
                         print "Finished with errors:"
                         logs = job.get('logs', [])
