@@ -322,7 +322,7 @@ class Cloud(object):
                             machines_created[state] = '%s/%s' % (creates.get(state, 'Undefined'), quantity)
                         x.add_row(["Create:", machines_created['success'], machines_created['error'],
                                    machines_created['skipped'], machines_created['pending']])
-                        print '********* %s' % machines_created['pending']
+
                     if probes:
                         probed_machines = {}
                         for state in states:
@@ -344,30 +344,57 @@ class Cloud(object):
                         x.add_row(["Monitoring:", monitored_machines['success'], monitored_machines['error'],
                                    monitored_machines['skipped'], monitored_machines['pending']])
 
-                    print x
-                    print
+#                    print x
+#                    print
 
-                log_actions = [log.get('action') for log in job.get('logs')]
-                log_actions = [
-                    log_action for log_action in log_actions if log_action in [
-                        'machine_creation_finished', 'post_deploy_finished']
-                ]
+#                log_actions = [log.get('action') for log in job.get('logs')]
+#                log_actions = [
+#                    log_action for log_action in log_actions if log_action in [
+#                        'machine_creation_finished', 'post_deploy_finished']
+#                ]
 
-                if job.get('finished_at', 0) or \
-                        'machine_creation_finished' in log_actions:
-                    error = job.get('error', None)
-                    if not error and (
-                        'post_deploy_finished' not in log_actions or 
-                            len(log_actions) % 2):
-                        # Machine created but `post_deploy_steps` are still
-                        # pending. Also, make sure the number of
-                        # `machine_creation_finished` logs equals the number of
-                        # `post_deploy_finished` in case of multiple machines
-                        # belonging to the same story
+                if job.get('finished_at', 0):
+                    machine_ready = True
+                else:
+                    names = []
+                    for log in job.get('logs', []):
+                        if 'machine_name' in log and \
+                            'machine_creation_finished' in log.values():
+                            names.append(log['machine_name'])
+                    machine_created = name in names
+                    if machine_created:
+                        machine_id = [log['machine_id'] for log in job['logs']
+                            if 'machine_creation_finished' in log and \
+                                log.get('machine_name', '') == name
+                        ][0]
+                    else:
                         sleep(5)
                         continue
+                    for log in job.get('logs', []):
+                        if 'machine_id' in log and \
+                            'post_deploy_finish' in log.values():
+                            if log['machine_id'] == machine_id:
+                                machine_ready = True
+                                break
+                    else:
+                        machine_ready = False
 
-                    if verbose and error:
+                if machine_ready:
+#                if job.get('finished_at', 0) or \
+#                        'machine_creation_finished' in log_actions:
+                    error = job.get('error', None)
+#                    if not error and (
+#                        'post_deploy_finished' not in log_actions or 
+#                            len(log_actions) % 2):
+#                        # Machine created but `post_deploy_steps` are still
+#                        # pending. Also, make sure the number of
+#                        # `machine_creation_finished` logs equals the number of
+#                        # `post_deploy_finished` in case of multiple machines
+#                        # belonging to the same story
+#                        sleep(5)
+#                        continue
+
+                    if error:
                         print "Finished with errors:"
                         logs = job.get('logs', [])
                         for log in logs:
