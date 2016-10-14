@@ -307,52 +307,51 @@ class Cloud(object):
                     scripts = summary.get('script', {})
                     monitoring = summary.get('monitoring', {})
 
-#                    states = [
-#                        'success',
-#                        'error',
-#                        'skipped',
-#                        'pending'
-#                    ]
-#
-#                    x = PrettyTable(['', 'SUCCESS', 'ERROR', 'SKIPPED', 'PENDING'])
+                    states = [
+                        'success',
+                        'error',
+                        'skipped',
+                        'pending'
+                    ]
 
-#                    if creates:
-#                        machines_created = {}
-#                        for state in states:
-#                            machines_created[state] = '%s/%s' % (creates.get(state, 'Undefined'), quantity)
-#                        x.add_row(["Create:", machines_created['success'], machines_created['error'],
-#                                   machines_created['skipped'], machines_created['pending']])
-#
-#                    if probes:
-#                        probed_machines = {}
-#                        for state in states:
-#                            probed_machines[state] = '%s/%s' % (probes.get(state, 'Undefined'), quantity)
-#                        x.add_row(["Probe:", probed_machines['success'], probed_machines['error'],
-#                                   probed_machines['skipped'], probed_machines['pending']])
-#
-#                    if scripts:
-#                        scripted_machines = {}
-#                        for state in states:
-#                            scripted_machines[state] = '%s/%s' % (scripts.get(state, 'Undefined'), quantity)
-#                        x.add_row(["Script:", scripted_machines['success'], scripted_machines['error'],
-#                                   scripted_machines['skipped'], scripted_machines['pending']])
-#
-#                    if monitoring:
-#                        monitored_machines = {}
-#                        for state in states:
-#                            monitored_machines[state] = '%s/%s' % (monitoring.get(state, 'Undefined'), quantity)
-#                        x.add_row(["Monitoring:", monitored_machines['success'], monitored_machines['error'],
-#                                   monitored_machines['skipped'], monitored_machines['pending']])
-#
-#                    print x
-#                    print
+                    x = PrettyTable(['', 'SUCCESS', 'ERROR', 'SKIPPED', 'PENDING'])
+
+                    if creates:
+                        machines_created = {}
+                        for state in states:
+                            machines_created[state] = '%s/%s' % (creates.get(state, 'Undefined'), quantity)
+                        x.add_row(["Create:", machines_created['success'], machines_created['error'],
+                                   machines_created['skipped'], machines_created['pending']])
+                        print '********* %s' % machines_created['pending']
+                    if probes:
+                        probed_machines = {}
+                        for state in states:
+                            probed_machines[state] = '%s/%s' % (probes.get(state, 'Undefined'), quantity)
+                        x.add_row(["Probe:", probed_machines['success'], probed_machines['error'],
+                                   probed_machines['skipped'], probed_machines['pending']])
+
+                    if scripts:
+                        scripted_machines = {}
+                        for state in states:
+                            scripted_machines[state] = '%s/%s' % (scripts.get(state, 'Undefined'), quantity)
+                        x.add_row(["Script:", scripted_machines['success'], scripted_machines['error'],
+                                   scripted_machines['skipped'], scripted_machines['pending']])
+
+                    if monitoring:
+                        monitored_machines = {}
+                        for state in states:
+                            monitored_machines[state] = '%s/%s' % (monitoring.get(state, 'Undefined'), quantity)
+                        x.add_row(["Monitoring:", monitored_machines['success'], monitored_machines['error'],
+                                   monitored_machines['skipped'], monitored_machines['pending']])
+
+                    print x
+                    print
 
                 log_actions = [log.get('action') for log in job.get('logs')]
                 log_actions = [
                     log_action for log_action in log_actions if log_action in [
                         'machine_creation_finished', 'post_deploy_finished']
                 ]
-                print '************* %s' % log_actions  # TODO
 
                 if job.get('finished_at', 0) or \
                         'machine_creation_finished' in log_actions:
@@ -379,7 +378,6 @@ class Cloud(object):
                     elif verbose and not error:
                         print "Finished without errors!"
                     self.update_machines()
-                    print '**************** %s' % job
                     return job
 
                 elif time() - started_at > timeout:
