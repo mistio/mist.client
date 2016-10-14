@@ -364,15 +364,16 @@ class Cloud(object):
                     machine_created = name in names
                     if machine_created:
                         machine_id = [log['machine_id'] for log in job['logs']
-                            if 'machine_creation_finished' in log and \
+                            if 'machine_creation_finished' in log.values() and \
                                 log.get('machine_name', '') == name
                         ][0]
+                        print '************ %s' % machine_id
                     else:
                         sleep(5)
                         continue
                     for log in job.get('logs', []):
                         if 'machine_id' in log and \
-                            'post_deploy_finish' in log.values():
+                            'post_deploy_finished' in log.values():
                             if log['machine_id'] == machine_id:
                                 machine_ready = True
                                 break
