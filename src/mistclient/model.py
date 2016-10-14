@@ -348,12 +348,23 @@ class Cloud(object):
 #                    print
 
                 log_actions = [log.get('action') for log in job.get('logs')]
+                log_actions = [
+                    log_action for log_action in log_actions if log_action in [
+                        'machine_creation_finished', 'post_deploy_finished']
+                ]
 
                 if job.get('finished_at', 0) or \
                         'machine_creation_finished' in log_actions:
 
                     error = job.get('error', None)
-                    if not error and 'post_deploy_finished' not in log_actions:
+                    if not error and (
+                        'post_deploy_finished' not in log_actions or 
+                            len(log_actions) % 2):
+                        # Machine created but `post_deploy_steps` are still
+                        # pending. Also, make sure the number of
+                        # `machine_creation_finished` logs equals the number of
+                        # `post_deploy_finished` in case of multiple machines
+                        # belonging to the same story
                         sleep(5)
                         continue
 
