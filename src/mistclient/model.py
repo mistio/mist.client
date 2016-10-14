@@ -352,10 +352,10 @@ class Cloud(object):
                     log_action for log_action in log_actions if log_action in [
                         'machine_creation_finished', 'post_deploy_finished']
                 ]
+                print '************* %s' % log_actions  # TODO
 
                 if job.get('finished_at', 0) or \
                         'machine_creation_finished' in log_actions:
-
                     error = job.get('error', None)
                     if not error and (
                         'post_deploy_finished' not in log_actions or 
@@ -379,6 +379,7 @@ class Cloud(object):
                     elif verbose and not error:
                         print "Finished without errors!"
                     self.update_machines()
+                    print '**************** %s' % job
                     return job
 
                 elif time() - started_at > timeout:
