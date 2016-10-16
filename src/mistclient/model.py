@@ -351,9 +351,9 @@ class Cloud(object):
                     machine_ready = True
                 else:
                     # In case of nested logs, we have to make sure we parse the
-                    # the logs correctly in case to determine whether the VM
-                    # is respondive, since a story may contain logs of multiple
-                    # machines
+                    # the logs correctly in order to determine whether the
+                    # provisioned VM is running, since a story may contain logs
+                    # of multiple machines
                     names = []
                     for log in job.get('logs', []):
                         if 'machine_name' in log and \
