@@ -346,12 +346,40 @@ class Cloud(object):
 
                     print x
                     print
-                log_actions = [l.get('action') for l in job.get('logs')]
-                if job.get('finished_at', 0) or \
-                   (probes and 'post_deploy_finished' in log_actions) or \
-                   (not probes and 'machine_creation_finished' in log_actions):
+
+                if job.get('finished_at', 0):
+                    machine_ready = True
+                else:
+                    # In case of nested logs, we have to make sure we parse the
+                    # the logs correctly in order to determine whether the
+                    # provisioned VM is running, since a story may contain logs
+                    # of multiple machines
+                    names = []
+                    for log in job.get('logs', []):
+                        if 'machine_name' in log and \
+                            'machine_creation_finished' in log.values():
+                            names.append(log['machine_name'])
+                    machine_created = name in names
+                    if machine_created:
+                        machine_id = [log['machine_id'] for log in job['logs']
+                            if 'machine_creation_finished' in log.values() and \
+                                log.get('machine_name', '') == name
+                        ][0]
+                    else:
+                        sleep(5)
+                        continue
+                    for log in job.get('logs', []):
+                        if 'machine_id' in log and \
+                            'post_deploy_finished' in log.values():
+                            if log['machine_id'] == machine_id:
+                                machine_ready = True
+                                break
+                    else:
+                        machine_ready = False
+
+                if machine_ready:
                     error = job.get('error', None)
-                    if verbose and error:
+                    if error:
                         print "Finished with errors:"
                         logs = job.get('logs', [])
                         for log in logs:
