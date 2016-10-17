@@ -241,7 +241,7 @@ class Cloud(object):
                        image_extra="", disk="", script="", monitoring=False,
                        ips=[], networks=[], location_name="", async=False,
                        docker_command="", quantity=1, persist=False, fire_and_forget=True,
-                       timeout=300, script_id="", script_params="", verbose=False,
+                       timeout=6000, script_id="", script_params="", verbose=False,
                        associate_floating_ip=False, provider=""):
         """
         Create a new machine on the given cloud
