@@ -378,7 +378,8 @@ class Cloud(object):
                         machine_ready = False
 
                 if machine_ready:
-                    error = job.get('error', None)
+                    error = job.get('error') or [
+                        log['error'] for log in job['logs'] if log['error']]
                     if error:
                         print "Finished with errors:"
                         logs = job.get('logs', [])
