@@ -348,7 +348,6 @@ class Cloud(object):
                     print
 
                 if job.get('finished_at', 0):
-                    print '**********************'
                     provision_finished = True
                 else:
                     # In case of nested logs, we have to make sure we parse the
@@ -360,6 +359,8 @@ class Cloud(object):
                             'machine_creation_finished' in log.values():
                             machine_id = log['machine_id']
                             error = log.get('error')
+                            print '++++++++++++++++++++++++++++++++++'
+                            print job
                             break
                     else:
                         sleep(5)
@@ -369,14 +370,13 @@ class Cloud(object):
                         provision_finished = True
                     else:
                         for log in job.get('logs', []):
-                            if log['machine_id'] == machine_id and \
+                            if log.get('machine_id', '') == machine_id and \
                                 'post_deploy_finished' in log.values():
                                 provision_finished = True
                                 break
                         else:
                             provision_finished = False
-                    print '++++++++++++++++++++++++++++++++++'
-                    print job
+
                 if provision_finished:
                     error = job.get('error')
                     if error:
