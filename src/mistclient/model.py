@@ -359,8 +359,6 @@ class Cloud(object):
                             'machine_creation_finished' in log.values():
                             machine_id = log['machine_id']
                             error = log.get('error')
-                            print '++++++++++++++++++++++++++++++++++'
-                            print job
                             break
                     else:
                         sleep(5)
