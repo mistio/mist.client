@@ -350,7 +350,6 @@ class Cloud(object):
                 if job.get('finished_at', 0):
                     provision_finished = True
                 else:
-                    provision_finished = False
                     # In case of nested logs, we have to make sure we parse the
                     # the logs correctly in order to determine whether the
                     # provisioned VM is running, since a story may contain logs
@@ -358,20 +357,23 @@ class Cloud(object):
                     for log in job.get('logs', []):
                         if log.get('machine_name', '') == name and \
                             'machine_creation_finished' in log.values():
-                            if log.get('error'):
-                               provision_finished = True
                             machine_id = log['machine_id']
+                            error = log.get('error')
                             break
                     else:
                         sleep(5)
                         continue
 
-                    if not provision_finished:
+                    if error:
+                        provision_finished = True
+                    else:
                         for log in job.get('logs', []):
                             if log['machine_id'] == machine_id and \
                                 'post_deploy_finished' in log.values():
-                                    provision_finished = True
-                                    break
+                                provision_finished = True
+                                break
+                        else:
+                            provision_finished = False
 
                 if provision_finished:
                     error = job.get('error')
