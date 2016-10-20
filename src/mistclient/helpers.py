@@ -7,9 +7,13 @@ from HTMLParser import HTMLParser as _HTMLParser
 
 try:
     import requests
+    from requests.packages.urllib3.exceptions import InsecureRequestWarning
 except ImportError:
-    print "requests required for this module'"
+    print "requests required for this module"
     sys.exit(1)
+else:
+    requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+
 
 
 class RequestsHandler(object):
