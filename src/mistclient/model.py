@@ -242,7 +242,7 @@ class Cloud(object):
                        ips=[], networks=[], location_name="", async=False,
                        docker_command="", quantity=1, persist=False, fire_and_forget=True,
                        timeout=6000, script_id="", script_params="", verbose=False,
-                       associate_floating_ip=False, provider=""):
+                       associate_floating_ip=False, provider="", tags=None):
         """
         Create a new machine on the given cloud
 
@@ -278,7 +278,8 @@ class Cloud(object):
             'async': async,
             'quantity': quantity,
             'persist': persist,
-            'associate_floating_ip': associate_floating_ip
+            'associate_floating_ip': associate_floating_ip,
+            'tags': tags,
         }
         # add as params only if they are provided
         if script_id:
