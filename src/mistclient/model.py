@@ -197,7 +197,7 @@ class Cloud(object):
 
         if machines:
             for machine in machines:
-                self._machines[machine['id']] = Machine(machine, self)
+                self._machines[machine['machine_id']] = Machine(machine, self)
         else:
             self._machines = {}
 
@@ -415,7 +415,7 @@ class Machine(object):
         self.info = machine
         self.api_token = self.mist_client.api_token
         self.name = machine['name']
-        self.id = machine['id']
+        self.id = machine['machine_id']
         self.probed = None
 
     def __str__(self):
