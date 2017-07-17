@@ -213,7 +213,7 @@ class Cloud(object):
 
         if id:
             return [self._machines[machine_id] for machine_id in self._machines.keys()
-                    if id == self._machines[machine_id].id]
+                    if str(id) == self._machines[machine_id].id]
         elif name:
             return [self._machines[machine_id] for machine_id in self._machines.keys()
                     if name == self._machines[machine_id].name]
