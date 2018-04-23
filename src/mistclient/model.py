@@ -295,7 +295,7 @@ class Cloud(object):
         self.update_machines()
 
         if not async or fire_and_forget:
-            return result
+            return result.json()
         else:
             job_id = result.json()['job_id']
 
