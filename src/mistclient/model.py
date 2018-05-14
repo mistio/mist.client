@@ -213,14 +213,14 @@ class Cloud(object):
 
         if id:
             return [self._machines[machine_id] for machine_id in self._machines.keys()
-                    if str(id) == self._machines[machine_id].id]
+                    if str(id) == str(self._machines[machine_id].id)]
         elif name:
             return [self._machines[machine_id] for machine_id in self._machines.keys()
                     if name == self._machines[machine_id].name]
         elif search:
             return [self._machines[machine_id] for machine_id in self._machines.keys()
-                    if search in self._machines[machine_id].name
-                    or search in self._machines[machine_id].id]
+                    if str(search) == str(self._machines[machine_id].name)
+                    or str(search) == str(self._machines[machine_id].id)]
         else:
             return [self._machines[machine_id] for machine_id in self._machines.keys()]
 
