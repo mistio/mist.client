@@ -213,14 +213,14 @@ class Cloud(object):
 
         if id:
             return [self._machines[machine_id] for machine_id in self._machines.keys()
-                    if str(id) == self._machines[machine_id].id]
+                    if str(id) == str(self._machines[machine_id].id)]
         elif name:
             return [self._machines[machine_id] for machine_id in self._machines.keys()
                     if name == self._machines[machine_id].name]
         elif search:
             return [self._machines[machine_id] for machine_id in self._machines.keys()
-                    if search in self._machines[machine_id].name
-                    or search in self._machines[machine_id].id]
+                    if str(search) == str(self._machines[machine_id].name)
+                    or str(search) == str(self._machines[machine_id].id)]
         else:
             return [self._machines[machine_id] for machine_id in self._machines.keys()]
 
@@ -242,7 +242,8 @@ class Cloud(object):
                        ips=[], networks=[], location_name="", async=False,
                        docker_command="", quantity=1, persist=False, fire_and_forget=True,
                        timeout=6000, script_id="", script_params="", verbose=False,
-                       associate_floating_ip=False, provider="", tags=None):
+                       associate_floating_ip=False, provider="", tags=None,
+                       cloud_init='', env_vars=''):
         """
         Create a new machine on the given cloud
 
@@ -280,6 +281,8 @@ class Cloud(object):
             'persist': persist,
             'associate_floating_ip': associate_floating_ip,
             'tags': tags,
+            'cloud_init': cloud_init,
+            'env_vars':  env_vars
         }
         # add as params only if they are provided
         if script_id:
