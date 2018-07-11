@@ -82,6 +82,8 @@ class RequestsHandler(object):
 
     def delete(self):
         data = {'job_id': self.job_id} if self.job_id else {}
+        if self.data:
+            data.update(json.loads(self.data))
         resp = requests.delete(self.uri, json=data, headers=self.headers,
                                timeout=self.timeout, verify=self.verify)
         return self.response(resp)
