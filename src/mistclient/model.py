@@ -21,7 +21,7 @@ class Cloud(object):
         """
         self.mist_client = mist_client
         self.info = cloud
-        self.title = cloud['title']
+        self.name = cloud.get('name') or cloud['title']
         self.id = cloud['id']
         self.enabled = cloud['enabled']
         self.provider = cloud['provider']
@@ -69,7 +69,7 @@ class Cloud(object):
         data = json.dumps(payload)
         req = self.request(self.mist_client.uri + '/clouds/' + self.id, data=data)
         req.put()
-        self.title = new_name
+        self.name = new_name
         self.mist_client.update_clouds()
 
     def enable(self):
@@ -101,6 +101,10 @@ class Cloud(object):
         req.post()
         self.enabled = False
         self.mist_client.update_clouds()
+
+    @property
+    def title(self):
+        return self.name
 
     @property
     def sizes(self):
@@ -197,7 +201,8 @@ class Cloud(object):
 
         if machines:
             for machine in machines:
-                self._machines[machine['machine_id']] = Machine(machine, self)
+                id = machine.get('external_id') or machine['machine_id']
+                self._machines[id] = Machine(machine, self)
         else:
             self._machines = {}
 
@@ -418,7 +423,7 @@ class Machine(object):
         self.info = machine
         self.api_token = self.mist_client.api_token
         self.name = machine['name']
-        self.id = machine['machine_id']
+        self.id = machine.get('external_id') or machine['machine_id']
         self.probed = None
 
     def __str__(self):

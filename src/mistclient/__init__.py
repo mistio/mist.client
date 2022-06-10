@@ -553,7 +553,7 @@ class MistClient(object):
                    env=None, su=False, fire_and_forget=True):
         payload = {
             'cloud_id': cloud_id,
-            'machine_id': machine_id,
+            'external_id': machine_id,
             'params': script_params,
             'env': env,
             'su': su
