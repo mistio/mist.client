@@ -11,7 +11,7 @@ requires = [
     'pyyaml',
     'prettytable',
     'cryptography',
-    'ansible==1.9.3',
+    'ansible==8.5.0',
     'HTMLParser',
     'netaddr'
 ]
